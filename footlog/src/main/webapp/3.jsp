@@ -9,6 +9,6 @@
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body>
-	<h3>3번 테스트 고치고 다시 올림</h3>
+	<h3>3번 테스트 다시 올림</h3>
 </body>
 </html>
