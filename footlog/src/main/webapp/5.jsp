@@ -10,6 +10,5 @@
 </head>
 <body>
 	<h3>hi</h3>
-	ㅇㅀㄹㄹ
 </body>
 </html>
