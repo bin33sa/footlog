@@ -15,7 +15,7 @@
         <li class="nav-item"><a class="text-reset" href="#">개인정보취급방침</a></li>
         <li class="nav-item"><span>&nbsp;&middot;&nbsp;</span></li>
         <li class="nav-item"><a class="text-reset" href="#">고객센터</a></li>
-        <li class="nav-item"><span>&nbsp;&nbsp;© SPRING Corp.</span></li>
+        <li class="nav-item"><span>&nbsp;&nbsp;© spring Corp.</span></li>
     </ul>
 </div>
 
