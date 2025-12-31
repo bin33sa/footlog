@@ -74,11 +74,21 @@ public class MemberController {
 			session.setAttribute("member", info);
 
 			String preLoginURI = (String)session.getAttribute("preLoginURI");
-			session.removeAttribute("preLoginURI");
+			session.removeAttribute("preLoginURI"); // 한 번 쓰면 바로 삭제
+
 			if(preLoginURI != null) {
-				// 로그인 전페이지로 리다이렉트
-				return new ModelAndView(preLoginURI);
-			} 
+			    // 1. 만약 되돌아갈 주소가 '잘못된 주소(/login)'라면? -> 무조건 메인으로 보냄
+			    // (LoginFilter가 "redirect:/login" 형태로 저장했을 수 있으므로 포함 여부로 체크)
+			    if(preLoginURI.contains("/login")) { 
+			        return new ModelAndView("redirect:/");
+			    }
+			    
+			    // 2. 정상적인 주소(예: /notice/list 등)라면? -> 거기로 이동
+			    return new ModelAndView(preLoginURI);
+			}
+
+			// 3. 기억된 주소가 없으면 메인으로 이동
+			return new ModelAndView("redirect:/");
 			
 		} catch (Exception e) {
 			e.printStackTrace();

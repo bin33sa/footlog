@@ -1,0 +1,206 @@
+@charset "UTF-8";
+
+/* =========================================
+   0. 폰트 및 컬러 오버라이딩 (젠지 스타일)
+   ========================================= */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css");
+
+:root {
+  /* 메인 컬러: 트렌디한 네온 라임 */
+  --primary-color: #D4F63F; 
+  /* 서브 컬러: 깊은 블랙 */
+  --black-color: #111111;
+  /* 배경: 아주 연한 그레이 */
+  --light-gray-color: #F7F8FA;
+  
+  /* 폰트 교체 */
+  --body-font: "Pretendard", -apple-system, sans-serif;
+  --heading-font: "Pretendard", -apple-system, sans-serif;
+  
+  /* 부트스트랩 변수 오버라이딩 */
+  --bs-primary: var(--primary-color);
+  --bs-body-bg: var(--light-gray-color);
+}
+
+/* 전체 기본 폰트 적용 */
+body {
+  font-family: var(--body-font);
+  color: #222;
+  letter-spacing: -0.02em; 
+}
+
+/* =========================================
+   1. UI 컴포넌트: 모던 카드
+   ========================================= */
+.modern-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  margin-bottom: 24px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================================
+   2. 사이드바 네비게이션
+   ========================================= */
+.sidebar-title {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-left: 12px;
+  letter-spacing: 0.05em;
+}
+
+.sidebar-menu .list-group-item {
+  border: none;
+  background: transparent;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #444;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-menu .list-group-item:hover {
+  background-color: #fff;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transform: translateX(4px);
+}
+
+.sidebar-menu .list-group-item.active-menu {
+  background-color: var(--black-color);
+  color: var(--primary-color);
+}
+
+/* =========================================
+   3. 메인 기능: 캘린더 & 용병 모집
+   ========================================= */
+/* 캘린더 */
+.calendar-day {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 1.2rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.calendar-day h6 {
+  font-size: 0.75rem;
+  color: #999;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.calendar-day span {
+  font-size: 1.2rem;
+  font-weight: 800;
+  display: block;
+}
+
+.calendar-day.active, 
+.calendar-day:hover {
+  background: var(--black-color);
+  border-color: var(--black-color);
+  transform: scale(1.05);
+}
+
+.calendar-day.active h6,
+.calendar-day.active span,
+.calendar-day:hover h6,
+.calendar-day:hover span {
+  color: var(--primary-color);
+}
+
+/* 용병 모집 섹션 */
+.mercenary-section {
+  background: radial-gradient(circle at 10% 20%, rgb(242, 246, 252) 0%, rgb(224, 233, 255) 90%);
+  border: 1px solid #dbe4f0;
+  position: relative;
+}
+
+/* 버튼 */
+.btn-primary {
+  background-color: var(--black-color);
+  color: var(--primary-color);
+  border: none;
+  font-weight: 700;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color);
+  color: var(--black-color);
+  box-shadow: 0 0 15px var(--primary-color);
+}
+
+/* =========================================
+   4. 헤더 & 로딩 삭제
+   ========================================= */
+.navbar-brand {
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 1.8rem;
+}
+
+.navbar-nav .nav-link {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.navbar-nav .nav-link:hover {
+  color: var(--black-color);
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-decoration-color: var(--primary-color);
+  text-underline-offset: 5px;
+}
+
+#preloader {
+  display: none !important;
+}
+
+/* =========================================
+   5. [강력 수정] 슬라이더 높이 고정
+   ========================================= */
+.swiper.main-swiper,
+.swiper-container.main-swiper {
+    width: 100%;
+    height: 400px !important; /* 높이 강제 고정 */
+    min-height: 400px !important;
+}
+
+.swiper-wrapper {
+    height: 100% !important;
+}
+
+.swiper-slide {
+    height: 400px !important; /* 슬라이드 개별 높이도 고정 */
+    display: flex !important; /* 내용물 중앙 정렬용 */
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .swiper.main-swiper,
+    .swiper-slide {
+        height: 250px !important;
+        min-height: 250px !important;
+    }
+}

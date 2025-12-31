@@ -3,11 +3,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.MemberMapper">
 	<select id="loginMember" parameterType="map" resultType="com.fl.model.MemberDTO">
-		SELECT memberIdx, m1.userId, userPwd, userName, userLevel, profile_photo, 
+		SELECT memberIdx, userId, userPwd, userName, userLevel,
 			register_date, modify_date
-		FROM member1 m1
-		LEFT OUTER JOIN member2 m2 ON m1.userId = m2.userId
-		WHERE m1.userId = #{userId} AND userPwd = #{userPwd} AND enabled = 1
+		FROM member
+		WHERE userId = #{userId} AND userPwd = #{userPwd} AND enabled = 1
 	</select>
 	
 </mapper>
