@@ -13,16 +13,12 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     
     <style>
-        /* 로그인 페이지 전용 스타일 */
         body {
-            /* 헤더와 푸터가 있으므로 body에 flex를 주지 않습니다. */
             background-color: #f8f9fa;
         }
 
-        /* 헤더/푸터 사이에서 로그인 박스를 중앙 정렬하기 위한 래퍼 */
         .login-wrapper {
             width: 100%;
-            /* 화면 높이(100vh)에서 헤더(약 80px)+푸터(약 300px) 높이를 뺀 만큼 최소 높이 확보 */
             min-height: calc(100vh - 380px); 
             display: flex;
             align-items: center;

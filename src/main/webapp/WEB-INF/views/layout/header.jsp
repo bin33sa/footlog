@@ -151,7 +151,7 @@
                             <div class="dropdown" style="position: relative;">
                                 <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold me-3" data-bs-toggle="dropdown" style="padding: 10px 0;">
                                     <img src="${pageContext.request.contextPath}/dist/images/avatar.png" class="rounded-circle border me-2" width="32" height="32" style="object-fit: cover;">
-                                    ${sessionScope.member.userName}님
+                                    ${sessionScope.member.memberName}님
                                 </a>
                                 
                                 <ul class="dropdown-menu dropdown-menu-end shadow user-menu">

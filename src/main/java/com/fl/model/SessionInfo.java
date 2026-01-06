@@ -1,40 +1,33 @@
 package com.fl.model;
 
 public class SessionInfo {
-	private Long memberIdx;
-	private String userId;
-	private String userName;
-	private int userLevel;
-	private String avatar; // profile photo
-	
-	public Long getMemberIdx() {
-		return memberIdx;
+	private Long memberCode;
+	private String memberId;
+	private String memberName;
+	private int roleLevel;
+
+	public Long getMemberCode() {
+		return memberCode;
 	}
-	public void setMemberIdx(Long memberIdx) {
-		this.memberIdx = memberIdx;
+	public void setMemberCode(Long memberCode) {
+		this.memberCode = memberCode;
 	}
-	public String getUserId() {
-		return userId;
+	public String getMemberId() {
+		return memberId;
 	}
-	public void setUserId(String userId) {
-		this.userId = userId;
+	public void setMemberId(String memberId) {
+		this.memberId = memberId;
 	}
-	public String getUserName() {
-		return userName;
+	public String getMemberName() {
+		return memberName;
 	}
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setMemberName(String memberName) {
+		this.memberName = memberName;
 	}
-	public int getUserLevel() {
-		return userLevel;
+	public int getRoleLevel() {
+		return roleLevel;
 	}
-	public void setUserLevel(int userLevel) {
-		this.userLevel = userLevel;
-	}
-	public String getAvatar() {
-		return avatar;
-	}
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
+	public void setRoleLevel(int roleLevel) {
+		this.roleLevel = roleLevel;
 	}
 }

@@ -70,7 +70,7 @@ public class LoginFilter implements Filter {
 
 			return;
 		} else if(info != null && uri.indexOf("admin") != -1) {
-			if(info.getUserLevel() < 51) {
+			if(info.getRoleLevel() < 51) {
 				resp.sendRedirect(cp + "/member/noAuthorized");
 				return;
 			}

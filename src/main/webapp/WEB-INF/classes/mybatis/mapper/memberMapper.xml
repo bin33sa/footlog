@@ -3,10 +3,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.MemberMapper">
 	<select id="loginMember" parameterType="map" resultType="com.fl.model.MemberDTO">
-		SELECT memberIdx, userId, userPwd, userName, userLevel,
-			register_date, modify_date
-		FROM member
-		WHERE userId = #{userId} AND userPwd = #{userPwd} AND enabled = 1
+		SELECT member_code, member_Id, password, member_name, role_level, is_deleted
+    	FROM member
+    	WHERE member_Id = #{userId} AND password = #{userPwd} AND is_deleted = 0
 	</select>
 	
 </mapper>

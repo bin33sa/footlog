@@ -38,7 +38,6 @@ public class MemberController {
 	@PostMapping("login")
 	public ModelAndView loginSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 로그인 처리 로직
-		System.out.println(">>> loginDo 메서드 진입 성공!");
 		HttpSession session = req.getSession();
 		
 		try {
@@ -61,17 +60,16 @@ public class MemberController {
 			session.setMaxInactiveInterval(20 * 60); // 20분
 
 			SessionInfo info = new SessionInfo();
-			info.setMemberIdx(dto.getMemberIdx());
-			info.setUserId(dto.getUserId());
-			info.setUserName(dto.getUserName());
-			info.setUserLevel(dto.getUserLevel());
-			// info.setAvatar(dto.getProfile_photo()); 
+			info.setMemberCode(dto.getMemberCode());
+			info.setMemberId(dto.getMemberId());
+			info.setMemberName(dto.getMemberName());
+			info.setRoleLevel(dto.getRoleLevel());
 
 			session.setAttribute("member", info);
 
 			// 이전 페이지 리다이렉트 처리
 			String preLoginURI = (String)session.getAttribute("preLoginURI");
-			session.removeAttribute("preLoginURI"); 
+			session.removeAttribute("preLoginURI");
 
 			if(preLoginURI != null) {
 				if(preLoginURI.contains("/login")) {
@@ -136,21 +134,27 @@ public class MemberController {
 		return new ModelAndView("member/signup");
 	}
 
-	@PostMapping("signupDo")
+	@PostMapping("signup")
 	public ModelAndView signupSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		try {
-			// 회원가입 폼 데이터 수집
+			// [수정] 회원가입 데이터 수집 시 새 DTO의 setter 사용
 			MemberDTO dto = new MemberDTO();
-			dto.setUserId(req.getParameter("userId"));
-			dto.setUserPwd(req.getParameter("userPwd"));
-			dto.setUserName(req.getParameter("userName"));
 			
-			// 성공 시 완료 페이지로 리다이렉트
+			// JSP의 name="userId" 값을 DTO의 memberId에 저장
+			dto.setMemberId(req.getParameter("userId"));     
+			
+			// JSP의 name="userPwd" 값을 DTO의 password에 저장
+			dto.setPassword(req.getParameter("userPwd"));    
+			
+			// JSP의 name="userName" 값을 DTO의 memberName에 저장
+			dto.setMemberName(req.getParameter("userName")); 
+			
+			// TODO: 서비스 호출 (service.insertMember(dto))
+			
 			return new ModelAndView("redirect:/member/signupSuccess");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			// 실패 시 다시 가입 폼으로 (메시지 포함)
 			ModelAndView mav = new ModelAndView("member/signup");
 			mav.addObject("message", "회원가입 실패");
 			return mav;
