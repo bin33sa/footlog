@@ -22,20 +22,23 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/member/*")
 public class MemberController {
-	private MemberService service = new MemberServiceImpl();
 	
-	// @RequestMapping(value = "login", method = RequestMethod.GET)
+	private MemberService service = new MemberServiceImpl();
+
+	// ==========================================
+	// 1. 로그인 및 로그아웃 관련
+	// ==========================================
+
 	@GetMapping("login")
 	public ModelAndView loginForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 로그인 폼
+		// 로그인 폼 페이지 이동
 		return new ModelAndView("member/login");
 	}
 
-	// @RequestMapping(value = "login", method = RequestMethod.POST)
 	@PostMapping("login")
 	public ModelAndView loginSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 로그인 처리
-		// 세션객체. 세션 정보는 서버에 저장(로그인 정보, 권한등을 저장)
+		// 로그인 처리 로직
+		System.out.println(">>> loginDo 메서드 진입 성공!");
 		HttpSession session = req.getSession();
 		
 		try {
@@ -49,73 +52,165 @@ public class MemberController {
 			MemberDTO dto = service.loginMember(map);
 			
 			if(dto == null) {
-				// 로그인 실패인 경우
 				ModelAndView mav = new ModelAndView("member/login");
-				
-				String msg = "아이디 또는 패스워드가 일치하지 않습니다.";
-				mav.addObject("message", msg);
-
+				mav.addObject("message", "아이디 또는 패스워드가 일치하지 않습니다.");
 				return mav;
 			}
 			
-			// 로그인 성공 : 로그인정보를 서버에 저장
-			// 세션의 유지시간을 20분설정(기본 30분)
-			session.setMaxInactiveInterval(20 * 60);
+			// 로그인 성공 처리
+			session.setMaxInactiveInterval(20 * 60); // 20분
 
-			// 세션에 저장할 내용
 			SessionInfo info = new SessionInfo();
 			info.setMemberIdx(dto.getMemberIdx());
 			info.setUserId(dto.getUserId());
 			info.setUserName(dto.getUserName());
-			info.setAvatar(dto.getProfile_photo());
 			info.setUserLevel(dto.getUserLevel());
+			// info.setAvatar(dto.getProfile_photo()); 
 
-			// 세션에 member이라는 이름으로 저장
 			session.setAttribute("member", info);
 
+			// 이전 페이지 리다이렉트 처리
 			String preLoginURI = (String)session.getAttribute("preLoginURI");
-			session.removeAttribute("preLoginURI"); // 한 번 쓰면 바로 삭제
+			session.removeAttribute("preLoginURI"); 
 
 			if(preLoginURI != null) {
-			    // 1. 만약 되돌아갈 주소가 '잘못된 주소(/login)'라면? -> 무조건 메인으로 보냄
-			    // (LoginFilter가 "redirect:/login" 형태로 저장했을 수 있으므로 포함 여부로 체크)
-			    if(preLoginURI.contains("/login")) { 
-			        return new ModelAndView("redirect:/");
-			    }
-			    
-			    // 2. 정상적인 주소(예: /notice/list 등)라면? -> 거기로 이동
-			    return new ModelAndView(preLoginURI);
+				if(preLoginURI.contains("/login")) {
+					return new ModelAndView("redirect:/main");
+				}
+				return new ModelAndView("redirect:" + preLoginURI);
 			}
 
-			// 3. 기억된 주소가 없으면 메인으로 이동
-			return new ModelAndView("redirect:/");
+			return new ModelAndView("redirect:/main");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			return new ModelAndView("redirect:/error");
 		}
-
-		// 메인 화면으로 리다이렉트
-		return new ModelAndView("redirect:/");
 	}
-	
+
 	@GetMapping("logout")
 	public ModelAndView logout(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 로그아웃
+		HttpSession session = req.getSession(false);
+		if(session != null) {
+			session.removeAttribute("member");
+			session.invalidate();
+		}
+		return new ModelAndView("redirect:/main");
+	}
+
+	// ==========================================
+	// 2. 아이디 / 비밀번호 찾기
+	// ==========================================
+
+	@GetMapping("findInfo")
+	public ModelAndView findInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		return new ModelAndView("member/findUserInfo");
+	}
+
+	@PostMapping("findIdDo")
+	public ModelAndView findIdSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			// 현재는 로직 없이 로그인 페이지로 이동
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ModelAndView("redirect:/member/login");
+	}
+
+	@PostMapping("findPwDo")
+	public ModelAndView findPwSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			// TODO: 파라미터 수집 후 서비스 호출 (예: service.findPw(map))
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ModelAndView("redirect:/member/login");
+	}
+
+	// ==========================================
+	// 3. 회원가입 관련
+	// ==========================================
+
+	@GetMapping("signup")
+	public ModelAndView signupForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		return new ModelAndView("member/signup");
+	}
+
+	@PostMapping("signupDo")
+	public ModelAndView signupSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			// 회원가입 폼 데이터 수집
+			MemberDTO dto = new MemberDTO();
+			dto.setUserId(req.getParameter("userId"));
+			dto.setUserPwd(req.getParameter("userPwd"));
+			dto.setUserName(req.getParameter("userName"));
+			
+			// 성공 시 완료 페이지로 리다이렉트
+			return new ModelAndView("redirect:/member/signupSuccess");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			// 실패 시 다시 가입 폼으로 (메시지 포함)
+			ModelAndView mav = new ModelAndView("member/signup");
+			mav.addObject("message", "회원가입 실패");
+			return mav;
+		}
+	}
+
+	@GetMapping("signupSuccess")
+	public ModelAndView signupSuccess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		return new ModelAndView("member/signup_success");
+	}
+
+	// ==========================================
+	// 4. 마이페이지 및 정보 수정
+	// ==========================================
+
+	@GetMapping("mypage")
+	public ModelAndView myPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		HttpSession session = req.getSession();
-
-		// 세션에 저장된 정보를 지운다.
-		session.removeAttribute("member");
-
-		// 세션에 저장된 모든 정보를 지우고 세션을 초기화 한다.
-		session.invalidate();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
-		return new ModelAndView("redirect:/");
+		if(info == null) {
+			return new ModelAndView("redirect:/member/login");
+		}
+		
+		
+		return new ModelAndView("member/mypage");
 	}
-	
-	@GetMapping("noAuthorized")
-	public ModelAndView noAuthorized(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 권한이 없는 경우
-		return new ModelAndView("member/noAuthorized");
+
+	@GetMapping("profile")
+	public ModelAndView profileForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 프로필 사진 변경 폼
+		return new ModelAndView("member/profile");
 	}
+
+	@PostMapping("profileUpdate")
+	public ModelAndView profileUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			// TODO: 파일 업로드 처리 및 DB 업데이트 로직 구현
+			// Part part = req.getPart("uploadFile"); ...
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ModelAndView("redirect:/member/mypage");
+	}
+
+	@GetMapping("updateInfo")
+	public ModelAndView updateInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 회원정보 수정 폼 (기존 정보를 가져와서 뿌려줘야 함)
 	
+		return new ModelAndView("member/updateInfo");
+	}
+
+	@PostMapping("updateDo")
+	public ModelAndView updateInfoSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+			// TODO: 수정된 정보 수집 후 서비스 호출
+			// service.updateMember(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ModelAndView("redirect:/member/mypage");
+	}
 }

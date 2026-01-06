@@ -35,6 +35,7 @@ public class AnnotationHandlerMapping implements HandlerMapping {
 	@Override
 	public HandlerExecution getHandler(final HttpServletRequest req) {
 		HandlerKey handlerKey = new HandlerKey(req);
+		System.out.println(">>> [요청 들어옴] Key: " + handlerKey);
 		return handlerExecutions.get(handlerKey);
 	}
 
@@ -123,7 +124,7 @@ public class AnnotationHandlerMapping implements HandlerMapping {
 			if (handlerExecutions.containsKey(key)) {
 				throw new ServletException(key + " : URI 가 중복되었습니다.");
 			}
-
+			System.out.println(">>> [매핑 등록됨] URL: " + finalUrl + " / Method: " + requestMethod);
 			handlerExecutions.put(key, new HandlerExecution(handler, method));
 		}
 	}

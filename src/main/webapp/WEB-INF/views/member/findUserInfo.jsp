@@ -13,7 +13,21 @@
         .nav-pills .nav-link.active { background-color: #000; color: #fff; }
         .form-control { border-radius: 10px; padding: 12px; margin-bottom: 15px; }
         .btn-black { background: #000; color: #fff; border-radius: 10px; width: 100%; padding: 12px; font-weight: bold; border: none; }
-        .brand-logo { font-size: 2rem; font-weight: bold; text-align: center; margin-bottom: 20px; display: block; text-decoration: none; color: #000; }
+       	.btn-black:hover { 
+            background: #D4F63F; 
+            color: #111; 
+        }
+       	.brand-logo { 
+            font-family: 'Pretendard', sans-serif; 
+            font-size: 2rem; 
+            font-weight: 900; 
+            font-style: italic; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            display: block; 
+            text-decoration: none; 
+            color: #000; 
+       	 }
     </style>
 </head>
 <body>
@@ -51,7 +65,7 @@
 	</div>
 
     <div class="mt-4 text-center">
-        <a href="${pageContext.request.contextPath}/login" class="text-muted small text-decoration-none">로그인 화면으로 돌아가기</a>
+        <a href="${pageContext.request.contextPath}/member/login" class="text-muted small text-decoration-none">로그인 화면으로 돌아가기</a>
     </div>
 </div>
 

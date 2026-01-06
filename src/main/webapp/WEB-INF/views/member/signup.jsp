@@ -12,23 +12,21 @@
     <style>
         body { background-color: #f8f9fa; padding: 50px 0; }
         .signup-card { width: 100%; max-width: 500px; padding: 40px; border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin: auto; }
-        .form-control, .form-select { border-radius: 10px; padding: 12px; border: 1px solid #eee; } /* Select 스타일 추가 */
+        .form-control, .form-select { border-radius: 10px; padding: 12px; border: 1px solid #eee; }
         .form-text { font-size: 0.8rem; margin-top: 5px; }
         
-        /* Gen.G 스타일 버튼 (Black & Neon Lime Hover) */
         .btn-black { background: #111; color: #fff; border-radius: 10px; width: 100%; padding: 12px; font-weight: bold; border: none; transition: 0.3s; }
-        .btn-black:hover { background: #D4F63F; color: #111; } /* 네온 라임 호버 효과 적용 */
+        .btn-black:hover { background: #D4F63F; color: #111; }
         
         .brand-logo { font-family: 'Pretendard', sans-serif; font-size: 2rem; font-weight: 900; font-style: italic; text-align: center; margin-bottom: 20px; display: block; text-decoration: none; color: #000; }
         
         .input-group .btn { border-radius: 0 10px 10px 0; }
         .input-group .form-control { border-radius: 10px 0 0 10px; }
 
-        /* 포지션 선택 버튼 커스텀 스타일 */
         .position-label { cursor: pointer; transition: all 0.2s; }
         .btn-check:checked + .btn-outline-dark {
             background-color: #111;
-            color: #D4F63F; /* 선택 시 네온 컬러 텍스트 */
+            color: #D4F63F;
             border-color: #111;
             font-weight: 800;
         }
@@ -40,12 +38,12 @@
     <a href="${pageContext.request.contextPath}/main" class="brand-logo">Footlog</a>
     <h5 class="fw-bold mb-4 text-center">새로운 팀원을 기다립니다</h5>
     
-    <form id="signupForm" action="${pageContext.request.contextPath}/signupDo" method="post" onsubmit="return validateForm()">
+    <form id="signupForm" action="${pageContext.request.contextPath}/member/signupDo" method="post" onsubmit="return validateForm()">
         
         <div class="mb-3">
             <label class="form-label small fw-bold">아이디</label>
             <div class="input-group">
-                <input type="text" name="userId" id="userId" class="form-control" placeholder="4~12자 영문/숫자" required>
+                <input type="text" name="userId" id="userId" class="form-control" placeholder="4~12자 영문/숫자">
                 <button type="button" class="btn btn-outline-dark btn-sm" onclick="checkDupId()">중복확인</button>
             </div>
             <div id="idFeedback" class="form-text"></div>
@@ -54,7 +52,7 @@
         <div class="mb-3">
             <label class="form-label small fw-bold">이메일 주소</label>
             <div class="input-group">
-                <input type="email" name="email" id="email" class="form-control" placeholder="example@footlog.com" required>
+                <input type="email" name="email" id="email" class="form-control" placeholder="example@footlog.com">
                 <button type="button" class="btn btn-outline-dark btn-sm" onclick="checkDupEmail()">중복확인</button>
             </div>
             <div id="emailFeedback" class="form-text"></div>
@@ -62,27 +60,27 @@
 
         <div class="mb-3">
             <label class="form-label small fw-bold">비밀번호</label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="8자 이상 조합" required>
+            <input type="password" name="password" id="password" class="form-control" placeholder="8자 이상 조합">
         </div>
         <div class="mb-3">
-            <input type="password" id="passwordConfirm" class="form-control" placeholder="비밀번호 확인" required>
+            <input type="password" id="passwordConfirm" class="form-control" placeholder="비밀번호 확인">
             <div id="pwFeedback" class="form-text"></div>
         </div>
 
         <div class="row mb-3">
             <div class="col-6">
                 <label class="form-label small fw-bold">이름</label>
-                <input type="text" name="name" id="userName" class="form-control" placeholder="실명" required>
+                <input type="text" name="name" id="userName" class="form-control" placeholder="실명">
             </div>
             <div class="col-6">
                 <label class="form-label small fw-bold">연락처</label>
-                <input type="tel" name="phone" id="phone" class="form-control" placeholder="숫자만 입력" required>
+                <input type="tel" name="phone" id="phone" class="form-control" placeholder="숫자만 입력">
             </div>
         </div>
 
         <div class="mb-3">
             <label class="form-label small fw-bold">거주지 주소</label>
-            <input type="text" name="address" id="address" class="form-control mb-2" placeholder="시/구/동 입력 (예: 서울시 마포구 상암동)" required>
+            <input type="text" name="address" id="address" class="form-control mb-2" placeholder="시/구/동 입력">
             <input type="text" name="addressDetail" id="addressDetail" class="form-control" placeholder="상세 주소 (선택)">
         </div>
 
@@ -102,9 +100,9 @@
         </div>
 
         <div class="mb-4">
-            <label class="form-label small fw-bold">주 포지션 <span class="text-danger">*</span></label>
+            <label class="form-label small fw-bold">주 포지션</label>
             <div class="d-flex gap-2 w-100">
-                <input type="radio" class="btn-check" name="position" id="pos_fw" value="FW" autocomplete="off" required>
+                <input type="radio" class="btn-check" name="position" id="pos_fw" value="FW" autocomplete="off">
                 <label class="btn btn-outline-dark flex-fill py-3" for="pos_fw">
                     <span class="d-block fs-5 fw-bold">FW</span>
                     <span class="d-block small text-muted" style="font-size: 0.7rem;">공격수</span>
@@ -132,24 +130,29 @@
 
         <div class="mb-4 p-3 bg-light rounded shadow-sm">
             <div class="form-check small">
-                <input class="form-check-input" type="checkbox" id="agreeCheck" required>
+                <input class="form-check-input" type="checkbox" id="agreeCheck">
                 <label class="form-check-label text-muted" for="agreeCheck">
                     (필수) 이용약관 및 개인정보 처리방침에 동의합니다.
                 </label>
             </div>
         </div>
 
-        <button type="submit" class="btn-black shadow-sm">가입하기</button>
+        <!--<button type="submit" class="btn-black shadow-sm">가입하기</button> -->
+        <div class="d-grid">
+	        <a href="${pageContext.request.contextPath}/member/signupSuccess" class="btn btn-black shadow-sm text-decoration-none text-center">
+	            가입하기
+	        </a>
+	    </div>
         
         <div class="mt-3 text-center">
-            <a href="${pageContext.request.contextPath}/login" class="text-muted small text-decoration-none">이미 계정이 있으신가요? 로그인</a>
+            <a href="${pageContext.request.contextPath}/member/login" class="text-muted small text-decoration-none">이미 계정이 있으신가요? 로그인</a>
         </div>
     </form>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    // 중복 확인 상태
+    // 중복 확인 상태 (테스트용이므로 무시됨)
     let isIdChecked = false;
     let isEmailChecked = false;
 
@@ -162,51 +165,38 @@
         }
     });
 
-    // 폼 제출 유효성 검사
+    // 폼 제출 함수 (임시 테스트용)
     function validateForm() {
+        // [임시] 복잡한 유효성 검사 모두 주석 처리
+        /*
         const userId = $("#userId").val();
         const pw = $("#password").val();
-        const pwConfirm = $("#passwordConfirm").val();
-        const phone = $("#phone").val();
-        const address = $("#address").val();
-        // 포지션 체크 여부 확인
-        const position = $("input[name='position']:checked").val();
-
-        // 1. 기본 검사
+        // ... (생략) ...
+        
         if (!isIdChecked) { alert("아이디 중복확인을 해주세요."); return false; }
-        if (!isEmailChecked) { alert("이메일 중복확인을 해주세요."); return false; }
-        if (pw !== pwConfirm) { alert("비밀번호가 일치하지 않습니다."); return false; }
         if (pw.length < 8) { alert("비밀번호는 8자 이상이어야 합니다."); return false; }
+        // ... (생략) ...
+        */
 
-        // 2. 추가된 필드 검사
-        if (!address) {
-            alert("거주지 주소를 입력해주세요.");
-            $("#address").focus();
-            return false;
-        }
-
-        if (!position) {
-            alert("주 포지션을 선택해주세요.");
-            return false;
-        }
-
-        return true;
+        // [임시] 서버 전송(submit) 주석 처리
+        // return true;
+        
+        // [임시] 바로 가입 완료 페이지(signup_success.jsp)로 화면만 이동
+        // 주의: WEB-INF에 숨겨진 파일이 아니라, 컨트롤러를 거치거나 공개된 경로여야 함.
+        // 여기서는 같은 폴더 내(혹은 컨트롤러 매핑) signup_success.jsp로 이동한다고 가정
+        location.href = "signup_success.jsp"; 
+        
+        return false; // 폼이 실제로 전송되지 않게 막음
     }
 
-    // (기존 스크립트 기능 유지: 중복확인 및 PW체크)
+    // (기능 유지: UI 테스트용)
     function checkDupId() {
-        const userId = $("#userId").val();
-        if(!userId) { alert("아이디를 입력해주세요."); return; }
-        // Ajax 자리
         alert("사용 가능한 아이디입니다.");
         isIdChecked = true;
         $("#idFeedback").text("확인 완료").css("color", "blue");
     }
 
     function checkDupEmail() {
-        const email = $("#email").val();
-        if(!email) { alert("이메일을 입력해주세요."); return; }
-        // Ajax 자리
         alert("사용 가능한 이메일입니다.");
         isEmailChecked = true;
         $("#emailFeedback").text("확인 완료").css("color", "blue");
