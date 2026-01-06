@@ -75,37 +75,10 @@
                         <button class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">용병 모집 / 신청하기</button>
                     </div>
                 </div>
-
             </div>
+         </div>
+      </div>
 
-            <div class="col-lg-2 d-none d-lg-block">
-                <div class="sidebar-menu sticky-top" style="top: 100px;">
-                    <div class="mb-4">
-                        <p class="sidebar-title">Community</p>
-                        <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                게시판 <span class="badge bg-danger rounded-pill">N</span>
-                            </a>
-                            <a href="${pageContext.request.contextPath}/notice/list" class="list-group-item list-group-item-action">공지사항</a>
-                            <a href="${pageContext.request.contextPath}/bbs/list" class="list-group-item list-group-item-action">자유 게시판</a>
-                            <a href="${pageContext.request.contextPath}/photo/list" class="list-group-item list-group-item-action">갤러리</a>
-                            <a href="#" class="list-group-item list-group-item-action">이벤트 / 뉴스</a>
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="sidebar-title">My Account</p>
-                        <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/member/mypage" class="list-group-item list-group-item-action bg-dark text-white rounded-3 mb-1">마이페이지</a>
-                            <a href="${pageContext.request.contextPath}/member/updateInfo" class="list-group-item list-group-item-action">회원정보 수정</a>
-                            <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action text-muted small">로그아웃</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div> 
-    </div> 
 
     <jsp:include page="/WEB-INF/views/layout/footer.jsp" />
 
