@@ -1,5 +1,5 @@
 /build/
 /uploads/
+/api/
 MailSender.java
 mybatis-config.xml
-/api/
