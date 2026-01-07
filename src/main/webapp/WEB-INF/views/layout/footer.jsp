@@ -3,7 +3,7 @@
 <style>
     /* 다크 테마 푸터 스타일 */
     .footer-dark {
-        background-color: #22252a; /* 이미지와 유사한 아주 어두운 차콜색 */
+        background-color: #22252a; 
         color: #999;
         font-size: 0.85rem;
         padding: 60px 0;

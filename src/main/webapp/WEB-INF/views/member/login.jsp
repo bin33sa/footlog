@@ -13,68 +13,69 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     
     <style>
-        body {
-            background-color: #f8f9fa;
+        /* 1. 배경 및 레이아웃 */
+        body { 
+            background-color: #f8f9fa; 
+            min-height: 100vh; /* 화면 중앙 정렬 */
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
         }
 
-        .login-wrapper {
-            width: 100%;
-            min-height: calc(100vh - 380px); 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 0;
+        /* 2. 카드 박스 */
+        .login-card { 
+            width: 100%; 
+            max-width: 400px; 
+            padding: 40px; 
+            border-radius: 20px; 
+            background: #fff; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
         }
 
-        .login-card {
-            width: 100%;
-            max-width: 400px;
-            padding: 40px;
-            border-radius: 20px;
-            background: #fff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-        }
-
-        .form-control {
-            border-radius: 10px;
-            padding: 12px;
-            border: 1px solid #eee;
+        /* 3. 입력창 스타일 & 클릭 효과  */
+        .form-control { 
+            border-radius: 10px; 
+            padding: 12px; 
+            border: 1px solid #eee; 
         }
         
+       
         .form-control:focus {
             color: #212529;
             background-color: #fff;
-            border-color: #86b7fe;
+            border-color: #86b7fe; /* 파란색 테두리 */
             outline: 0;
-            box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25);
+            box-shadow: 0 0 0 .25rem rgba(13, 110, 253, .25); /* 파란색 빛 번짐 */
         }
 
-        .btn-black {
-            background: #111;
-            color: #fff;
-            border-radius: 10px;
-            width: 100%;
-            padding: 12px;
-            font-weight: bold;
-            border: none;
-            transition: 0.3s;
+        /* 4. 버튼 스타일  */
+        .btn-black { 
+            background: #111; 
+            color: #fff; 
+            border-radius: 10px; 
+            width: 100%; 
+            padding: 12px; 
+            font-weight: bold; 
+            border: none; 
+            transition: 0.3s; 
         }
-        
-        .btn-black:hover {
-            background: #D4F63F;
-            color: #111;
+        /* 마우스 올렸을 때 네온 라임색 효과 */
+        .btn-black:hover { 
+            background: #D4F63F; 
+            color: #111; 
         }
 
-        .brand-logo {
-            font-family: 'Pretendard', sans-serif;
-            font-size: 2rem;
-            font-weight: 900;
-            font-style: italic;
-            text-align: center;
-            margin-bottom: 20px;
-            display: block;
-            text-decoration: none;
-            color: #000;
+        /* 5. 로고 스타일  */
+        .brand-logo { 
+            font-family: 'Pretendard', sans-serif; 
+            font-size: 2rem; 
+            font-weight: 900; 
+            font-style: italic; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            display: block; 
+            text-decoration: none; 
+            color: #000; 
         }
     </style>
 </head>

@@ -18,9 +18,12 @@
         .match-card.end { border-left-color: #555; background: #f8f9fa; }
     </style>
 </head>
+	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <body>
 
-    <jsp:include page="/WEB-INF/views/layout/header.jsp" />
+    <header>
+	   <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
+	</header>
 
     <div class="container mt-4 mb-5" style="max-width: 1200px;">
         <div class="row g-4">
@@ -28,7 +31,7 @@
             <div class="col-lg-3">
                 <div class="modern-card p-4 text-center mb-3">
                     <div class="position-relative d-inline-block mb-3">
-                        <img src="${empty sessionScope.member.profile_photo ? pageContext.request.contextPath.concat('/dist/images/avatar.png') : pageContext.request.contextPath.concat('/uploads/profile/').concat(sessionScope.member.profile_photo)}" 
+                        <img src="${empty sessionScope.member.profile_photo ? pageContext.request.contextPath.concat('/dist/images/') : pageContext.request.contextPath.concat('/uploads/profile/').concat(sessionScope.member.profile_photo)}" 
                              class="rounded-circle border border-3 border-dark" 
                              style="width: 100px; height: 100px; object-fit: cover;">
                              
@@ -48,7 +51,7 @@
                 <div class="list-group shadow-sm rounded-4 overflow-hidden">
                     <a href="#" class="list-group-item list-group-item-action py-3 fw-bold bg-light">🚀 대시보드</a>
                     <a href="#" class="list-group-item list-group-item-action py-3">내 구단 이동</a>
-                    <a href="#" class="list-group-item list-group-item-action py-3">매치/용병 신청 내역</a>
+                    <a href="${pageContext.request.contextPath}/member/history" class="list-group-item list-group-item-action py-3">매치/용병 신청 내역</a>
                     <a href="${pageContext.request.contextPath}/member/updateInfo"class="list-group-item list-group-item-action py-3">회원정보 수정</a>
                     <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action py-3">로그아웃</a>
        
@@ -111,7 +114,11 @@
         </div>
     </div>
 
-    <jsp:include page="/WEB-INF/views/layout/footer.jsp" />
+    <footer>
+	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+	</footer>
+
+<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

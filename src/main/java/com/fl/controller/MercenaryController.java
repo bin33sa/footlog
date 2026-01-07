@@ -11,12 +11,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
-public class CalendarController {
-
-	@RequestMapping("/calendar/match_calendar")
-	public ModelAndView matchCalendar(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
-		ModelAndView mav = new ModelAndView("calendar/match_calendar");
+@RequestMapping("/mercenary/*")
+public class MercenaryController {
+	@RequestMapping("list")
+	public ModelAndView list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		ModelAndView mav = new ModelAndView("mercenary/list");
 		
 		return mav;
 	}
