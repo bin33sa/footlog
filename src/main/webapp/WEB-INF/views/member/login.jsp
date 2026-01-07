@@ -97,7 +97,7 @@
             
             <h5 class="fw-bold mb-4 text-center">로그인을 환영합니다</h5>
             
-            <form action="${pageContext.request.contextPath}/member/loginDo" method="post">
+            <form action="${pageContext.request.contextPath}/member/login" method="post">
                 
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-secondary">아이디</label>
