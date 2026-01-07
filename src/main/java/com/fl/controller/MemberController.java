@@ -60,10 +60,10 @@ public class MemberController {
 			session.setMaxInactiveInterval(20 * 60); // 20분
 
 			SessionInfo info = new SessionInfo();
-			info.setMemberCode(dto.getMemberCode());
-			info.setMemberId(dto.getMemberId());
-			info.setMemberName(dto.getMemberName());
-			info.setRoleLevel(dto.getRoleLevel());
+			info.setMember_code(dto.getMember_code());
+			info.setMember_id(dto.getMember_id());
+			info.setMember_name(dto.getMember_name());
+			info.setRole_level(dto.getRole_level());
 
 			session.setAttribute("member", info);
 
@@ -141,13 +141,13 @@ public class MemberController {
 			MemberDTO dto = new MemberDTO();
 			
 			// JSP의 name="userId" 값을 DTO의 memberId에 저장
-			dto.setMemberId(req.getParameter("userId"));     
+			dto.setMember_id(req.getParameter("userId"));     
 			
 			// JSP의 name="userPwd" 값을 DTO의 password에 저장
 			dto.setPassword(req.getParameter("userPwd"));    
 			
 			// JSP의 name="userName" 값을 DTO의 memberName에 저장
-			dto.setMemberName(req.getParameter("userName")); 
+			dto.setMember_name(req.getParameter("userName")); 
 			
 			// TODO: 서비스 호출 (service.insertMember(dto))
 			

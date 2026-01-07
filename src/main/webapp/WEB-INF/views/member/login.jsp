@@ -7,9 +7,9 @@
     <title>로그인 - Footlog</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     
     <style>
@@ -79,9 +79,11 @@
     </style>
 </head>
 <body>
+<header>
+	<jsp:include page="/WEB-INF/views/layout/header.jsp"/>
+</header>
 
-    <jsp:include page="/WEB-INF/views/layout/header.jsp" />
-
+<main>
     <div class="login-wrapper">
         <div class="login-card">
             <a href="${pageContext.request.contextPath}/main" class="brand-logo">Footlog</a>
@@ -120,8 +122,7 @@
             </form>
         </div>
     </div>
-
-    <jsp:include page="/WEB-INF/views/layout/footer.jsp" />
+</main>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -151,5 +152,12 @@
         alert("${message}");
     </c:if>
     </script>
+    
+<footer>
+	<jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+</footer>
+    
+<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>    
+    
 </body>
 </html>
