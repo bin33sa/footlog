@@ -14,18 +14,18 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
-import com.fl.model.PhotoDTO;
-import com.fl.util.FileManager;      
-import com.fl.util.MyMultipartFile;  
+import com.fl.model.GalleryDTO; // [변경] PhotoDTO -> GalleryDTO
+import com.fl.util.FileManager;
+import com.fl.util.MyMultipartFile;
 import com.fl.util.MyUtil;
 
 @WebServlet("/photo/*")
-@MultipartConfig 
+@MultipartConfig
 public class PhotoController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
 	private MyUtil util = new MyUtil();
-	private FileManager fileManager = new FileManager(); 
+	private FileManager fileManager = new FileManager();
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -74,31 +74,45 @@ public class PhotoController extends HttpServlet {
 			if (schType == null) { schType = "all"; kwd = ""; }
 			if(req.getMethod().equalsIgnoreCase("GET")) { kwd = util.decodeUrl(kwd); }
 
-			int dataCount = 35; 
-			int size = 12; 
+			int dataCount = 35;
+			int size = 12;
 			int total_page = util.pageCount(dataCount, size);
 			if (current_page > total_page) current_page = total_page;
 			
-			List<PhotoDTO> list = new ArrayList<>();
-			int startNum = dataCount - (current_page - 1) * size; 
+			List<GalleryDTO> list = new ArrayList<>();
+			int startNum = dataCount - (current_page - 1) * size;
 			int endNum = startNum - size + 1;
 			if(endNum < 1) endNum = 1;
 
+	
 			for (int i = startNum; i >= endNum; i--) {
-				PhotoDTO dto = new PhotoDTO();
-				dto.setNum(i);
-				dto.setSubject("갤러리 사진 (" + i + ")");
-				dto.setUserId("admin");
-				dto.setUserName("관리자");
-				dto.setReg_date("2025-05-22");
-				// 리스트 썸네일용 (sample.jpg가 없으면 엑박 뜨므로 주의)
-				dto.setImageFilename("sample.jpg"); 
+				GalleryDTO dto = new GalleryDTO();
+				
+	
+				dto.setGallery_code((long)i);
+				
+	
+				dto.setTitle("갤러리 사진 (" + i + ")");
+				
+				
+				dto.setMember_id("admin");
+				dto.setMember_name("관리자");
+				
+				// [변경] reg_date -> created_at
+				dto.setCreated_at("2025-05-22");
+				
+				// [변경] imageFilename -> title_image (썸네일)
+				dto.setTitle_image("sample.jpg");
+				
+				// [추가] 조회수 등
+				dto.setView_count(i * 10);
+				
 				list.add(dto);
 			}
 
 			String listUrl = cp + "/photo/list";
 			
-			// JSP에서 seq로 넘기도록 여기서 주소 생성
+			// [변경] articleUrl 파라미터를 gallery_code로 받을 준비 (JSP에서 &gallery_code=${dto.gallery_code} 사용 권장)
 			String articleUrl = cp + "/photo/article?page=" + current_page;
 			
 			String query = "size=" + size;
@@ -146,19 +160,33 @@ public class PhotoController extends HttpServlet {
 		String pathname = root + "uploads" + File.separator + "photo";
 
 		try {
-			PhotoDTO dto = new PhotoDTO();
-			dto.setUserId("admin");
-			dto.setSubject(req.getParameter("subject"));
+			GalleryDTO dto = new GalleryDTO();
+			
+			// [변경] DTO 변수명에 맞춰 파라미터 수신
+			// 주의: JSP의 input name도 "subject" -> "title"로 바꾸는 것이 좋지만,
+			// 일단 기존 JSP 호환을 위해 "subject"로 받아서 setTitle에 넣습니다.
+			String title = req.getParameter("title");
+			if(title == null) title = req.getParameter("subject"); // 호환성 체크
+			
+			dto.setTitle(title);
 			dto.setContent(req.getParameter("content"));
+			dto.setMember_id("admin"); // 임시
 
-			Part p = req.getPart("uploadFile"); 
+			Part p = req.getPart("uploadFile");
 			MyMultipartFile multiPart = fileManager.doFileUpload(p, pathname);
 			
 			if (multiPart != null) {
 				String filename = multiPart.getSaveFilename();
-				dto.setImageFilename(filename);
+				
+				// [변경] imageFilename -> title_image
+				dto.setTitle_image(filename);
+				
 				System.out.println("파일 저장 성공: " + pathname + File.separator + filename);
 			}
+			
+			// 실제 DB 저장 로직 (Service 호출)
+			// dao.insertGallery(dto);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -166,15 +194,18 @@ public class PhotoController extends HttpServlet {
 		resp.sendRedirect(cp + "/photo/list");
 	}
 
-	// 4. 글 보기 
+	// 4. 글 보기 (Article -> View)
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		String cp = req.getContextPath();
 		String page = req.getParameter("page");
 		String query = "page=" + page;
 		
 		try {
+			// [변경] 파라미터 수신 (gallery_code 우선, 없으면 seq)
+			String codeStr = req.getParameter("gallery_code");
+			if(codeStr == null) codeStr = req.getParameter("seq");
 			
-			long num = Long.parseLong(req.getParameter("seq")); 
+			long gallery_code = Long.parseLong(codeStr);
 			
 			String schType = req.getParameter("schType");
 			String kwd = req.getParameter("kwd");
@@ -185,23 +216,25 @@ public class PhotoController extends HttpServlet {
 			}
 
 			// 상세 보기용 가짜 데이터
-			PhotoDTO dto = new PhotoDTO();
-			dto.setNum(num);
-			dto.setSubject("사진 상세 보기");
-			dto.setContent("사진 설명입니다.");
+			GalleryDTO dto = new GalleryDTO();
 			
-		
-			dto.setImageFilename("meow.png"); 
+			// [변경] setter 메서드명 변경
+			dto.setGallery_code(gallery_code);
+			dto.setTitle("사진 상세 보기 (제목)");
+			dto.setContent("사진 설명입니다. (내용)");
 			
-			dto.setUserId("admin");
-			dto.setUserName("관리자");
-			dto.setReg_date("2025-05-22");
+			// [변경] 이미지 파일명 설정
+			dto.setTitle_image("meow.png");
+			
+			dto.setMember_id("admin");
+			dto.setMember_name("관리자");
+			dto.setCreated_at("2025-05-22");
+			dto.setView_count(123);
 			
 			req.setAttribute("dto", dto);
 			req.setAttribute("page", page);
 			req.setAttribute("query", query);
 
-			//  article.jsp로 포워딩
 			String path = "/WEB-INF/views/photo/article.jsp";
 			req.getRequestDispatcher(path).forward(req, resp);
 			
