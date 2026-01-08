@@ -82,18 +82,7 @@
 
             </div>
             
-            <div class="col-lg-2 d-none d-lg-block">
-                <div class="sidebar-menu sticky-top" style="top: 100px;">
-                    <div>
-                        <p class="sidebar-title">My Account</p>
-                        <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/member/mypage" class="list-group-item list-group-item-action bg-dark text-white rounded-3 mb-1">마이페이지</a>
-                            <a href="${pageContext.request.contextPath}/member/updateInfo" class="list-group-item list-group-item-action">회원정보 수정</a>
-                            <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action text-muted small">로그아웃</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
     
         </div> 
       </div> 
