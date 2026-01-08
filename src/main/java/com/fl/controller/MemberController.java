@@ -76,7 +76,7 @@ public class MemberController {
 				if(preLoginURI.contains("/login")) {
 					return new ModelAndView("redirect:/main");
 				}
-				return new ModelAndView("redirect:" + preLoginURI);
+				return new ModelAndView(preLoginURI);
 			}
 
 			return new ModelAndView("redirect:/main");

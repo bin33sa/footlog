@@ -12,7 +12,8 @@ public class JoinRequestDTO {
     private String phone_number;
    
     private String team_name;
-
+    private String created_at;
+    
 	public Long getMember_code() {
 		return member_code;
 	}
@@ -83,6 +84,14 @@ public class JoinRequestDTO {
 
 	public void setTeam_name(String team_name) {
 		this.team_name = team_name;
+	}
+
+	public String getCreated_at() {
+		return created_at;
+	}
+
+	public void setCreated_at(String created_at) {
+		this.created_at = created_at;
 	}
     
     
