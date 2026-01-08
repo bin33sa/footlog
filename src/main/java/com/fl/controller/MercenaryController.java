@@ -62,40 +62,53 @@ public class MercenaryController {
     // 2. 게시글 등록 관련
     // ==========================================
     @GetMapping("write")
-    public ModelAndView writeForm(HttpSession session) {
-        // 로그인 여부 체크
+    public ModelAndView writeForm(HttpServletRequest req, HttpServletResponse resp) {
+    	HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
-        if (info == null) {
-            return new ModelAndView("redirect:/member/login");
-        }
-
-        return new ModelAndView("mercenary/write");
+        
+        try {
+        	ModelAndView mav = new ModelAndView("mercenary/write");
+        	
+        	Map<String, Object> map = new HashMap<>();
+        	map.put("member_code", info.getMember_code());
+        	
+        	List<MercenaryDTO> listTeam = service.listTeam(map);
+        	
+        	mav.addObject("listTeam", listTeam);
+    		mav.addObject("mode", "write");
+    		return mav;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+        
+		return new ModelAndView("redirect:/mercenary/list");
+        
     }
 
     @PostMapping("write")
-    public ModelAndView writeSubmit(MercenaryDTO dto, HttpSession session) {
+    public ModelAndView writeSubmit(HttpServletRequest req, HttpServletResponse resp) {
+    	
+    	HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
-        
-        if (info == null) {
-            return new ModelAndView("redirect:/member/login");
-        }
-
+ 
         try {
-            // MemberController 스타일: 세션의 member_code를 DTO에 저장
-            // DTO의 필드명이 recruitId, memberCode(카멜케이스)인지 확인하세요.
-            dto.setMember_code(info.getMember_code()); 
-            dto.setStatus("RECRUITING");
-
-            //service.insertMercenary(dto);
+        	MercenaryDTO dto = new MercenaryDTO();
+        	
+			dto.setTitle(req.getParameter("title"));
+			dto.setTeam_code(Long.parseLong(req.getParameter("team_code")));
+            dto.setContent(req.getParameter("content"));
+        	dto.setMember_code(info.getMember_code()); 
             
-            return new ModelAndView("redirect:/mercenary/list");
+
+            service.insertMercenary(dto);
+            
+            
             
         } catch (Exception e) {
-            e.printStackTrace();
-            ModelAndView mav = new ModelAndView("mercenary/write");
-            mav.addObject("message", "등록 중 오류가 발생했습니다.");
-            return mav;
+            e.printStackTrace();                       
+            
         }
+        return new ModelAndView("/mercenary/list");
     }
 
     // ==========================================

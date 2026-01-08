@@ -8,20 +8,19 @@ import com.fl.model.MercenaryDTO;
 import com.fl.mybatis.support.MapperContainer;
 
 public class MercenaryServiceImpl implements MercenaryService {
-    // 강사님 스타일: MapperContainer를 통해 Mapper 객체 획득
     private MercenaryMapper mapper = MapperContainer.get(MercenaryMapper.class);
 
-    /*
+    
     @Override
     public void insertMercenary(MercenaryDTO dto) throws Exception {
         try {
             mapper.insertMercenary(dto);
         } catch (Exception e) {
             e.printStackTrace();
-            throw e; // 등록 실패 시 컨트롤러로 예외를 던져 에러 페이지 처리를 유도
+            throw e; // 
         }
     }
-
+    /*
     @Override
     public void updateMercenary(MercenaryDTO dto) throws Exception {
         try {
@@ -84,4 +83,14 @@ public class MercenaryServiceImpl implements MercenaryService {
 //            throw e;
 //        }
 //    }
+	@Override
+	public List<MercenaryDTO> listTeam(Map<String, Object> map) {
+        List<MercenaryDTO> list = null;
+        try {
+            list = mapper.listTeam(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+	}
 }

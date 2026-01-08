@@ -1,5 +1,6 @@
 package com.fl.mapper;
 
+import java.sql.SQLException;
 // import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -7,8 +8,8 @@ import java.util.Map;
 import com.fl.model.MercenaryDTO; // DTO 위치 확인 필요
 
 public interface MercenaryMapper {
-//    // 게시글 등록
-//    public void insertMercenary(MercenaryDTO dto) throws SQLException;
+    // 게시글 등록
+    public void insertMercenary(MercenaryDTO dto) throws SQLException;
 //    
 //    // 게시글 수정
 //    public void updateMercenary(MercenaryDTO dto) throws SQLException;
@@ -23,6 +24,6 @@ public interface MercenaryMapper {
 //    public MercenaryDTO findById(long recruit_id);
     
     public List<MercenaryDTO> listMercenary(Map<String, Object> map);
-    
+    public List<MercenaryDTO> listTeam(Map<String, Object> map);    
 //    public int dataCount(Map<String, Object> map);
 }
