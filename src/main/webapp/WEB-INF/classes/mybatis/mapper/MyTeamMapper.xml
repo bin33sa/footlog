@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fl.mapper.MyTeamMapper">
+
+	<!-- 내 팀 리스트 -->
+	<select id="listMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
+    	SELECT 
+			t.team_code, 
+			t.team_name, 
+			t.emblem_image AS emblem,  t.region, 
+			(SELECT COUNT(*) FROM member_team WHERE team_code = t.team_code) AS member_count,
+			mt.role_level AS my_role   FROM team t
+		JOIN member_team mt ON t.team_code = mt.team_code
+		WHERE mt.member_code = #{member_code}
+		ORDER BY mt.role_level DESC
+	</select>
+	
+	<!-- 가입 신청 리스트 -->
+	<select id="listJoinRequest" parameterType="Long" resultType="com.fl.model.JoinRequestDTO">
+	    SELECT 
+	        jr.member_code, 
+	        jr.team_code, 
+	        jr.status,
+	        TO_CHAR(jr.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+	        m.member_id,
+	        m.member_name,
+	        m.profile_image,
+	        m.phone_number,
+	        m.preferred_position,
+	        m.region
+	    FROM join_request jr
+	    JOIN member m ON jr.member_code = m.member_code
+	    WHERE jr.team_code = #{team_code} 
+	      AND jr.status = 1
+	    ORDER BY jr.created_at ASC
+	</select>
+	
+	<!-- 가입 승인 -->
+	<update id="updateJoinRequestStatus" parameterType="map">
+		UPDATE join_request 
+		SET status = #{status}
+		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	</update>
+	
+	<!-- 팀멤버 추가 -->
+	<insert id="insertTeamMember" parameterType="com.fl.model.TeamMemberDTO">
+		INSERT INTO member_team (member_code, team_code, role_level, position)
+		VALUES (#{member_code}, #{team_code}, 1, #{position, jdbcType=VARCHAR})
+	</insert>
+	
+	<!-- 팀 인원수 증가 -->
+	<update id="updateTeamMemberCountUp" parameterType="Long">
+		UPDATE team 
+		SET member_count = member_count + 1
+		WHERE team_code = #{team_code}
+	</update>
+	
+	
+</mapper>

@@ -61,7 +61,7 @@
                             <li><a class="dropdown-item" href="#">구단 프로필 수정</a></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/">구단 탈퇴</a></li>
                             <li><a class="dropdown-item" href="#">매치관리</a></li>
-                            <li><a class="dropdown-item" href="#">신청현황</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/request">신청현황</a></li>
                         </ul>
                     </li>
                 </ul>
