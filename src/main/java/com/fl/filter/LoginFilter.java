@@ -118,7 +118,8 @@ public class LoginFilter implements Filter {
 				"/team/view",  
 				
 				"/match/list",   
-				"/match/view",
+				"/match/article",
+				"/match/myMatch",
 				
 				"/field/list", 
 				"/field/view", 
