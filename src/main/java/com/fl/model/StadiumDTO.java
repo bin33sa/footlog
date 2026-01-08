@@ -1,29 +1,28 @@
 package com.fl.model;
 
 public class StadiumDTO {
-	private Long stadium_code;    
-    private String stadium_name;  
+	private Long stadiumCode;    
+    private String stadiumName;  
     private String region;        
-    private String phone_number;  
+    private String phoneNumber;  
     private String description;   
-    private String intro_url;     
-    private String stadium_image; 
+    private String introUrl;     
+    private String stadiumImage; 
 
-    private int like_count;  
-    private int arena_count; 
-    private int user_liked;
-    
-	public Long getStadium_code() {
-		return stadium_code;
+    private int likeCount;  
+    private int arenaCount; 
+    private int userLiked;
+	public Long getStadiumCode() {
+		return stadiumCode;
 	}
-	public void setStadium_code(Long stadium_code) {
-		this.stadium_code = stadium_code;
+	public void setStadiumCode(Long stadiumCode) {
+		this.stadiumCode = stadiumCode;
 	}
-	public String getStadium_name() {
-		return stadium_name;
+	public String getStadiumName() {
+		return stadiumName;
 	}
-	public void setStadium_name(String stadium_name) {
-		this.stadium_name = stadium_name;
+	public void setStadiumName(String stadiumName) {
+		this.stadiumName = stadiumName;
 	}
 	public String getRegion() {
 		return region;
@@ -31,11 +30,11 @@ public class StadiumDTO {
 	public void setRegion(String region) {
 		this.region = region;
 	}
-	public String getPhone_number() {
-		return phone_number;
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
-	public void setPhone_number(String phone_number) {
-		this.phone_number = phone_number;
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 	public String getDescription() {
 		return description;
@@ -43,36 +42,37 @@ public class StadiumDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public String getIntro_url() {
-		return intro_url;
+	public String getIntroUrl() {
+		return introUrl;
 	}
-	public void setIntro_url(String intro_url) {
-		this.intro_url = intro_url;
+	public void setIntroUrl(String introUrl) {
+		this.introUrl = introUrl;
 	}
-	public String getStadium_image() {
-		return stadium_image;
+	public String getStadiumImage() {
+		return stadiumImage;
 	}
-	public void setStadium_image(String stadium_image) {
-		this.stadium_image = stadium_image;
+	public void setStadiumImage(String stadiumImage) {
+		this.stadiumImage = stadiumImage;
 	}
-	public int getLike_count() {
-		return like_count;
+	public int getLikeCount() {
+		return likeCount;
 	}
-	public void setLike_count(int like_count) {
-		this.like_count = like_count;
+	public void setLikeCount(int likeCount) {
+		this.likeCount = likeCount;
 	}
-	public int getArena_count() {
-		return arena_count;
+	public int getArenaCount() {
+		return arenaCount;
 	}
-	public void setArena_count(int arena_count) {
-		this.arena_count = arena_count;
+	public void setArenaCount(int arenaCount) {
+		this.arenaCount = arenaCount;
 	}
-	public int getUser_liked() {
-		return user_liked;
+	public int getUserLiked() {
+		return userLiked;
 	}
-	public void setUser_liked(int user_liked) {
-		this.user_liked = user_liked;
+	public void setUserLiked(int userLiked) {
+		this.userLiked = userLiked;
 	}
+	
     
     
 }

@@ -1,0 +1,12 @@
+package com.fl.mapper;
+
+import java.util.List;
+import java.util.Map;
+
+import com.fl.model.StadiumDTO;
+
+public interface StadiumMapper {
+
+	  public List<StadiumDTO> listStadium(Map<String, Object> map);
+	
+}

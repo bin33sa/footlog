@@ -71,7 +71,7 @@
 
                 <div class="row g-4">
                     
-                   <!-- <c:forEach var="slot" items="${timeList}" varStatus="s"> -->
+                  <c:forEach var="dto" items = "${list}">
                   
                     <div class="col-md-6" onclick="location.href='${pageContext.request.contextPath}/field/view'">
                         <div class="modern-card stadium-card p-0 h-100">
@@ -81,7 +81,7 @@
                             </div>
                             <div class="p-4">
                                 <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h5 class="fw-bold mb-0">상암 월드컵 보조경기장</h5>
+                                    <h5 class="fw-bold mb-0">${dto.stadiumName}</h5>
                                     <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> 4.9</span>
                                 </div>
                                 <p class="text-muted small mb-3">서울 마포구 성산동</p>
@@ -101,8 +101,10 @@
                             </div>
                         </div>
                     </div>
+                    
+                    </c:forEach>
+                    
 
-			<!-- </c:forEach> -->
 
 
 
