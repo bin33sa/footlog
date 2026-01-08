@@ -39,14 +39,12 @@ public class MemberController {
 		HttpSession session = req.getSession();
 		
 		try {
-			// [수정 1] JSP의 name="userId", name="password" 와 일치시켜야 함
 			String userId = req.getParameter("userId");
 			String password = req.getParameter("password"); // userPwd -> password 변경
 
 			Map<String, Object> map = new HashMap<>();
 			map.put("userId", userId);
-			
-			// [수정 2] Mapper XML의 #{password} 와 일치시켜야 함
+
 			map.put("password", password); // 키값 userPwd -> password 변경
 			
 			MemberDTO dto = service.loginMember(map);

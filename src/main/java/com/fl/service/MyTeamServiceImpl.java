@@ -1,7 +1,6 @@
 package com.fl.service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,35 +49,41 @@ public class MyTeamServiceImpl implements MyTeamService{
 		return list;
 	}
 
-	@Override
-	public void processJoinRequest(JoinRequestDTO dto) throws Exception {
-		try {
-			Map<String, Object> map = new HashMap<>();
-			map.put("team_code", dto.getTeam_code());
-			map.put("member_code", dto.getMember_code());
-			map.put("status", dto.getStatus());
-			
-			mapper.updateJoinRequestStatus(map);
-
-			if(dto.getStatus() == 2) {
-
-				TeamMemberDTO memberDto = new TeamMemberDTO();
-				memberDto.setTeam_code(dto.getTeam_code());
-				memberDto.setMember_code(dto.getMember_code());
-
-				memberDto.setPosition(dto.getPreferred_position()); 
-				
-				mapper.insertTeamMember(memberDto);
-	
-				mapper.updateTeamMemberCountUp(dto.getTeam_code());
+	// 1. 상태 변경 (대기 -> 수락/거절)
+		@Override
+		public void updateJoinRequestStatus(Map<String, Object> map) throws Exception {
+			try {
+				mapper.updateJoinRequestStatus(map);
+			} catch (Exception e) {
+				System.out.println("[MyTeamService] updateJoinRequestStatus 에러 발생");
+				e.printStackTrace(); // 에러 로그 필수!
+				throw e; // 컨트롤러에게 "야, DB 쪽에서 문제 터졌어!"라고 알려줌
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			
-			throw e;
 		}
-		
-	}
+
+		// 2. 정식 팀원으로 추가
+		@Override
+		public void insertTeamMember(TeamMemberDTO dto) throws Exception {
+			try {
+				mapper.insertTeamMember(dto);
+			} catch (Exception e) {
+				System.out.println("[MyTeamService] insertTeamMember 에러 발생");
+				e.printStackTrace();
+				throw e;
+			}
+		}
+
+		// 3. 팀원 수 증가
+		@Override
+		public void updateTeamMemberCountUp(long team_code) throws Exception {
+			try {
+				mapper.updateTeamMemberCountUp(team_code);
+			} catch (Exception e) {
+				System.out.println("[MyTeamService] updateTeamMemberCountUp 에러 발생");
+				e.printStackTrace();
+				throw e;
+			}
+		}
 
 	@Override
 	public void updateMemberRole(Map<String, Object> map) throws Exception {

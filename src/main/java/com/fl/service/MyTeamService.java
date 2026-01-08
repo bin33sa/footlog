@@ -20,8 +20,12 @@ public interface MyTeamService {
 
     public List<JoinRequestDTO> listJoinRequest(long team_code);
 
-    public void processJoinRequest(JoinRequestDTO dto) throws Exception;
-
+    public void updateJoinRequestStatus(Map<String, Object> map) throws Exception;
+    
+    public void insertTeamMember(TeamMemberDTO dto) throws Exception;
+    
+    public void updateTeamMemberCountUp(long team_code) throws Exception;
+    
     public void updateMemberRole(Map<String, Object> map) throws Exception;
 
     public void expelMember(Map<String, Object> map) throws Exception;
