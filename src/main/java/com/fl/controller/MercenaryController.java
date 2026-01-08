@@ -1,7 +1,6 @@
 package com.fl.controller;
 
 import java.io.IOException;
-<<<<<<< HEAD
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -129,24 +128,3 @@ public class MercenaryController {
     }
     
 }
-=======
-
-import com.fl.mvc.annotation.Controller;
-import com.fl.mvc.annotation.RequestMapping;
-import com.fl.mvc.view.ModelAndView;
-
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-@Controller
-@RequestMapping("/mercenary/*")
-public class MercenaryController {
-	@RequestMapping("list")
-	public ModelAndView list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ModelAndView mav = new ModelAndView("mercenary/list");
-		
-		return mav;
-	}
-}
->>>>>>> branch 'main' of https://github.com/bin33sa/footlog
