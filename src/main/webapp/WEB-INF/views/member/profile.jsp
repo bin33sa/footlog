@@ -14,9 +14,12 @@
         .profile-upload-zone:hover .profile-preview { opacity: 0.7; }
     </style>
 </head>
+	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <body>
 
-    <jsp:include page="/WEB-INF/views/layout/header.jsp" />
+    <header>
+	   <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
+	</header>
 
     <div class="container mt-5 mb-5" style="max-width: 800px;">
         
@@ -94,6 +97,11 @@
             </form>
         </div>
     </div>
+    <footer>
+	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+	</footer>
+
+	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>

@@ -17,7 +17,9 @@
 	        is_deleted,
 	        deleted_at
     	FROM member
-    	WHERE member_Id = #{userId} AND password = #{userPwd} AND is_deleted = 0
-</select>
+    	WHERE member_id = #{userId} 
+          AND password = #{password} 
+          AND is_deleted = 0
+	</select>
 	
 </mapper>

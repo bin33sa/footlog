@@ -1,0 +1,230 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>Footlog - Stadium Detail</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
+    
+    <style>
+        /* 시간 선택 버튼 스타일 */
+        .btn-check:checked + .btn-outline-primary {
+            background-color: var(--primary-color, #D4F63F);
+            color: #000;
+            border-color: var(--primary-color, #D4F63F);
+            font-weight: bold;
+        }
+        .facility-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #f8f9fa;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+<body>
+
+    <header>
+	   <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
+	</header>
+
+
+    <div class="container-fluid px-lg-5 mt-4">
+        <div class="row">
+            <div class="col-lg-2 d-none d-lg-block">
+                <div class="sidebar-menu sticky-top" style="top: 100px;">
+                    <div class="mb-4">
+                        <p class="sidebar-title">구장</p>
+                        <div class="list-group">
+                            <a href="${pageContext.request.contextPath}/field/list" class="list-group-item list-group-item-action active-menu">구장 검색 / 예약</a>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8 col-12">
+                
+                <div class="modern-card p-0 overflow-hidden mb-4">
+                    <div class="position-relative" style="height: 400px;">
+                        <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=1000&auto=format&fit=crop&q=80" class="w-100 h-100 object-fit-cover" alt="stadium">
+                        <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
+                            <h2 class="text-white fw-bold mb-1">상암 월드컵 보조경기장</h2>
+                            <p class="text-white-50 mb-0"><i class="bi bi-geo-alt-fill me-1"></i>서울 마포구 성산동 515</p>
+                        </div>
+                    </div>
+
+                    <div class="p-5">
+                        
+                        <div class="row mb-5">
+                            <div class="col-md-8">
+                                <h5 class="fw-bold mb-3">시설 정보</h5>
+                                <div class="d-flex gap-4 text-center">
+                                    <div>
+                                        <div class="facility-icon"><i class="bi bi-p-square-fill"></i></div>
+                                        <span class="small text-muted">주차가능</span>
+                                    </div>
+                                    <div>
+                                        <div class="facility-icon"><i class="bi bi-droplet-fill"></i></div>
+                                        <span class="small text-muted">샤워실</span>
+                                    </div>
+                                    <div>
+                                        <div class="facility-icon"><i class="bi bi-shop"></i></div>
+                                        <span class="small text-muted">매점</span>
+                                    </div>
+                                    <div>
+                                        <div class="facility-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                                        <span class="small text-muted">조명</span>
+                                    </div>
+                                </div>
+                                <hr class="my-4">
+                                <h5 class="fw-bold mb-3">구장 소개</h5>
+                                <p class="text-muted" style="line-height: 1.8;">
+                                    국제 규격의 인조잔디 구장으로 최상의 잔디 상태를 유지하고 있습니다.<br>
+                                    야간 경기를 위한 조명 시설이 완비되어 있으며, 넓은 주차 공간을 보유하고 있습니다.<br>
+                                    풋살화(TF) 착용 필수이며, 스터드가 있는 축구화는 착용이 불가능합니다.
+                                </p>
+                            </div>
+                            
+                            <div class="col-md-4 border-start ps-md-4">
+                                <div class="text-center bg-light p-4 rounded-4 mb-3">
+                                    <h6 class="text-muted mb-2">평균 별점</h6>
+                                    <h1 class="fw-bold mb-0">4.9 <span class="fs-6 text-muted">/ 5.0</span></h1>
+                                    <div class="text-warning small mb-2">
+                                        <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                                    </div>
+                                    <a href="#" class="text-decoration-underline small text-muted">리뷰 128개 보기</a>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-outline-dark rounded-pill"><i class="bi bi-heart me-1"></i> 찜하기</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light p-4 rounded-4 mb-4 border">
+                            <h4 class="fw-bold mb-4">📅 예약 일정 선택</h4>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">날짜</label>
+                                <input type="date" class="form-control form-control-lg border-0 shadow-sm" value="2025-09-20">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold d-block mb-2">시간 선택</label>
+                                <div class="row g-2">
+                                    <div class="col-4 col-md-3">
+                                        <input type="radio" class="btn-check" name="time" id="t1" disabled>
+                                        <label class="btn btn-outline-secondary w-100 py-2 rounded-3 text-decoration-line-through" for="t1">10:00</label>
+                                    </div>
+                                    <div class="col-4 col-md-3">
+                                        <input type="radio" class="btn-check" name="time" id="t2">
+                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t2">12:00</label>
+                                    </div>
+                                    <div class="col-4 col-md-3">
+                                        <input type="radio" class="btn-check" name="time" id="t3">
+                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t3">14:00</label>
+                                    </div>
+                                    <div class="col-4 col-md-3">
+                                        <input type="radio" class="btn-check" name="time" id="t4">
+                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t4">16:00</label>
+                                    </div>
+                                    <div class="col-4 col-md-3">
+                                        <input type="radio" class="btn-check" name="time" id="t5">
+                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t5">18:00</label>
+                                    </div>
+                                    <div class="col-4 col-md-3">
+                                        <input type="radio" class="btn-check" name="time" id="t6" disabled>
+                                        <label class="btn btn-outline-secondary w-100 py-2 rounded-3 text-decoration-line-through" for="t6">20:00</label>
+                                    </div>
+                                </div>
+                                <div class="mt-2 small text-muted">
+                                    <span class="me-2"><i class="bi bi-square-fill text-secondary opacity-25"></i> 마감</span>
+                                    <span><i class="bi bi-square-fill text-primary opacity-50"></i> 예약가능</span>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center mt-4">
+                                <div>
+                                    <span class="text-muted small">총 결제금액 (2시간)</span>
+                                    <h3 class="fw-bold text-dark mb-0">80,000원</h3>
+                                </div>
+                                <button class="btn btn-dark btn-lg rounded-pill px-5 fw-bold" onclick="alert('예약 페이지로 이동합니다.')">
+                                    예약하기
+                                </button>
+                            </div>
+                        </div>
+
+                        <h5 class="fw-bold mb-3">위치 안내</h5>
+
+<div id="map" class="rounded-4 border shadow-sm w-100" style="height: 400px;"></div>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=키입력하는곳"></script>
+<script>
+    var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+        mapOption = { 
+            center: new kakao.maps.LatLng(37.571679, 126.898320), // 지도의 중심좌표
+            level: 3 
+        };
+
+    var map = new kakao.maps.Map(mapContainer, mapOption); 
+    
+    var markerPosition  = new kakao.maps.LatLng(37.571679, 126.898320);
+    
+    var marker = new kakao.maps.Marker({
+        position: markerPosition
+    });
+    
+    marker.setMap(map);	
+</script>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center mb-5">
+                    <button class="btn btn-light rounded-pill px-4" onclick="location.href='${pageContext.request.contextPath}/field/list'">
+                        목록으로 돌아가기
+                    </button>
+                </div>
+
+            </div>
+
+            <div class="col-lg-2 d-none d-lg-block">
+                <div class="sidebar-menu sticky-top" style="top: 100px;">
+                    <div class="mb-4">
+                        <p class="sidebar-title">Community</p>
+                        <div class="list-group">
+                            <a href="#" class="list-group-item list-group-item-action">게시판</a>
+                            <a href="#" class="list-group-item list-group-item-action">공지사항</a>
+                            <a href="#" class="list-group-item list-group-item-action">자유 게시판</a>
+                            <a href="#" class="list-group-item list-group-item-action">팀 사진첩</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <footer>
+	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+	</footer>
+	
+	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

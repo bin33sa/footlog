@@ -1,37 +1,41 @@
 @charset "UTF-8";
 
 /* =========================================
-   0. 폰트 및 컬러 오버라이딩 (젠지 스타일)
+   0. 기본 설정 & 폰트 (공통)
    ========================================= */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css");
 
+* {
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+}
+
 :root {
-  /* 메인 컬러: 트렌디한 네온 라임 */
+  /* 메인 컬러: 네온 라임 & 딥 블랙 */
   --primary-color: #D4F63F; 
-  /* 서브 컬러: 깊은 블랙 */
   --black-color: #111111;
-  /* 배경: 아주 연한 그레이 */
   --light-gray-color: #F7F8FA;
   
-  /* 폰트 교체 */
+  /* 폰트 */
   --body-font: "Pretendard", -apple-system, sans-serif;
-  --heading-font: "Pretendard", -apple-system, sans-serif;
   
   /* 부트스트랩 변수 오버라이딩 */
   --bs-primary: var(--primary-color);
   --bs-body-bg: var(--light-gray-color);
 }
 
-/* 전체 기본 폰트 적용 */
 body {
   font-family: var(--body-font);
   color: #222;
-  letter-spacing: -0.02em; 
+  letter-spacing: -0.02em;
 }
 
+/* 링크 기본 스타일 제거 */
+a { text-decoration: none; color: inherit; }
+
 /* =========================================
-   1. UI 컴포넌트: 모던 카드
+   1. 공통 UI 컴포넌트
    ========================================= */
+/* 모던 카드 (박스 디자인) */
 .modern-card {
   background: #ffffff;
   border-radius: 24px;
@@ -39,118 +43,56 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.04);
   overflow: hidden;
   margin-bottom: 24px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.modern-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.06);
-}
+/* 버튼 스타일 오버라이딩 */
+.btn-primary {
+  background-color: var(--black-color) !important;
+  color: var(--primary-color) !important;
+  border: 1px solid var(--black-color) !important;
+  border-radius: 50px;
 
-/* =========================================
-   2. 사이드바 네비게이션
-   ========================================= */
-.sidebar-title {
-  font-size: 0.8rem;
-  color: #888;
-  font-weight: 800;
-  text-transform: uppercase;
-  margin-bottom: 12px;
-  padding-left: 12px;
-  letter-spacing: 0.05em;
-}
+  /*  폰트 크기 15.33px & 굵기 800 적용 */
+  font-size: 15.33px !important;
+  font-weight: 800 !important;
 
-.sidebar-menu .list-group-item {
-  border: none;
-  background: transparent;
-  padding: 12px 16px;
-  font-weight: 600;
-  color: #444;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-  display: flex;
+  /* button 태그 사용 시 텍스트가 위아래로 튀는 현상 방지 (Flexbox 적용) */
+  display: inline-flex !important;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  
+  /* 내부 여백 조정 */
+  padding-top: 12px; 
+  padding-bottom: 12px;
+  
+  transition: all 0.3s ease;
 }
 
-.sidebar-menu .list-group-item:hover {
-  background-color: #fff;
-  color: #000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  transform: translateX(4px);
+.btn-primary:hover, 
+.btn-primary:focus, 
+.btn-primary:active,
+.btn-primary:active:focus {
+  background-color: var(--primary-color) !important;
+  color: var(--black-color) !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 15px rgba(212, 246, 63, 0.4) !important;
+  outline: none !important;
 }
 
-.sidebar-menu .list-group-item.active-menu {
-  background-color: var(--black-color);
-  color: var(--primary-color);
-}
-
-/* =========================================
-   3. 메인 기능: 캘린더 & 용병 모집
-   ========================================= */
-/* 캘린더 */
-.calendar-day {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 16px;
-  padding: 1.2rem 0.5rem;
-  text-align: center;
-  cursor: pointer;
+.btn-dark {
+  background-color: var(--black-color) !important;
+  border: 1px solid var(--black-color) !important;
+  font-weight: 600;
   transition: all 0.2s;
 }
-
-.calendar-day h6 {
-  font-size: 0.75rem;
-  color: #999;
-  margin-bottom: 5px;
-  font-weight: 700;
-}
-
-.calendar-day span {
-  font-size: 1.2rem;
-  font-weight: 800;
-  display: block;
-}
-
-.calendar-day.active, 
-.calendar-day:hover {
-  background: var(--black-color);
-  border-color: var(--black-color);
-  transform: scale(1.05);
-}
-
-.calendar-day.active h6,
-.calendar-day.active span,
-.calendar-day:hover h6,
-.calendar-day:hover span {
-  color: var(--primary-color);
-}
-
-/* 용병 모집 섹션 */
-.mercenary-section {
-  background: radial-gradient(circle at 10% 20%, rgb(242, 246, 252) 0%, rgb(224, 233, 255) 90%);
-  border: 1px solid #dbe4f0;
-  position: relative;
-}
-
-/* 버튼 */
-.btn-primary {
-  background-color: var(--black-color);
-  color: var(--primary-color);
-  border: none;
-  font-weight: 700;
-  padding: 1rem 2rem;
-  border-radius: 50px;
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-color);
-  color: var(--black-color);
-  box-shadow: 0 0 15px var(--primary-color);
+.btn-dark:hover {
+  background-color: #333 !important;
+  border-color: #333 !important;
+  transform: translateY(-2px);
 }
 
 /* =========================================
-   4. 헤더 & 로딩 삭제
+   2. 헤더 & 사이드바
    ========================================= */
 .navbar-brand {
   font-family: 'Pretendard', sans-serif;
@@ -162,6 +104,7 @@ body {
 .navbar-nav .nav-link {
   font-weight: 700;
   font-size: 1.05rem;
+  transition: color 0.2s;
 }
 .navbar-nav .nav-link:hover {
   color: var(--black-color);
@@ -170,37 +113,785 @@ body {
   text-decoration-color: var(--primary-color);
   text-underline-offset: 5px;
 }
+.navbar-nav .nav-link.active {
+    color: var(--black-color);
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-decoration-color: var(--primary-color);
+    text-underline-offset: 5px;
+}
 
-#preloader {
-  display: none !important;
+/* 사이드바 메뉴 */
+.sidebar-title {
+  font-size: 0.8rem;
+  color: #888;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-left: 12px;
+}
+.sidebar-menu .list-group-item {
+  border: none;
+  background: transparent;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #444;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+.sidebar-menu .list-group-item:hover {
+  background-color: #fff;
+  color: #000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transform: translateX(4px);
+}
+.sidebar-menu .list-group-item.active-menu {
+  background-color: var(--black-color);
+  color: var(--primary-color);
 }
 
 /* =========================================
-   5. [강력 수정] 슬라이더 높이 고정
+   3. 메인 페이지 (Index)
    ========================================= */
-.swiper.main-swiper,
-.swiper-container.main-swiper {
-    width: 100%;
-    height: 400px !important; /* 높이 강제 고정 */
-    min-height: 400px !important;
+/* 슬라이더 높이 고정 */
+.main-swiper, .main-swiper .swiper-slide {
+    height: 400px !important; 
+    min-height: 400px;
 }
-
-.swiper-wrapper {
-    height: 100% !important;
-}
-
-.swiper-slide {
-    height: 400px !important; /* 슬라이드 개별 높이도 고정 */
-    display: flex !important; /* 내용물 중앙 정렬용 */
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-/* 모바일 대응 */
 @media (max-width: 768px) {
-    .swiper.main-swiper,
-    .swiper-slide {
+    .main-swiper, .main-swiper .swiper-slide {
         height: 250px !important;
-        min-height: 250px !important;
     }
 }
+
+/* 캘린더 */
+.calendar-day {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: 1.2rem 0.5rem;
+  text-align: center;
+  cursor: pointer;
+}
+.calendar-day.active, .calendar-day:hover {
+  background: var(--black-color);
+  color: var(--primary-color);
+  transform: scale(1.05);
+}
+.calendar-day.active h6, .calendar-day.active span,
+.calendar-day:hover h6, .calendar-day:hover span {
+  color: var(--primary-color);
+}
+
+/* 용병 섹션 */
+.mercenary-section {
+  background: radial-gradient(circle at 10% 20%, rgb(242, 246, 252) 0%, rgb(224, 233, 255) 90%);
+}
+
+/* =========================================
+   4. 구단 페이지 (Team)
+   ========================================= */
+.team-card {
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+.team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+.team-img-wrapper {
+    height: 180px;
+    overflow: hidden;
+    background-color: #eee;
+}
+.team-img-wrapper img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform 0.5s ease;
+}
+.team-card:hover .team-img-wrapper img {
+    transform: scale(1.1);
+}
+
+/* =========================================
+   5. 문의 게시판 (QnA)
+   ========================================= */
+.qna-table th {
+    font-size: 0.9rem; font-weight: 700; color: #555;
+    border-bottom: 2px solid #eee;
+}
+.qna-table td {
+    padding: 1.2rem 1rem; border-bottom: 1px solid #f5f5f5;
+    font-size: 0.95rem;
+}
+.qna-table a:hover {
+    color: var(--black-color); /* 호버 시 검은색 */
+    text-decoration: underline;
+    text-decoration-color: var(--primary-color);
+}
+
+/* =========================================
+   6. 자주 묻는 질문 (FAQ)
+   ========================================= */
+.custom-accordion .accordion-button {
+    background-color: #fff;
+    color: #333;
+    box-shadow: none;
+    font-weight: 700;
+    padding: 1.5rem;
+    border-radius: 16px !important; /* 버튼 자체 둥글게 */
+}
+.custom-accordion .accordion-item {
+    border: none;
+    margin-bottom: 16px;
+    background: transparent;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03); /* 그림자 추가 */
+}
+.custom-accordion .accordion-button:not(.collapsed) {
+    background-color: var(--black-color);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+/* 화살표 색상 처리 (닫혔을 땐 검정, 열렸을 땐 형광) */
+.custom-accordion .accordion-button::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23333'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+.custom-accordion .accordion-button:not(.collapsed)::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23D4F63F'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+/* =========================================
+   7. 구장 페이지 (Stadium Page) 스타일
+   ========================================= */
+
+/* 구장 카드 애니메이션 (팀 카드와 동일) */
+.stadium-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+.stadium-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+/* 구장 이미지 영역 */
+.stadium-img-wrapper {
+    width: 100%;
+    height: 200px; /* 구단 이미지보다 조금 더 크게 */
+    overflow: hidden;
+    background-color: #eee;
+}
+.stadium-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+.stadium-card:hover .stadium-img-wrapper img {
+    transform: scale(1.1);
+}
+
+/* 편의시설 뱃지 */
+.stadium-card .badge.bg-light {
+    font-weight: 500;
+    color: #666 !important;
+}
+/* =========================================
+   10. 구단 생성 (Team Create) 스타일
+   ========================================= */
+
+/* 엠블럼 업로드 박스 (원형) */
+.emblem-upload-box {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* 마우스 올렸을 때 효과 */
+.emblem-upload-box:hover {
+    border-color: var(--primary-color, #D4F63F); /* 또는 #D4F63F */
+    background-color: #fff;
+}
+
+/* 미리보기 이미지 */
+.emblem-upload-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none; /* 이미지가 선택되면 스크립트로 block 처리됨 */
+}
+
+/* 기본 안내 문구 (카메라 아이콘) */
+.emblem-placeholder {
+    text-align: center;
+    color: #adb5bd;
+}
+/* 사이드바 메뉴 기본 스타일 */
+.sidebar-menu .list-group-item {
+    border: none;             /* 테두리 제거 */
+    border-radius: 12px;      /* 둥근 모서리 */
+    margin-bottom: 8px;       /* 메뉴 간 간격 */
+    color: #555;              /* 기본 글자색 (회색) */
+    font-weight: 500;         /* 글자 두께 */
+    transition: all 0.2s;     /* 부드러운 애니메이션 */
+    background-color: transparent; /* 배경 투명 */
+}
+
+/* 마우스 올렸을 때 (Hover) */
+.sidebar-menu .list-group-item:hover {
+    background-color: #f1f3f5; /* 연한 회색 배경 */
+    color: #000;               /* 글자색 검정 */
+    padding-left: 25px;        /* 살짝 오른쪽으로 이동 효과 */
+}
+
+/* ★ 현재 선택된 메뉴 (Active) 스타일 ★ */
+/* 이미지처럼 검은 배경 + 형광 글씨 */
+.sidebar-menu .list-group-item.active-menu {
+    background-color: #111 !important;    /* 검은색 배경 */
+    color: #D4F63F !important;            /* 형광색 글씨 (Footlog 포인트 컬러) */
+    font-weight: bold;                    /* 글자 굵게 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* 그림자 효과 */
+}
+/* 사이드바 메인 타이틀 (사이트 소개) */
+.sidebar-title {
+    font-size: 1.8rem;      /* 글씨 크기 키움 (기존보다 2배 정도) */
+    font-weight: 900;       /* 아주 두꺼운 폰트 (Bold보다 더 진하게) */
+    color: #000;            /* 완전 검정색 */
+    margin-bottom: 20px;    /* 아래 메뉴와 간격 벌리기 */
+    letter-spacing: -1px;   /* 자간을 좁혀서 더 단단한 느낌 */
+    padding-left: 10px;     /* 왼쪽 살짝 여백 */
+    border-left: 5px solid #D4F63F; /* (선택사항) 왼쪽에 형광 포인트 줄 */
+    line-height: 1;
+}
+.sidebar-menu .list-group-item:hover {
+    background-color: #111 !important;    /* 검은색 배경 */
+    color: #D4F63F !important;            /* 형광색 글씨 */
+    font-weight: bold;                    /* 글자 굵게 */
+    padding-left: 25px;                   /* 살짝 오른쪽으로 밀리는 효과 유지 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); /* 살짝 그림자 */
+    transition: all 0.2s ease;            /* 부드럽게 변환 */
+}
+/* =========================================
+   11. 선수 스쿼드 (Squad) 포지션 뱃지 (수정됨)
+   ========================================= */
+
+/* 뱃지 공통 스타일 (크기 감소 & 중앙 정렬) */
+.badge-position { 
+    width: 35px;              /* 너비 줄임 (40px -> 35px) */
+    height: 35px;             /* 높이도 똑같이 맞춰서 정사각형으로 만듦 */
+    border-radius: 50%;       /* 완벽한 동그라미로 만듦 */
+    
+    /* ★ 글자 정중앙 배치 (Flexbox 사용) ★ */
+    display: flex;
+    justify-content: center;  /* 가로 중앙 */
+    align-items: center;      /* 세로 중앙 */
+    
+    font-size: 0.8rem;        /* 뱃지가 작아졌으니 글씨도 살짝 작게 */
+    font-weight: bold;        /* 글씨 두껍게 */
+    margin-right: 10px;       /* 옆에 숫자랑 너무 붙지 않게 간격 줌 */
+}
+
+/* 포지션별 색상 정의 (기존과 동일) */
+.pos-fw { background-color: #ff4d4d !important; color: white !important; } /* 공격수 (빨강) */
+.pos-mf { background-color: #2ecc71 !important; color: white !important; } /* 미드필더 (초록) */
+.pos-df { background-color: #3498db !important; color: white !important; } /* 수비수 (파랑) */
+.pos-gk { background-color: #f1c40f !important; color: black !important; } /* 골키퍼 (노랑) */
+
+/* 선수 카드 호버 효과 (혹시 빠졌다면 같이 추가) */
+.player-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #eee;
+}
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    border-color: var(--primary-color, #D4F63F);
+}
+
+    @media (min-width: 992px) {
+        .dropdown:hover .dropdown-menu {
+            display: block;
+            margin-top: 0;
+            animation: fadeInDown 0.3s ease;
+        }
+    }
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .dropdown-menu {
+        background-color: #111;
+        border: 1px solid #333;
+        border-radius: 15px;
+        padding: 10px 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .dropdown-item {
+        color: #fff;
+        font-weight: 500;
+        padding: 10px 20px;
+        transition: 0.2s;
+    }
+    .dropdown-item:hover {
+        background-color: transparent;
+        color: var(--primary-color, #D4F63F);
+        padding-left: 25px;
+    }
+     /* 대시보드 전용 카드 스타일 */
+        .dashboard-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 1px solid #eee;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border-color: var(--primary-color, #D4F63F);
+        }
+        
+        /* 우측 사이드바 스타일 (와이어프레임 반영) */
+        .admin-menu-header {
+            background-color: #212529; /* Dark */
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+        }
+        .admin-menu-header.match {
+            background-color: var(--primary-color, #D4F63F); /* 매치 관리는 형광색 */
+            color: black;
+        }
+        .admin-menu-item {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 12px 20px;
+            display: block;
+            color: #333;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+        .admin-menu-item:hover {
+            background-color: #e9ecef;
+            padding-left: 25px;
+            color: #000;
+        }
+        .admin-menu-item:last-child {
+            border-radius: 0 0 10px 10px;
+            border-bottom: none;
+        }
+        
+         /* 탭 메뉴 스타일 (PSG/Real Madrid 스타일) */
+        .squad-tabs {
+            border-bottom: 2px solid #eee;
+            margin-bottom: 40px;
+            display: flex;
+            gap: 30px;
+            padding-bottom: 0;
+        }
+        
+        .squad-tab-item {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase; /* 대문자 고정 */
+            cursor: pointer;
+            padding-bottom: 15px;
+            position: relative;
+            transition: all 0.3s;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        .squad-tab-item:hover {
+            color: #000;
+        }
+
+        /* 선택된 탭 스타일 (밑줄 강조) */
+        .squad-tab-item.active {
+            color: #000;
+        }
+        .squad-tab-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; /* 선 위치 */
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #000; /* 포인트 컬러 */
+        }
+         /* 탭 버튼 스타일 커스텀 */
+        .nav-pills .nav-link {
+            color: #555;
+            background-color: #fff; /* 배경 흰색으로 변경 */
+            border-radius: 50px;
+            padding: 8px 20px;
+            margin-right: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid #eee;
+            transition: all 0.2s;
+        }
+        .nav-pills .nav-link:hover {
+            background-color: #f8f9fa;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #111;
+            color: #D4F63F; /* 형광 라임 포인트 */
+            border-color: #111;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+        
+        /* 리스트 아이템 스타일 */
+        .history-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1px solid #f1f1f1;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .history-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: #e0e0e0;
+        }
+
+        /* 상태 뱃지 */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .status-wait { background: #fff8e1; color: #b78a00; border: 1px solid #ffeeba; } /* 대기중 */
+        .status-ok { background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8; }   /* 승인 */
+        .status-no { background: #fff5f5; color: #fa5252; border: 1px solid #ffc9c9; }   /* 거절 */
+        
+         /* 매치 날짜 박스 스타일 */
+        .match-date-box {
+            width: 80px;
+            height: 80px;
+            background-color: #f8f9fa;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        .match-month { font-size: 0.85rem; color: #888; font-weight: 600; }
+        .match-day { font-size: 1.8rem; font-weight: 800; line-height: 1; color: #333; }
+        .match-time { font-size: 0.8rem; color: #555; margin-top: 3px; background: #e9ecef; padding: 2px 6px; border-radius: 4px; }
+
+        /* 투표 버튼 스타일 */
+        .btn-vote {
+            border: 1px solid #ddd;
+            background: white;
+            color: #555;
+            transition: all 0.2s;
+        }
+        .btn-vote:hover, .btn-vote.active {
+            border-color: black;
+            background: black;
+            color: #D4F63F; /* 형광 포인트 */
+            font-weight: bold;
+        }
+        
+        /* 상태 뱃지 */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .status-recruiting { background-color: #e3f2fd; color: #0d6efd; } /* 모집중 (파랑) */
+        .status-confirmed { background-color: #d1e7dd; color: #0f5132; } /* 확정 (초록) */
+        .status-ended { background-color: #f8f9fa; color: #6c757d; } /* 종료 (회색) */
+
+        /* 참여 현황 프로그레스 바 */
+        .vote-progress { height: 6px; border-radius: 3px; background-color: #eee; overflow: hidden; }
+        .vote-bar { height: 100%; background-color: #333; }
+        
+       
+         /* 매치 슬라이더 컨테이너 */
+        .match-slider-container {
+            position: relative;
+            padding: 0 40px; /* 화살표 들어갈 공간 확보 */
+        }
+
+        .match-slider-wrapper {
+            overflow: hidden;
+            margin: 0 -10px; /* 카드 간격 보정 */
+            padding: 10px 0; /* 그림자 잘림 방지 */
+        }
+
+        .match-slider-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* 고급스러운 감속 효과 */
+        }
+
+        .match-slide-item {
+            flex: 0 0 33.333%; /* 3개씩 보기 */
+            max-width: 33.333%;
+            padding: 0 10px; /* 카드 사이 간격 */
+            box-sizing: border-box;
+        }
+
+        /* 매치 카드 스타일 (PSG 스타일 재해석) */
+        .match-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 4px; /* 살짝 각진 모서리로 세련미 UP */
+            padding: 25px 20px;
+            height: 100%;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .match-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-color: #D4F63F; /* 포인트 컬러 */
+        }
+
+        .match-date-badge {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .match-teams {
+            margin-bottom: 20px;
+        }
+
+        .team-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            font-weight: 800; /* 굵은 폰트로 강렬하게 */
+            letter-spacing: -0.5px;
+        }
+        
+        .team-logo-placeholder {
+            width: 24px;
+            height: 24px;
+            background: #eee;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: inline-block;
+        }
+
+        .match-score {
+            margin-left: auto;
+            color: #111;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        .match-footer {
+            border-top: 1px solid #f0f0f0;
+            padding-top: 15px;
+            margin-top: auto;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #aaa;
+            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: color 0.2s;
+        }
+
+        .match-card:hover .match-footer {
+            color: #111; /* 호버 시 글씨 진해짐 */
+        }
+
+        /* 좌우 화살표 버튼 커스텀 */
+        .slider-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+            color: #111;
+        }
+
+        .slider-nav-btn:hover {
+            background: #111;
+            color: #D4F63F;
+            border-color: #111;
+        }
+
+        .slider-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+            background: #f9f9f9;
+            color: #ccc;
+            border-color: #eee;
+        }
+
+        .slider-prev { left: -10px; }
+        .slider-next { right: -10px; }
+        
+        /* 홈/원정 구분 선 */
+        .bg-home { border-left: 4px solid #111; }
+        .bg-away { border-left: 4px solid #ccc; }
+        
+               /* 매치 센터 전용 스타일 (PSG 느낌) */
+        
+        /* 1. 히어로 섹션 (경기 정보 헤더) */
+        .match-hero {
+            background-color: #0e1e35; /* PSG Dark Navy */
+            color: #fff;
+            padding: 60px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 배경에 은은한 패턴이나 로고 (선택사항) */
+        .match-hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .match-score-board {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .team-logo-large {
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            border-radius: 50%;
+            padding: 15px;
+            object-fit: contain;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+
+        .match-vs-text {
+            font-size: 3rem;
+            font-weight: 900;
+            font-family: 'Arial', sans-serif;
+            letter-spacing: 2px;
+            color: #D4F63F; /* 포인트 컬러 */
+        }
+
+        .match-info-badge {
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .countdown-box {
+            text-align: right;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* 2. 탭 메뉴 */
+        .match-tabs {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-custom-tab {
+            border: none;
+            background: none;
+            padding: 20px 30px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .nav-custom-tab.active {
+            color: #0e1e35;
+        }
+        
+        .nav-custom-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: #0e1e35;
+        }
+
+        /* 3. 라인업 리스트 */
+        .lineup-card {
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 15px 0;
+            display: flex;
+            align-items: center;
+            transition: 0.2s;
+        }
+        .lineup-card:hover { background-color: #f8f9fa; }
+        
+        .player-number {
+            font-size: 1.2rem;
+            font-weight: 800;
+            width: 40px;
+            color: #ccc;
+        }
+        
+        .stadium-info-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        

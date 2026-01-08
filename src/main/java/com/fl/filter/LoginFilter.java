@@ -98,14 +98,28 @@ public class LoginFilter implements Filter {
 		String uri = req.getRequestURI();
 		String cp = req.getContextPath();
 		uri = uri.substring(cp.length());
-		
+
 		String []uris = {
 				"/index.jsp", "/main", 
+
 				"/member/login", "/member/logout",
-				"/member/account", "/member/userIdCheck", "/member/complete",
-				"/notice/list",
-				"/uploads/photo/**",
-				"/dist/**"
+				
+				"/member/signup", "/member/signupSuccess", 
+				"/member/userIdCheck",
+
+				"/member/findInfo", "/member/findIdDo", "/member/findPwDo",
+
+				"/notice/list", "/notice/view",
+				
+				"/team/list",   
+				"/team/view",  
+
+				"/stadium/list", 
+				"/stadium/view", 
+				
+				"/uploads/**", 
+				"/dist/**",
+				"/resource/**" 
 		};
 		
 		if(uri.length() <= 1) {
@@ -114,8 +128,8 @@ public class LoginFilter implements Filter {
 		
 		for(String s : uris) {
 			if(s.lastIndexOf("**") != -1) {
-                s = s.substring(0, s.lastIndexOf("**"));
-                if(uri.indexOf(s) == 0) {
+				s = s.substring(0, s.lastIndexOf("**"));
+				if(uri.indexOf(s) == 0) {
 					return true;
 				}
 			} else if(uri.equals(s)) {
