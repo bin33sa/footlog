@@ -66,9 +66,14 @@
                     </div>
                 </div>
 
+
+
+
                 <div class="row g-4">
                     
-                    <div class="col-md-6" onclick="location.href='${pageContext.request.contextPath}/field/detail'">
+                   <!-- <c:forEach var="slot" items="${timeList}" varStatus="s"> -->
+                  
+                    <div class="col-md-6" onclick="location.href='${pageContext.request.contextPath}/field/view'">
                         <div class="modern-card stadium-card p-0 h-100">
                             <div class="stadium-img-wrapper position-relative">
                                 <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=500&auto=format&fit=crop&q=60" alt="stadium">
@@ -97,93 +102,16 @@
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <div class="modern-card stadium-card p-0 h-100">
-                            <div class="stadium-img-wrapper position-relative">
-                                <img src="https://images.unsplash.com/photo-1459865264687-595d652de67e?w=500&auto=format&fit=crop&q=60" alt="stadium">
-                                <span class="badge bg-secondary position-absolute top-0 end-0 m-3">마감임박</span>
-                            </div>
-                            <div class="p-4">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h5 class="fw-bold mb-0">HM 풋살파크 동대문점</h5>
-                                    <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> 4.5</span>
-                                </div>
-                                <p class="text-muted small mb-3">서울 중구 을지로</p>
-                                
-                                <div class="d-flex gap-2 mb-3">
-                                    <span class="badge bg-light text-secondary border"><i class="bi bi-p-square-fill me-1"></i>주차가능</span>
-                                    <span class="badge bg-light text-secondary border"><i class="bi bi-shop me-1"></i>매점</span>
-                                </div>
+			<!-- </c:forEach> -->
 
-                                <div class="d-flex justify-content-between align-items-end border-top pt-3">
-                                    <div>
-                                        <span class="text-muted small">시간당</span>
-                                        <h5 class="fw-bold mb-0">110,000원</h5>
-                                    </div>
-                                    <button class="btn btn-sm btn-primary rounded-pill px-4">예약하기</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="col-md-6">
-                        <div class="modern-card stadium-card p-0 h-100">
-                            <div class="stadium-img-wrapper position-relative">
-                                <img src="https://images.unsplash.com/photo-1556056504-5c7696c4c28d?w=500&auto=format&fit=crop&q=60" alt="stadium">
-                                <span class="badge bg-dark text-primary position-absolute top-0 end-0 m-3">예약가능</span>
-                            </div>
-                            <div class="p-4">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h5 class="fw-bold mb-0">용산 아이파크몰 구장</h5>
-                                    <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> 4.8</span>
-                                </div>
-                                <p class="text-muted small mb-3">서울 용산구 한강대로</p>
-                                
-                                <div class="d-flex gap-2 mb-3">
-                                    <span class="badge bg-light text-secondary border"><i class="bi bi-p-square-fill me-1"></i>주차가능</span>
-                                    <span class="badge bg-light text-secondary border"><i class="bi bi-moon-stars-fill me-1"></i>야간조명</span>
-                                </div>
 
-                                <div class="d-flex justify-content-between align-items-end border-top pt-3">
-                                    <div>
-                                        <span class="text-muted small">시간당</span>
-                                        <h5 class="fw-bold mb-0">130,000원</h5>
-                                    </div>
-                                    <button class="btn btn-sm btn-primary rounded-pill px-4">예약하기</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="modern-card stadium-card p-0 h-100">
-                            <div class="stadium-img-wrapper position-relative">
-                                <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?w=500&auto=format&fit=crop&q=60" alt="stadium">
-                                <span class="badge bg-secondary position-absolute top-0 end-0 m-3">예약마감</span>
-                            </div>
-                            <div class="p-4">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h5 class="fw-bold mb-0">잠실 유수지 풋살장</h5>
-                                    <span class="text-warning fw-bold"><i class="bi bi-star-fill"></i> 4.3</span>
-                                </div>
-                                <p class="text-muted small mb-3">서울 송파구 잠실동</p>
-                                
-                                <div class="d-flex gap-2 mb-3">
-                                    <span class="badge bg-light text-secondary border"><i class="bi bi-droplet-fill me-1"></i>샤워가능</span>
-                                </div>
 
-                                <div class="d-flex justify-content-between align-items-end border-top pt-3">
-                                    <div>
-                                        <span class="text-muted small">시간당</span>
-                                        <h5 class="fw-bold mb-0">50,000원</h5>
-                                    </div>
-                                    <button class="btn btn-sm btn-secondary rounded-pill px-4" disabled>예약불가</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div> <div class="text-center mt-5 mb-5">
+                </div> 
+                
+                
+                
+                <div class="text-center mt-5 mb-5">
                     <button class="btn btn-light rounded-pill px-5 py-3 shadow-sm text-muted fw-bold hover-scale w-50">
                         더 많은 구장 보기 <i class="bi bi-arrow-down-circle ms-2"></i>
                     </button>

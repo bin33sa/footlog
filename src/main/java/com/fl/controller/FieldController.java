@@ -19,9 +19,9 @@ public class FieldController {
 		
 		return mav;
 	}
-	@RequestMapping("detail")
+	@RequestMapping("view")
 	public ModelAndView detail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ModelAndView mav = new ModelAndView("field/detail");
+		ModelAndView mav = new ModelAndView("field/view");
 		
 		return mav;
 	}
