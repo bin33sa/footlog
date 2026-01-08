@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fl.mapper.MercenaryMapper">
+	
+
+    <select id="listMercenary" parameterType="map" resultType="com.fl.model.MercenaryDTO">
+        SELECT recruit_id, team_code, match_code, member_code, 
+               created_at, status, title, content, view_count
+        FROM MERCENARY_POST
+        
+    </select>
+    
+</mapper>
