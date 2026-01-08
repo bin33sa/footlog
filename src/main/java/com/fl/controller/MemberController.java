@@ -61,7 +61,6 @@ public class MemberController {
 			session.setMaxInactiveInterval(20 * 60); // 20분
 
 			SessionInfo info = new SessionInfo();
-			// [참고] MemberDTO 변수명이 스네이크 표기법으로 바뀌었으므로 getter도 바뀜
 			info.setMember_code(dto.getMember_code());
 			info.setMember_id(dto.getMember_id());
 			info.setMember_name(dto.getMember_name());
