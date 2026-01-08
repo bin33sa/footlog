@@ -893,5 +893,170 @@ a { text-decoration: none; color: inherit; }
             padding: 30px;
             text-align: center;
         }
+              /* 폰트 및 기본 스타일 재정의 */
+        body { background-color: #f8f9fa; }
+
+        /* 캘린더 헤더 */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+        }
         
+        /* [기존] 화살표 버튼 스타일 */
+        .calendar-controls button.nav-btn {
+            border: 1px solid #eee;
+            background: #fff;
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+            color: #333;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .calendar-controls button.nav-btn:hover {
+            background: #111; color: #D4F63F; border-color: #111;
+        }
+
+        /* [신규] Today 버튼 커스텀 스타일 */
+        .btn-today {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            color: #111;
+            font-weight: 800; /* 두꺼운 폰트 */
+            font-size: 0.8rem;
+            padding: 8px 18px;
+            border-radius: 30px; /* 완전 둥근 알약 형태 */
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            display: flex;
+            align-items: center;
+            gap: 6px; /* 아이콘과 텍스트 사이 간격 */
+        }
+        .btn-today:hover {
+            background: #111;
+            color: #D4F63F; /* 형광 라임색 */
+            border-color: #111;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        .btn-today i { font-size: 0.9rem; } /* 아이콘 크기 조절 */
+
+        /* 그리드 레이아웃 */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px; 
+        }
+
+        /* 요일 헤더 */
+        .week-day {
+            text-align: center;
+            font-weight: 800;
+            color: #aaa;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .week-day.sun { color: #ff6b6b; }
+        .week-day.sat { color: #4dabf7; }
+
+        /* 날짜 셀 디자인 */
+        .day-cell {
+            background-color: #fff; 
+            border: 1px solid #f1f3f5;
+            border-radius: 16px;
+            min-height: 130px;
+            padding: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .day-cell:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border-color: #D4F63F; 
+            z-index: 5;
+        }
+        
+        /* 이전/다음 달 날짜 */
+        .day-cell.other-month {
+            background-color: #f8f9fa;
+            opacity: 0.6;
+        }
+        .day-cell.other-month .date-num { color: #ced4da; }
+
+        /* 날짜 숫자 */
+        .date-num {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .text-danger { color: #ff6b6b !important; }
+        .text-primary { color: #4dabf7 !important; }
+        
+        /* [중요] 오늘 날짜 스타일 (깔끔한 버전) */
+        .day-cell.today {
+            background-color: #111; 
+            border: 1px solid #111;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .day-cell.today .date-num {
+            color: #D4F63F; 
+            font-size: 1.4rem; 
+            font-weight: 900;  
+            letter-spacing: -1px; 
+            margin-bottom: 12px;
+            text-decoration: none; 
+            display: inline-block;
+        }
+        /* 숫자 위 작은 점 */
+        .day-cell.today .date-num::before {
+            content: '';
+            display: block;
+            width: 6px; height: 6px;
+            background-color: #D4F63F;
+            border-radius: 50%;
+            margin-bottom: 4px; margin-left: 2px;
+        }
+        .day-cell.today:hover { border-color: #D4F63F; }
+        .day-cell.today .badge-match { 
+            background-color: rgba(255,255,255,0.1); 
+            color: #fff; border: none;
+            border-left: 3px solid #D4F63F;
+        }
+
+        /* 일정 배지 스타일 */
+        .event-badge {
+            display: block;
+            font-size: 0.75rem;
+            padding: 5px 8px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: left;
+        }
+        .badge-match { background-color: #f1f3f5; color: #333; border-left: 3px solid #333; }
+        .badge-holiday { background-color: #fff5f5; color: #e03131; border-left: 3px solid #e03131; }
+        .badge-recruit { background-color: #e7f5ff; color: #1971c2; border-left: 3px solid #1971c2; }
+        
+        @media (max-width: 768px) {
+            .day-cell { min-height: 80px; padding: 6px; border-radius: 10px; }
+            .date-num { font-size: 0.9rem; }
+            .event-badge { font-size: 0.6rem; padding: 2px 4px; border-left-width: 2px; }
+            .calendar-grid { gap: 6px; }
+        }
         

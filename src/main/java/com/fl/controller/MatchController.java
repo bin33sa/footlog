@@ -32,4 +32,11 @@ public class MatchController {
 		
 		return mav;
 	}
+	
+	@RequestMapping("myMatch")
+	public ModelAndView myMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		ModelAndView mav = new ModelAndView("match/myMatch");
+		
+		return mav;
+	}
 }

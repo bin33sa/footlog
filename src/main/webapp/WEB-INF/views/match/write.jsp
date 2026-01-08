@@ -27,7 +27,7 @@
                     <div class="mb-4">
                         <p class="sidebar-title">매치</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action ">내 매치 일정</a>
+                            <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action ">내 매치 일정</a>
                             <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action ">전체 매치 리스트</a>
                             <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action  active-menu">매치 개설하기</a>
                             <a href="${pageContext.request.contextPath}/mercenary/list" class="list-group-item list-group-item-action ">용병 구하기</a>
