@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 <!DOCTYPE html>
@@ -6,159 +6,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Spring</title>
-<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/board.css" type="text/css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
+<title>Footlog - 용병 게시판</title>
+<jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
 
 <style>
-        /* 1. 게시판 테이블 스타일 */
-        .board-table thead th { background-color: #111; color: #fff; border: none; padding: 15px; font-weight: 700; }
-        .board-table tbody tr { transition: 0.2s; cursor: pointer; }
-        .board-table tbody tr:hover { background-color: rgba(212, 246, 63, 0.1); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        
-        /* 2. 페이지네이션 */
-        .pagination .page-link { color: #111; border: none; border-radius: 50%; margin: 0 5px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
-        .pagination .page-item.active .page-link { background-color: #111; color: var(--primary-color); font-weight: bold; }
-        
-        /* 3. 카테고리 버튼 */
-        .btn-category { border: 1px solid #ddd; color: #666; font-size: 0.9rem; font-weight: 600; }
-        .btn-category:hover, .btn-category.active { background-color: #111; color: #fff; border-color: #111; }
+/* 기본 변수 설정 */
+:root {
+	--primary-color: #D4F63F;
+}
 
-        /* 4. [수정] 네온 검색창 스타일 (사이즈 축소 및 최적화) */
-        .neon-search-box {
-            background-color: #111; /* 딥 블랙 */
-            border: 2px solid #333;
-            transition: 0.3s;
-            height: 40px; /* 높이 50px -> 40px로 축소 */
-            max-width: 350px; /* 너무 길어지지 않게 너비 제한 */
-            font-size: 0.9rem; /* 글자 크기 살짝 줄임 */
-        }
-        .neon-search-box:hover,
-        .neon-search-box:focus-within {
-            border-color: var(--primary-color, #D4F63F); /* 호버 시 네온 컬러 */
-            box-shadow: 0 0 10px rgba(212, 246, 63, 0.2);
-        }
-        .neon-search-box input::placeholder { color: #888; }
-        
-        /* Select 화살표를 흰색으로 변경 */
-        .neon-search-box select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-            background-size: 10px; /* 화살표 크기 조절 */
-        }
-    </style>
+/* 1. 게시판 테이블 스타일 */
+.board-table thead th {
+	background-color: #111;
+	color: #fff;
+	border: none;
+	padding: 15px;
+	font-weight: 700;
+	text-align: center;
+}
+
+.board-table tbody tr {
+	transition: 0.2s;
+	cursor: pointer;
+}
+
+.board-table tbody tr:hover {
+	background-color: rgba(212, 246, 63, 0.1);
+	transform: translateY(-2px);
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* 2. 네온 검색창 스타일 */
+.neon-search-box {
+	background-color: #111;
+	border: 2px solid #333;
+	transition: 0.3s;
+	height: 40px;
+	max-width: 350px;
+	font-size: 0.9rem;
+}
+
+.neon-search-box:hover, .neon-search-box:focus-within {
+	border-color: var(--primary-color);
+	box-shadow: 0 0 10px rgba(212, 246, 63, 0.2);
+}
+
+.neon-search-box select option {
+	background-color: #111;
+	color: #fff;
+}
+
+/* 3. 카테고리 버튼 */
+.btn-category {
+	border: 1px solid #ddd;
+	color: #666;
+	font-size: 0.9rem;
+	font-weight: 600;
+}
+
+.btn-category:hover, .btn-category.active {
+	background-color: #111;
+	color: #fff;
+	border-color: #111;
+}
+
+/* 기타 스타일 */
+.modern-card {
+	border-radius: 15px;
+	border: none;
+}
+</style>
 </head>
 <body>
 
-<header>
-	<jsp:include page="/WEB-INF/views/layout/header.jsp"/>
-</header>
+	<header>
+		<jsp:include page="/WEB-INF/views/layout/header.jsp" />
+	</header>
 
-<main>
-	<div class="container">
-		<div class="body-container row justify-content-center">
-			<div class="col-md-10 my-3 p-3">
-				<div class="body-title">
-					<h3><i class="bi bi-app"></i> 용병 게시판 </h3>
+	<main class="container-fluid px-lg-5 mt-5 mb-5">
+		<div class="row justify-content-center">
+			<div class="col-lg-10">
+
+				<div
+					class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+					<div>
+						<h2 class="fw-bold display-6 mb-1">MERCENARY</h2>
+						<p class="text-muted mb-0">함께 뛸 용병을 찾거나 지원하세요.</p>
+					</div>
+					<button type="button"
+						class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm"
+						style="color: var(--primary-color);"
+						onclick="location.href='${pageContext.request.contextPath}/mercenary/write';">
+						🖊️ 용병 등록</button>
 				</div>
-				
-				<div class="body-main">
-					
-									
-					<table class="table table-hover board-list">
-						<thead class="table-light">
-							<tr>
-								<th width="60">번호</th>
-								<th>제목</th>
-								<th>내용</th>
-								<th width="100">작성일</th>
-								<th width="70">조회수</th>
-							</tr>
-						</thead>
-						
-						<tbody>
-							<c:forEach var="dto" items="${list}" varStatus="status">
-								<tr>
-									<td>${dto.recruit_id}   </td>
-									<td>${dto.title}        </td>
-									<td>${dto.content}      </td>																		
-									<td>${dto.created_at}   </td>
-									<td>${dto.view_count}   </td>																
-								</tr>
-							</c:forEach>
-						</tbody>
-					</table>							
-		
-					<div class="row board-list-footer">
-						<div class="col">
-							<button type="button" class="btn btn-light" onclick="location.href='${pageContext.request.contextPath}/mercenary/list';" title="새로고침"><i class="bi bi-arrow-counterclockwise"></i></button>
-						</div>
-						<div class="col-6 d-flex justify-content-center">
-							<form class="row" name="searchForm">
-								<div class="col-auto p-1">
-									<select name="schType" class="form-select">
-										<option value="all" ${schType=="all"?"selected":""}>제목+내용</option>
-										<option value="userName" ${schType=="userName"?"selected":""}>작성자</option>
-										<option value="reg_date" ${schType=="reg_date"?"selected":""}>등록일</option>
-										<option value="subject" ${schType=="subject"?"selected":""}>제목</option>
-										<option value="content" ${schType=="content"?"selected":""}>내용</option>
-									</select>
-								</div>
-								<div class="col-auto p-1">
-									<input type="text" name="kwd" value="${kwd}" class="form-control">
-								</div>
-								<div class="col-auto p-1">
-									<button type="button" class="btn btn-light" onclick="searchList()"> <i class="bi bi-search"></i> </button>
-								</div>
-							</form>
-						</div>
-						<div class="col text-end">
-							<button type="button" class="btn btn-light" onclick="location.href='${pageContext.request.contextPath}/mercenary/write';">글올리기</button>
+
+				<div class="row g-2 align-items-center mb-4">
+					<div class="col-md-6">
+						<div class="d-flex gap-2">
+							<a href="#" class="btn btn-category rounded-pill px-3 active">전체</a>
+							<a href="#" class="btn btn-category rounded-pill px-3">구인</a> <a
+								href="#" class="btn btn-category rounded-pill px-3">구직</a>
 						</div>
 					</div>
-					
+
+					<div class="col-md-6">
+						<form name="searchForm" class="d-flex justify-content-md-end">
+							<div
+								class="neon-search-box d-flex align-items-center rounded-pill px-3 w-100">
+								<select name="schType"
+									class="form-select border-0 text-white bg-transparent py-0 shadow-none"
+									style="width: auto; font-size: 0.9em;">
+									<option value="all" ${schType=="all"?"selected":""}>전체</option>
+									<option value="subject" ${schType=="title"?"selected":""}>제목</option>
+									<option value="content" ${schType=="content"?"selected":""}>내용</option>
+									<option value="userName"
+										${schType=="member_code"?"selected":""}>작성자</option>
+								</select> <input type="text" name="kwd" value="${kwd}"
+									class="form-control border-0 bg-transparent text-white py-0 shadow-none"
+									placeholder="검색어 입력...">
+
+								<button type="button"
+									class="btn btn-link text-decoration-none p-0"
+									onclick="searchList()" style="color: var(--primary-color);">
+									<i class="bi bi-search"></i>
+								</button>
+							</div>
+						</form>
+					</div>
 				</div>
+
+				<div class="modern-card p-0 overflow-hidden shadow-sm border">
+					<table
+						class="table table-hover board-table mb-0 text-center align-middle">
+						<thead>
+							<tr>
+								<th width="80">번호</th>
+								<th class="text-start">제목</th>
+								<th width="120">작성일</th>
+								<th width="80">조회수</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach var="dto" items="${list}">
+								<tr
+									onclick="location.href='${pageContext.request.contextPath}/mercenary/article?recruit_id=${dto.recruit_id}&page=${page}';">
+									<td>${dto.recruit_id}</td>
+									<td class="text-start fw-bold">${dto.title}</td>
+									<td class="text-muted">${dto.created_at}</td>
+									<td><span
+										class="badge rounded-pill bg-light text-dark border">${dto.view_count}</span></td>
+								</tr>
+							</c:forEach>
+							<c:if test="${list.size() == 0}">
+								<tr>
+									<td colspan="4" class="py-5 text-muted">등록된 게시글이 없습니다.</td>
+								</tr>
+							</c:if>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="mt-4">${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
+				</div>
+
 			</div>
 		</div>
-	</div>
-</main>
+	</main>
 
-<script type="text/javascript">
-// 검색 키워드 입력란에서 엔터를 누른 경우 서버 전송 막기 
+	<script>
 window.addEventListener('DOMContentLoaded', () => {
-	const inputEL = document.querySelector('form input[name=kwd]'); 
-	inputEL.addEventListener('keydown', function (evt) {
-	    if(evt.key === 'Enter') {
-	    	evt.preventDefault();
-	    	
-	    	searchList();
-	    }
-	});
+    const inputEL = document.querySelector('form input[name=kwd]'); 
+    if(inputEL) {
+        inputEL.addEventListener('keydown', function (evt) {
+            if(evt.key === 'Enter') {
+                evt.preventDefault();
+                searchList();
+            }
+        });
+    }
 });
 
 function searchList() {
-	const f = document.searchForm;
-	if(! f.kwd.value.trim()) {
-		return;
-	}
-	
-	// FormData : 키-값 쌍을 저장하며, multipart/form-data 형식으로 데이터를 보낼 수 있도록 만들어졌다.
-	// URLSearchParams : URL의 쿼리 문자열(query string)을 쉽게 다루기 위한 내장 객체
-	
-	// form 요소를 FormData를 이용하여 URLSearchParams 으로 변환
-	const formData = new FormData(f);
-	let params = new URLSearchParams(formData).toString();
-	
-	let url = '${pageContext.request.contextPath}/bbs/list';
-	location.href = url + '?' + params;
+    const f = document.searchForm;
+    if(! f.kwd.value.trim()) {
+        f.kwd.focus();
+        return;
+    }
+    const formData = new FormData(f);
+    let params = new URLSearchParams(formData).toString();
+    location.href = '${pageContext.request.contextPath}/mercenary/list?' + params;
 }
 </script>
 
-<footer>
-	<jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
-</footer>
-
-<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<footer>
+		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
+	</footer>
+	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
 </body>
 </html>

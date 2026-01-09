@@ -45,10 +45,14 @@ public class MercenaryController {
             
             List<MercenaryDTO> list = service.listMercenary(map);
             //int dataCount = service.dataCount(map);
-
+            
+            String cp = req.getContextPath();          
+            String articleUrl = cp + "/mercenary/article?page=" + current_page;
+            
             mav.addObject("list", list);
-            //mav.addObject("dataCount", dataCount);
+            // mav.addObject("dataCount", dataCount);
             mav.addObject("page", current_page);
+            mav.addObject("articleUrl", articleUrl);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -117,27 +121,81 @@ public class MercenaryController {
     @GetMapping("article")
     public ModelAndView article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
         ModelAndView mav = new ModelAndView("mercenary/article");
-        /*
+        
         try {
-        	long recruitId = Long.parseLong(req.getParameter("recruitId"));
+        	long recruit_id = Long.parseLong(req.getParameter("recruit_id"));
             // 조회수 증가 및 상세 데이터 조회
-           // service.updateHitCount(recruitId);
-            //MercenaryDTO dto = service.findById(recruitId);
-            
+        	// service.updateHitCount(recruit_id);
+             MercenaryDTO dto = service.findById(recruit_id);
+             String page = req.getParameter("page");
         	
             if (dto == null) {
                 return new ModelAndView("redirect:/mercenary/list");
             }
             
             mav.addObject("dto", dto);
+            mav.addObject("page", page);
             
         } catch (Exception e) {
             e.printStackTrace();
             return new ModelAndView("redirect:/error");
         }
-        */
+        
         return mav;
         
     }
+    
+    @GetMapping("update")
+	public ModelAndView updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		String page = req.getParameter("page");
+		try {
+			long recruit_id = Long.parseLong(req.getParameter("recruit_id"));
+			
+			MercenaryDTO dto = service.findById(recruit_id);
+			if(dto == null || ! info.getMember_code().equals(dto.getMember_code())) {
+				return new ModelAndView("redirect:/mercenary/list?page=" + page);
+			}
+			
+			ModelAndView mav = new ModelAndView("mercenary/write");
+			
+			mav.addObject("dto", dto);
+			mav.addObject("page", page);
+			mav.addObject("mode", "update");
+			
+			return mav;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:/mercenary/list?page=" + page);
+	}
+	
+	@PostMapping("update")
+	public ModelAndView updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		String page = req.getParameter("page");
+		try {
+			MercenaryDTO dto = new MercenaryDTO();
+			
+			dto.setRecruit_id(Long.parseLong(req.getParameter("recruit_id")));
+			dto.setTitle(req.getParameter("title"));
+			dto.setContent(req.getParameter("content"));
+			
+			dto.setMember_code(info.getMember_code());
+			
+			service.updateMercenary(dto);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:/mercenary/list?page=" + page);
+	}
     
 }

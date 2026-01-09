@@ -21,7 +21,7 @@
 		<div class="body-container row justify-content-center">
 			<div class="col-md-10 my-3 p-3">
 				<div class="body-title">
-					<h3><i class="bi bi-app"></i> 자유 게시판 </h3>
+					<h3><i class="bi bi-app"></i> 용병 게시판 </h3>
 				</div>
 				
 				<div class="body-main">

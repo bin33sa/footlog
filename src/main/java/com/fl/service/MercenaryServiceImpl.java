@@ -20,17 +20,7 @@ public class MercenaryServiceImpl implements MercenaryService {
             throw e; // 
         }
     }
-    /*
-    @Override
-    public void updateMercenary(MercenaryDTO dto) throws Exception {
-        try {
-            mapper.updateMercenary(dto);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
+/*
     @Override
     public void deleteMercenary(Map<String, Object> map) throws Exception {
         try {
@@ -41,16 +31,6 @@ public class MercenaryServiceImpl implements MercenaryService {
         }
     }
 
-    @Override
-    public MercenaryDTO findById(long recruitId) {
-        MercenaryDTO dto = null;
-        try {
-            dto = mapper.findById(recruitId);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return dto;
-    }
 */
     @Override
     public List<MercenaryDTO> listMercenary(Map<String, Object> map) {
@@ -62,27 +42,27 @@ public class MercenaryServiceImpl implements MercenaryService {
         }
         return list;
     }
-//
-//    @Override
-//    public int dataCount(Map<String, Object> map) {
-//        int result = 0;
-//        try {
-//            result = mapper.dataCount(map);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return result;
-//    }
-//
-//    @Override
-//    public void updateHitCount(long recruitId) throws Exception {
-//        try {
-//            mapper.updateHitCount(recruitId);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw e;
-//        }
-//    }
+/*
+    @Override
+    public int dataCount(Map<String, Object> map) {
+        int result = 0;
+        try {
+            result = mapper.dataCount(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+*/
+    @Override
+    public void updateHitCount(long recruitId) throws Exception {
+       try {
+            mapper.updateHitCount(recruitId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 	@Override
 	public List<MercenaryDTO> listTeam(Map<String, Object> map) {
         List<MercenaryDTO> list = null;
@@ -93,4 +73,28 @@ public class MercenaryServiceImpl implements MercenaryService {
         }
         return list;
 	}
+	@Override
+	public void updateMercenary(MercenaryDTO dto) throws Exception {
+		try {
+			mapper.updateMercenary(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			throw e;
+		}
+		
+	}
+	@Override
+	public MercenaryDTO findById(long recruit_id) {
+		MercenaryDTO dto = null;
+		try {
+			dto = mapper.findById(recruit_id);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		return dto;
+	}
+
 }

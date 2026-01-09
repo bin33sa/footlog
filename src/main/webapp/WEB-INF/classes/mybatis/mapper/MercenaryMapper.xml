@@ -26,6 +26,16 @@
 		join member_team m on t.team_code = m.team_code
 		where m.member_code = #{member_code}
     </select>
-
+	
+	<update id="updateMercenary" parameterType="com.fl.model.MercenaryDTO">
+		UPDATE Mercenary_post SET title = #{title}, content = #{content}
+		WHERE recruit_id = #{recruit_id} AND member_code = #{member_code}
+	</update>
+    
+    <select id="findById" parameterType="long" resultType="com.fl.model.MercenaryDTO">
+        SELECT recruit_id, title, content
+    	FROM mercenary_post
+    	WHERE recruit_id = #{recruit_id}
+    </select>
     
 </mapper>
