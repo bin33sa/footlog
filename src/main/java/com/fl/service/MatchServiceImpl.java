@@ -32,19 +32,9 @@ public class MatchServiceImpl implements MatchService{
 	}
 
 	@Override
-	public void deleteMatch(MatchDTO dto) throws Exception {
+	public void deleteMatch(List<Long> list) throws Exception {
 		try {
-			mapper.deleteMatch(dto);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-	}
-
-	@Override
-	public void deleteListMatch(List<Long> list) throws Exception {
-		try {
-			mapper.deleteListMatch(list);
+			mapper.deleteMatch(list);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -65,6 +55,12 @@ public class MatchServiceImpl implements MatchService{
 
 	@Override
 	public MatchDTO getTeamcodeById(long num) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public MatchDTO getTeamnameById(String name) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -110,5 +106,7 @@ public class MatchServiceImpl implements MatchService{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
 
 }

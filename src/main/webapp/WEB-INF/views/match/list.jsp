@@ -75,25 +75,27 @@
                 </div>
 				
 				<div class="d-flex flex-column gap-3" >
-					 <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" onclick="location.href='${pageContext.request.contextPath}/match/article'">
+					 <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" >
                         <div class="match-time-box text-center rounded-3 p-2 bg-light">
-                            <span class="d-block small text-muted">${matchdate}</span> 
+                            <span class="d-block small text-muted">${dto.match_date}</span> 
                             <span class="d-block fw-bold fs-5">18:00</span>
                         </div>
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge bg-primary text-dark rounded-pill">${status }</span>
-                                <span class="badge bg-light text-secondary border">6 vs 6</span> 
-                                <span class="badge bg-light text-secondary border">남성</span>
+                                <span class="badge bg-primary text-dark rounded-pill">${dto.status}</span>
+                                <span class="badge bg-light text-secondary border">${dto.matchType}</span> 
+                                <span class="badge bg-light text-secondary border">${dto.gender}</span>
                             </div>
-                            <h5 class="fw-bold mb-1">상암 월드컵 보조경기장 3파전</h5>
+                            <h5 class="fw-bold mb-1">${dto.stadium_name}</h5>
                             <p class="text-muted small mb-0">
-                                <i class="bi bi-geo-alt-fill me-1"></i>서울 마포구 | 호스트: 슛돌이주장
+                                <i class="bi bi-geo-alt-fill me-1"></i>${dto.region}| 호스트: ${dto.home_team_name}
                             </p>
                         </div>
                         <div class="text-end d-none d-md-block">
-                            <span class="d-block fw-bold text-primary mb-1">10,000원</span>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3">신청가능</button>
+                            <span class="d-block fw-bold text-primary mb-1">${dto.fee}</span>
+                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3" 
+                            onclick="location.href='${pageContext.request.contextPath}/match/article'" 
+                            ${status != '모집중' ? 'disabled' : ''}>${status=='모집중'? '신청하기':'마감됨'}</button>
                         </div>
                     </div>
 				</div>

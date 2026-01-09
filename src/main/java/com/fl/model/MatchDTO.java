@@ -22,6 +22,44 @@ public class MatchDTO {
     private String away_team_emblem;
     
     private int reply_count;
+    
+    private String matchType;
+    private String gender;
+    private Long fee;
+    private Long member_code;
+    
+    
+    public String getMatchType() {
+		return matchType;
+	}
+
+	public void setMatchType(String matchType) {
+		this.matchType = matchType;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public Long getFee() {
+		return fee;
+	}
+
+	public void setFee(Long fee) {
+		this.fee = fee;
+	}
+
+	public Long getMember_code() {
+		return member_code;
+	}
+
+	public void setMember_code(Long member_code) {
+		this.member_code = member_code;
+	}
 
 	public Long getMatch_code() {
 		return match_code;
@@ -158,8 +196,6 @@ public class MatchDTO {
 	public void setReply_count(int reply_count) {
 		this.reply_count = reply_count;
 	}
-    
-    
     
     
 }

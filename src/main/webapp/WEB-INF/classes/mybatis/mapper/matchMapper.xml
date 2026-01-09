@@ -1,19 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.MemberMapper">
-	
-	<insert id="insertMatch">
-		INSERT INTO match_post(match_code,home_code,away_code,match_date,status,title,content,created_at,view_count)
-		VALUES(seq_match_post.NEXTVAL, #{home_code},NULL,TO_CHAR(match_date,'YYYY-MM-DD')match_date, 
-		'모집중',#{title},#{content},SYSDATE,0)
-		
+
+	<!-- 글 등록 -->
+	<insert id="insertMatch" parameterType="com.fl.model.MatchDTO">
+		INSERT INTO match_post
+			(match_code,home_code,away_code,match_date,status,title,content,created_at,view_count, matchType, gender, fee,member_code)
+		VALUES
+		(seq_match_post.NEXTVAL, #{home_code},NULL,TO_CHAR(match_date,'YYYY-MM-DD')match_date, '모집중',#{title},#{content},SYSDATE,0,#{matchType},#{gender},#{fee},#{member_code})
 	</insert>
+	
+	<!-- 글 수정 -->
+	<update id="updateMatch">
+		UPDATE match_post SET title=#{title}, content=#{content}, match_date=#{match_date}, status=#{status}, matchType=#{matchType}, gender=#{gender},fee=#{fee}
+		WHERE match_code=#{match_code}
+	</update>
+	
+	<!-- 글 삭제 -->
+	<delete id="deleteMatch" parameterType="map">
+		DELETE FROM match_post 
+		<where>
+			<choose>
+				<when test="ROLE_LEVEL>=5">
+					match_code=#{match_code}
+				</when>
+				<otherwise>
+					match_code=#{match_code} AND member_code=#{member_code}
+				</otherwise>
+			</choose>
+		</where>
+	</delete>
+	
+	<!-- 글 리스트 -->
+	<select id="listMatch">
+		
+	</select>
+	
 	
 	<!-- 팀코드 가져오기 -->
 	<select id="getTeamcodeById" parameterType="Long" resultType="com.fl.model.MatchDTO">
 		SELECT t.team_code 
 		FROM team t
 		JOIN member_team mt ON t.team_code = mt.team_code
+	</select>
+	
+	<!-- 팀 이름 가져오기 -->
+	<select id="getTeamnameById" parameterType="String" resultType="com.fl.model.MatchDTO">
+		SELECT team_name AS home_team_name
+		FROM team t
+		JOIN match_post mp ON t.team_code = mp.home_code
 	</select>
 	
 	<!-- 글 리스트 -->
@@ -23,4 +58,8 @@
 		JOIN member_team mt ON t.team_code = mt.team_code
 		WHERE mt.member_code = #{member_code}
 	</select>
+	
+	
+	
+	
 </mapper>

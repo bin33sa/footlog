@@ -11,12 +11,12 @@ public interface MatchMapper {
 	
 	public void insertMatch(MatchDTO dto) throws SQLException;
 	public void updateMatch(MatchDTO dto) throws SQLException;
-	public void deleteMatch(MatchDTO dto) throws SQLException;
-	public void deleteListMatch(List<Long> list) throws SQLException;
+	public void deleteMatch(List<Long> list) throws SQLException;
 	
 	public int dataCount(Map<String, Object> map);
 	public List<MatchDTO> listMatch(Map<String, Object> map);
 	public MatchDTO getTeamcodeById(long num);
+	public MatchDTO getTeamnameById(String name);
 	public MatchDTO findByPrev(Map<String, Object> map);
 	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws SQLException;

@@ -5,10 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
+import com.fl.model.BoardDTO;
 import com.fl.model.MatchDTO;
+import com.fl.model.SessionInfo;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
+import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MatchService;
@@ -18,6 +20,7 @@ import com.fl.util.MyUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("/match/*")
 public class MatchController {
@@ -68,23 +71,55 @@ public class MatchController {
 			
 			mav.addObject("list", list);
 			
+			
+			
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
 		return mav;
 	}
+	@GetMapping("write")
+	public ModelAndView writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		ModelAndView mav = new ModelAndView("match/write");
+		mav.addObject("mode", "write");
+		
+		return mav;
+	}
+	
+	@PostMapping("write")
+	public ModelAndView writeSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		try {
+			MatchDTO dto = new MatchDTO();
+			
+			dto.setMember_code(info.getMember_code());
+			
+			dto.setTitle(req.getParameter("title"));
+			dto.setContent(req.getParameter("content"));
+			dto.setHome_code(Long.parseLong(req.getParameter("home_code")));
+			dto.setMatch_date(req.getParameter("match_date"));
+			dto.setMatchType(req.getParameter("matchType"));
+			dto.setGender(req.getParameter("gender"));
+			dto.setFee(Long.parseLong(req.getParameter("fee")));
+			
+			service.insertMatch(dto);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:/match/list");
+	}
 	
 	@RequestMapping("article")
 	public ModelAndView matchBoard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/article");
 		
-		return mav;
-	}
-	
-	@RequestMapping("write")
-	public ModelAndView write(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ModelAndView mav = new ModelAndView("match/write");
 		
 		return mav;
 	}

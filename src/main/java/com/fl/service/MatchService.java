@@ -8,12 +8,12 @@ import com.fl.model.MatchDTO;
 public interface MatchService {
 	public void insertMatch(MatchDTO dto) throws Exception;
 	public void updateMatch(MatchDTO dto) throws Exception;
-	public void deleteMatch(MatchDTO dto) throws Exception;
-	public void deleteListMatch(List<Long> list) throws Exception;
+	public void deleteMatch(List<Long> list) throws Exception;
 	
 	public int dataCount(Map<String, Object> map);
 	public List<MatchDTO> listMatch(Map<String, Object> map);
 	public MatchDTO getTeamcodeById(long num);
+	public MatchDTO getTeamnameById(String name);
 	public MatchDTO findByPrev(Map<String, Object> map);
 	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws Exception;
