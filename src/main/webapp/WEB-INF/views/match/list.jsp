@@ -35,7 +35,6 @@
                 </div>
             </div>
             <div class="col-lg-8 col-12 ">
-
                 <div class="modern-card p-4 d-flex justify-content-between align-items-center bg-dark text-white mb-4">
                     <div>
                         <h4 class="fw-bold mb-1">원하는 매치가 없나요?</h4>
@@ -52,6 +51,14 @@
                             <option value="1">서울</option>
                             <option value="2">경기</option>
                             <option value="3">인천</option>
+                            <option value="4">강원</option>
+                            <option value="5">충북</option>
+                            <option value="6">충남</option>
+                            <option value="7">전북</option>
+                            <option value="8">전남</option>
+                            <option value="9">경북</option>
+                            <option value="10">경남</option>
+                            <option value="11">제주</option>
                         </select>
                         <div class="position-relative flex-grow-1">
                             <input type="text" class="form-control rounded-pill ps-5 border-0 shadow-sm" placeholder="구장명, 팀명 검색"> 
@@ -66,7 +73,32 @@
                         <label class="btn btn-outline-dark border-0 rounded-end-pill px-3" for="btnradio2">임박순</label>
                     </div>
                 </div>
-
+				
+				<div class="d-flex flex-column gap-3" >
+					 <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" onclick="location.href='${pageContext.request.contextPath}/match/article'">
+                        <div class="match-time-box text-center rounded-3 p-2 bg-light">
+                            <span class="d-block small text-muted">${matchdate}</span> 
+                            <span class="d-block fw-bold fs-5">18:00</span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-primary text-dark rounded-pill">${status }</span>
+                                <span class="badge bg-light text-secondary border">6 vs 6</span> 
+                                <span class="badge bg-light text-secondary border">남성</span>
+                            </div>
+                            <h5 class="fw-bold mb-1">상암 월드컵 보조경기장 3파전</h5>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-geo-alt-fill me-1"></i>서울 마포구 | 호스트: 슛돌이주장
+                            </p>
+                        </div>
+                        <div class="text-end d-none d-md-block">
+                            <span class="d-block fw-bold text-primary mb-1">10,000원</span>
+                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3">신청가능</button>
+                        </div>
+                    </div>
+				</div>
+				
+				<!-- 
                 <div class="d-flex flex-column gap-3">
                     <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" onclick="location.href='${pageContext.request.contextPath}/match/article'">
                         <div class="match-time-box text-center rounded-3 p-2 bg-light">
@@ -145,7 +177,8 @@
                             <button class="btn btn-sm btn-outline-dark rounded-pill px-3">신청가능</button>
                         </div>
                     </div>
-                </div>
+                </div>  -->
+                
 
                 <nav class="mt-5" aria-label="Page navigation">
                     <ul class="pagination justify-content-center">

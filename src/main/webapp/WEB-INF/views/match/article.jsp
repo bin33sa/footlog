@@ -13,7 +13,7 @@
     
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
 </head>
-	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <body>
 
    <header>
@@ -22,6 +22,7 @@
 
     <div class="container-fluid px-lg-5 mt-4">
         <div class="row">
+            
             <div class="col-lg-2 d-none d-lg-block">
                 <div class="sidebar-menu sticky-top" style="top: 100px;">
                     <div class="mb-4">
@@ -36,7 +37,6 @@
                 </div>
             </div>
           
-
             <div class="col-lg-8 col-12">
                 
                 <div class="d-flex align-items-center justify-content-between mb-4">
@@ -52,7 +52,7 @@
                     <button class="btn btn-light rounded-circle"><i class="bi bi-share"></i></button>
                 </div>
 
-                <div class="modern-card p-4">
+                <div class="modern-card p-4 mb-4">
                     <table class="table table-borderless match-info-table mb-0">
                         <tbody>
                             <tr>
@@ -80,8 +80,18 @@
                 </div>
 
                 <div class="modern-card p-5" style="min-height: 300px;">
+                    
                     <h5 class="fw-bold mb-3">매치 소개</h5>
-                    <p class="text-muted" style="line-height: 1.8;">
+                    
+                    <c:if test="${not empty dto.imageFilename}">
+                        <div class="mb-4">
+                            <img src="${pageContext.request.contextPath}/uploads/match/${dto.imageFilename}" 
+                                 class="img-fluid rounded-4 w-100 shadow-sm object-fit-cover" 
+                                 alt="매치 이미지">
+                        </div>
+                    </c:if>
+                    
+                    <p class="text-muted mb-5" style="line-height: 1.8;">
                         안녕하세요. FC 슛돌이입니다.<br>
                         이번 주 토요일 상암에서 즐겁게 공 차실 팀 또는 용병을 모집합니다.<br><br>
                         
@@ -97,49 +107,47 @@
 
 					<div id="map" class="rounded-4 border shadow-sm w-100" style="height: 400px;"></div>
 					
-					<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=키넣을곳"></script>
-					<script>
-					    var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
-					        mapOption = { 
-					            center: new kakao.maps.LatLng(37.571679, 126.898320), // 지도의 중심좌표
-					            level: 3 
-					        };
-					
-					    var map = new kakao.maps.Map(mapContainer, mapOption); 
-					    
-					    var markerPosition  = new kakao.maps.LatLng(37.571679, 126.898320);
-					    
-					    var marker = new kakao.maps.Marker({
-					        position: markerPosition
-					    });
-					    
-					    marker.setMap(map);	
-					</script>
+                    <div class="d-flex justify-content-end align-items-center gap-2 mt-5">
+                        <button class="btn btn-light rounded-pill px-4 py-2 fw-bold hover-scale" onclick="location.href='${pageContext.request.contextPath}/match/list'">
+                            목록으로
+                        </button>
+                        <button class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm hover-scale" onclick="alert('신청이 완료되었습니다!')">
+                            매치 신청하기 <i class="bi bi-check-lg ms-1"></i>
+                        </button>
+                    </div>
 
-                <div class="d-flex justify-content-end align-items-center gap-4 mt-5 mb-5">
-    
-			    <button class="btn btn-light rounded-pill px-4 py-2 fw-bold" onclick="location.href='${pageContext.request.contextPath}/match/list'">
-			        목록으로
-			    </button>
-
-			    <button class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm" onclick="alert('신청이 완료되었습니다!')">
-			        매치 신청하기 
-			       <i class="bi bi-check-lg ms-1"></i>
-			    </button>
-			</div>
+                </div>
 
             </div>
-			</div>
+		</div> 
+    </div> 
     
+    <footer>
+	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+	</footer>
 		
-        </div> </div> 
-      <footer>
-		   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
-	  </footer>
-		
-		<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
+	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=키넣을곳"></script>
+    <script>
+        var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+            mapOption = { 
+                center: new kakao.maps.LatLng(37.571679, 126.898320), // 지도의 중심좌표
+                level: 3 
+            };
+    
+        var map = new kakao.maps.Map(mapContainer, mapOption); 
+        
+        var markerPosition  = new kakao.maps.LatLng(37.571679, 126.898320);
+        
+        var marker = new kakao.maps.Marker({
+            position: markerPosition
+        });
+        
+        marker.setMap(map);	
+    </script>
 
 </body>
 </html>

@@ -1059,4 +1059,15 @@ a { text-decoration: none; color: inherit; }
             .event-badge { font-size: 0.6rem; padding: 2px 4px; border-left-width: 2px; }
             .calendar-grid { gap: 6px; }
         }
+        /* 매치 히어로 (배경 이미지 스타일) */
+    .match-hero {
+        background: 
+            linear-gradient(rgba(14, 30, 53, 0.85), rgba(14, 30, 53, 0.9)),
+            url('https://images.unsplash.com/photo-1522770179533-24471fcdba45?q=80&w=1600&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+    }
         
