@@ -1,60 +1,243 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.MyTeamMapper">
 
-	<!-- 내 팀 리스트 -->
 	<select id="listMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
-    	SELECT 
-			t.team_code, 
-			t.team_name, 
-			t.emblem_image AS emblem,  t.region, 
-			(SELECT COUNT(*) FROM member_team WHERE team_code = t.team_code) AS member_count,
-			mt.role_level AS my_role   FROM team t
-		JOIN member_team mt ON t.team_code = mt.team_code
-		WHERE mt.member_code = #{member_code}
-		ORDER BY mt.role_level DESC
+		SELECT t.team_code, t.team_name, t.emblem_image AS team_logo
+		FROM team t
+		JOIN member_team tm ON t.team_code = tm.team_code
+		WHERE tm.member_code = #{member_code}
+		ORDER BY t.team_name
 	</select>
-	
-	<!-- 가입 신청 리스트 -->
-	<select id="listJoinRequest" parameterType="Long" resultType="com.fl.model.JoinRequestDTO">
-	    SELECT 
-	        jr.member_code, 
-	        jr.team_code, 
-	        jr.status,
-	        TO_CHAR(jr.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
-	        m.member_id,
-	        m.member_name,
-	        m.profile_image,
-	        m.phone_number,
-	        m.preferred_position,
-	        m.region
-	    FROM join_request jr
-	    JOIN member m ON jr.member_code = m.member_code
-	    WHERE jr.team_code = #{team_code} 
-	      AND jr.status = 1
-	    ORDER BY jr.created_at ASC
+
+	<select id="readTeamInfo" parameterType="Long" resultType="com.fl.model.TeamDTO">
+		SELECT team_code, team_name, team_logo, team_info, 
+		       region, city, member_count, max_member, foundation_day
+		FROM team
+		WHERE team_code = #{team_code}
 	</select>
-	
-	<!-- 가입 승인 -->
-	<update id="updateJoinRequestStatus" parameterType="map">
-		UPDATE join_request 
-		SET status = #{status}
+
+	<select id="readMyTeamStatus" parameterType="map" resultType="com.fl.model.TeamMemberDTO">
+		SELECT member_code, team_code, team_level, position, status, join_date
+		FROM team_member
 		WHERE team_code = #{team_code} AND member_code = #{member_code}
-	</update>
-	
-	<!-- 팀멤버 추가 -->
-	<insert id="insertTeamMember" parameterType="com.fl.model.TeamMemberDTO">
-		INSERT INTO member_team (member_code, team_code, role_level, position)
-		VALUES (#{member_code}, #{team_code}, 1, #{position, jdbcType=VARCHAR})
-	</insert>
-	
-	<!-- 팀 인원수 증가 -->
-	<update id="updateTeamMemberCountUp" parameterType="Long">
-		UPDATE team 
-		SET member_count = member_count + 1
+	</select>
+
+	<update id="updateTeamInfo" parameterType="com.fl.model.TeamDTO">
+		UPDATE team
+		SET team_info = #{team_info}, 
+		    team_logo = #{team_logo, jdbcType=VARCHAR}
 		WHERE team_code = #{team_code}
 	</update>
+
+	<delete id="deleteMyTeamHistory" parameterType="map">
+		DELETE FROM team_member 
+		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	</delete>
 	
+	<update id="updateTeamMemberCountDown" parameterType="Long">
+		UPDATE team SET member_count = member_count - 1 WHERE team_code = #{team_code}
+	</update>
+	
+	<update id="updateTeamMemberCountUp" parameterType="Long">
+		UPDATE team SET member_count = member_count + 1 WHERE team_code = #{team_code}
+	</update>
+
+
+	<select id="listTeamMember" parameterType="map" resultType="com.fl.model.TeamMemberDTO">
+		SELECT * FROM (
+			SELECT ROWNUM rnum, tb.* FROM (
+				SELECT tm.member_code, m.user_name, m.user_id, 
+				       tm.team_level, tm.position, TO_CHAR(tm.join_date, 'YYYY-MM-DD') as join_date
+				FROM team_member tm
+				JOIN member m ON tm.member_code = m.member_code
+				WHERE tm.team_code = #{team_code} AND tm.status = 1
+				<if test="keyword != null and keyword != ''">
+					AND (m.user_name LIKE '%' || #{keyword} || '%')
+				</if>
+				ORDER BY tm.team_level DESC, m.user_name ASC
+			) tb WHERE ROWNUM &lt;= #{end}
+		) WHERE rnum &gt;= #{start}
+	</select>
+	
+	<select id="dataCountTeamMember" parameterType="map" resultType="Integer">
+		SELECT COUNT(*)
+		FROM team_member tm
+		JOIN member m ON tm.member_code = m.member_code
+		WHERE tm.team_code = #{team_code} AND tm.status = 1
+		<if test="keyword != null and keyword != ''">
+			AND (m.user_name LIKE '%' || #{keyword} || '%')
+		</if>
+	</select>
+
+	<update id="updateMemberRole" parameterType="map">
+		UPDATE team_member SET team_level = #{team_level}
+		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	</update>
+
+	<delete id="deleteTeamMember" parameterType="map">
+		DELETE FROM team_member 
+		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	</delete>
+
+
+	<select id="listJoinRequest" parameterType="Long" resultType="com.fl.model.JoinRequestDTO">
+	    SELECT 
+	        r.member_code, 
+	        r.team_code, 
+	        r.status, 
+	        TO_CHAR(r.created_at, 'YYYY-MM-DD') as created_at,
+	        
+	        m.member_name AS user_name, 
+	        m.member_id AS user_id
+	    FROM join_request r
+	    JOIN member m ON r.member_code = m.member_code
+	    WHERE r.team_code = #{team_code}
+	    ORDER BY r.created_at ASC
+	</select>
+
+	<insert id="insertTeamMemberFromRequest" parameterType="com.fl.model.TeamMemberDTO">
+		INSERT INTO member_team(member_code, team_code, role_level, position)
+		VALUES (#{member_code}, #{team_code}, 1, #{position})
+	</insert>
+	
+	<delete id="deleteJoinRequest" parameterType="map">
+		DELETE FROM join_request 
+		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	</delete>
+
+
+	<insert id="insertSchedule" parameterType="com.fl.model.ScheduleDTO">
+		INSERT INTO team_schedule(schedule_code, team_code, member_code, subject, start_date, end_date, color, place, memo, reg_date)
+		VALUES (team_schedule_seq.NEXTVAL, #{team_code}, #{member_code}, #{subject}, #{start_date}, #{end_date}, #{color}, #{place}, #{memo}, SYSDATE)
+	</insert>
+
+	<select id="listMonthSchedule" parameterType="map" resultType="com.fl.model.ScheduleDTO">
+		SELECT schedule_code, subject, start_date, end_date, color, place
+		FROM team_schedule
+		WHERE team_code = #{team_code}
+		  AND start_date &gt;= #{startStr} AND start_date &lt;= #{endStr}
+	</select>
+	
+	<update id="updateSchedule" parameterType="com.fl.model.ScheduleDTO">
+		UPDATE team_schedule
+		SET subject=#{subject}, start_date=#{start_date}, end_date=#{end_date}, color=#{color}, place=#{place}, memo=#{memo}
+		WHERE schedule_code=#{schedule_code}
+	</update>
+
+	<delete id="deleteSchedule" parameterType="Long">
+		DELETE FROM team_schedule WHERE schedule_code = #{schedule_code}
+	</delete>
+
+
+	<insert id="insertVote" parameterType="com.fl.model.VoteDTO">
+		<selectKey keyProperty="board_vote_code" resultType="Long" order="BEFORE">
+			SELECT team_vote_seq.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO team_vote(board_vote_code, team_code, member_code, title, content, start_date, end_date, status, view_count, created_at)
+		VALUES (#{board_vote_code}, #{team_code}, #{member_code}, #{title}, #{content}, #{start_date}, #{end_date}, 0, 0, SYSDATE)
+	</insert>
+
+	<insert id="insertVoteOption" parameterType="com.fl.model.VoteOptionDTO">
+		INSERT INTO team_vote_option(option_code, board_vote_code, content)
+		VALUES (team_vote_option_seq.NEXTVAL, #{board_vote_code}, #{content})
+	</insert>
+
+	<select id="listVote" parameterType="map" resultType="com.fl.model.VoteDTO">
+		SELECT v.board_vote_code, v.title, v.end_date, v.status, v.view_count,
+		       m.user_name AS writer_name,
+		       TO_CHAR(v.created_at, 'YYYY-MM-DD') AS created_at,
+		       /* 참여자 수 */
+		       (SELECT COUNT(DISTINCT member_code) FROM team_vote_history WHERE board_vote_code = v.board_vote_code) AS vote_count,
+		       /* 내 투표 여부 */
+		       NVL((SELECT 1 FROM team_vote_history 
+		            WHERE board_vote_code = v.board_vote_code AND member_code = #{member_code} AND ROWNUM = 1), 0) AS my_vote_status
+		FROM team_vote v
+		JOIN member m ON v.member_code = m.member_code
+		WHERE v.team_code = #{team_code}
+		ORDER BY v.status ASC, v.end_date ASC
+	</select>
+
+	<select id="readVote" parameterType="map" resultType="com.fl.model.VoteDTO">
+		SELECT v.board_vote_code, v.title, v.content, v.view_count,
+		       TO_CHAR(v.start_date, 'YYYY-MM-DD HH24:MI') as start_date,
+		       TO_CHAR(v.end_date, 'YYYY-MM-DD HH24:MI') as end_date,
+		       m.user_name AS writer_name,
+		       NVL((SELECT 1 FROM team_vote_history WHERE board_vote_code = v.board_vote_code AND member_code = #{member_code} AND ROWNUM = 1), 0) AS my_vote_status
+		FROM team_vote v
+		JOIN member m ON v.member_code = m.member_code
+		WHERE v.board_vote_code = #{board_vote_code}
+	</select>
+
+	<select id="listVoteOptions" parameterType="map" resultType="com.fl.model.VoteOptionDTO">
+		SELECT option_code, board_vote_code, content,
+		       /* 이 옵션의 득표수 */
+		       (SELECT COUNT(*) FROM team_vote_history WHERE option_code = o.option_code) AS option_count,
+		       /* 내가 체크했는지 여부 */
+		       NVL((SELECT 1 FROM team_vote_history WHERE option_code = o.option_code AND member_code = #{member_code}), 0) AS is_checked
+		FROM team_vote_option o
+		WHERE board_vote_code = #{board_vote_code}
+		ORDER BY option_code ASC
+	</select>
+
+	<insert id="insertVoteHistory" parameterType="map">
+		INSERT INTO team_vote_history(history_code, board_vote_code, option_code, member_code)
+		VALUES (team_vote_history_seq.NEXTVAL, #{board_vote_code}, #{option_code}, #{member_code})
+	</insert>
+	
+	<select id="checkVoteHistory" parameterType="map" resultType="Integer">
+		SELECT COUNT(*) FROM team_vote_history 
+		WHERE board_vote_code = #{board_vote_code} AND member_code = #{member_code}
+	</select>
+
+
+	<insert id="insertTeamBoard" parameterType="com.fl.model.TeamBoardDTO">
+		INSERT INTO team_board(board_team_code, team_code, member_code, subject, content, reg_date, hit_count)
+		VALUES (team_board_seq.NEXTVAL, #{team_code}, #{member_code}, #{subject}, #{content}, SYSDATE, 0)
+	</insert>
+
+	<select id="listTeamBoard" parameterType="map" resultType="com.fl.model.TeamBoardDTO">
+		SELECT * FROM (
+			SELECT ROWNUM rnum, tb.* FROM (
+				SELECT b.board_team_code, b.subject, m.user_name, 
+				       TO_CHAR(b.reg_date, 'YYYY-MM-DD') as reg_date, b.hit_count
+				FROM team_board b
+				JOIN member m ON b.member_code = m.member_code
+				WHERE b.team_code = #{team_code}
+				ORDER BY b.board_team_code DESC
+			) tb WHERE ROWNUM &lt;= #{end}
+		) WHERE rnum &gt;= #{start}
+	</select>
+
+	<select id="dataCountTeamBoard" parameterType="map" resultType="Integer">
+		SELECT NVL(COUNT(*), 0) FROM team_board WHERE team_code = #{team_code}
+	</select>
+
+	<update id="updateHitCount" parameterType="Long">
+		UPDATE team_board SET hit_count = hit_count + 1 WHERE board_team_code = #{board_team_code}
+	</update>
+
+	<select id="readTeamBoard" parameterType="Long" resultType="com.fl.model.TeamBoardDTO">
+		SELECT b.board_team_code, b.team_code, b.member_code, b.subject, b.content, 
+		       b.hit_count, b.reg_date, m.user_name
+		FROM team_board b
+		JOIN member m ON b.member_code = m.member_code
+		WHERE board_team_code = #{board_team_code}
+	</select>
+
+	<update id="updateTeamBoard" parameterType="com.fl.model.TeamBoardDTO">
+		UPDATE team_board SET subject = #{subject}, content = #{content}
+		WHERE board_team_code = #{board_team_code}
+	</update>
+
+	<delete id="deleteTeamBoard" parameterType="Long">
+		DELETE FROM team_board WHERE board_team_code = #{board_team_code}
+	</delete>
+	
+	<select id="readMemberRoleLevel" parameterType="map" resultType="Integer">
+	    SELECT role_level
+	    FROM member_team
+	    WHERE team_code = #{team_code} AND member_code = #{member_code}
+	</select>
 	
 </mapper>

@@ -1,19 +1,26 @@
 package com.fl.model;
 
-public class VoteDTO {
-	private Long board_vote_code;
-    private Long member_code;
-    private Long team_code;
-    private String title;
-    private String content;
-    private int status;            
-    private int view_count;
-    private String start_date;
-    private String end_date;
-    private String created_at;
+import java.util.List;
 
-    private int vote_count;   
-    private int my_vote_status;
+public class VoteDTO {
+	private Long board_vote_code;  
+    private Long member_code;      
+    private Long team_code;        
+    
+    private String title;          
+    private String content;        
+    private int status;            
+    private int view_count;        
+    
+    private String start_date;    
+    private String end_date;      
+    private String created_at;    
+
+    private int vote_count;              
+    private int my_vote_status;          
+    
+    private String writer_name;          
+    private List<VoteOptionDTO> options;
     
 	public Long getBoard_vote_code() {
 		return board_vote_code;
@@ -86,6 +93,18 @@ public class VoteDTO {
 	}
 	public void setMy_vote_status(int my_vote_status) {
 		this.my_vote_status = my_vote_status;
+	}
+	public String getWriter_name() {
+		return writer_name;
+	}
+	public void setWriter_name(String writer_name) {
+		this.writer_name = writer_name;
+	}
+	public List<VoteOptionDTO> getOptions() {
+		return options;
+	}
+	public void setOptions(List<VoteOptionDTO> options) {
+		this.options = options;
 	}
     
     

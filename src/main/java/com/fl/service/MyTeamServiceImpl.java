@@ -1,6 +1,6 @@
 package com.fl.service;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,174 +11,332 @@ import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
 import com.fl.model.TeamMemberDTO;
 import com.fl.model.VoteDTO;
+import com.fl.model.VoteOptionDTO;
 import com.fl.mybatis.support.MapperContainer;
 
-public class MyTeamServiceImpl implements MyTeamService{
+public class MyTeamServiceImpl implements MyTeamService {
+
 	private MyTeamMapper mapper = MapperContainer.get(MyTeamMapper.class);
-	
+
 	@Override
 	public List<TeamDTO> listMyTeam(long member_code) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return mapper.listMyTeam(member_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e; 
+		}
+	}
+
+	@Override
+	public TeamDTO readTeamInfo(long team_code) {
+		try {
+			return mapper.readTeamInfo(team_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public TeamMemberDTO readMyTeamStatus(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return mapper.readMyTeamStatus(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public void updateTeamInfo(TeamDTO dto) throws Exception {
+		try {
+			mapper.updateTeamInfo(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public void leaveTeam(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			long team_code = Long.parseLong(map.get("team_code").toString());
+			mapper.deleteMyTeamHistory(map);
+			mapper.updateTeamMemberCountDown(team_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
-	public List<JoinRequestDTO> listJoinRequest(long team_code) {
-		List<JoinRequestDTO> list = new ArrayList<JoinRequestDTO>();
-		
+	public List<TeamMemberDTO> listTeamMember(Map<String, Object> map) {
 		try {
-			list = mapper.listJoinRequest(team_code);
+			return mapper.listTeamMember(map);
 		} catch (Exception e) {
 			e.printStackTrace();
-			
 			throw e;
 		}
-		
-		return list;
 	}
 
-	// 1. 상태 변경 (대기 -> 수락/거절)
-		@Override
-		public void updateJoinRequestStatus(Map<String, Object> map) throws Exception {
-			try {
-				mapper.updateJoinRequestStatus(map);
-			} catch (Exception e) {
-				System.out.println("[MyTeamService] updateJoinRequestStatus 에러 발생");
-				e.printStackTrace(); // 에러 로그 필수!
-				throw e; // 컨트롤러에게 "야, DB 쪽에서 문제 터졌어!"라고 알려줌
-			}
+	@Override
+	public int dataCountTeamMember(Map<String, Object> map) {
+		try {
+			return mapper.dataCountTeamMember(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
 		}
-
-		// 2. 정식 팀원으로 추가
-		@Override
-		public void insertTeamMember(TeamMemberDTO dto) throws Exception {
-			try {
-				mapper.insertTeamMember(dto);
-			} catch (Exception e) {
-				System.out.println("[MyTeamService] insertTeamMember 에러 발생");
-				e.printStackTrace();
-				throw e;
-			}
-		}
-
-		// 3. 팀원 수 증가
-		@Override
-		public void updateTeamMemberCountUp(long team_code) throws Exception {
-			try {
-				mapper.updateTeamMemberCountUp(team_code);
-			} catch (Exception e) {
-				System.out.println("[MyTeamService] updateTeamMemberCountUp 에러 발생");
-				e.printStackTrace();
-				throw e;
-			}
-		}
+	}
 
 	@Override
 	public void updateMemberRole(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.updateMemberRole(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
-	public void expelMember(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public void kickMember(Map<String, Object> map) throws Exception {
+		try {
+			long team_code = Long.parseLong(map.get("team_code").toString());
+			mapper.deleteTeamMember(map);
+			mapper.updateTeamMemberCountDown(team_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	
+	@Override
+	public int readMemberRoleLevel(long memberCode, long teamCode) {
+	    try {
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("member_code", memberCode);
+	        map.put("team_code", teamCode);
+	        
+	        Integer level = mapper.readMemberRoleLevel(map);
+
+	        return (level == null) ? 0 : level;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return 0;
+	    }
+	}
+	
+	@Override
+	public List<JoinRequestDTO> listJoinRequest(long team_code) {
+        try {
+            return mapper.listJoinRequest(team_code);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+	@Override
+	public void processJoinAccept(Map<String, Object> map) throws Exception {
+		try {
+			TeamMemberDTO memberDto = new TeamMemberDTO();
+			memberDto.setMember_code(Long.parseLong(map.get("member_code").toString()));
+			memberDto.setTeam_code(Long.parseLong(map.get("team_code").toString()));
+			memberDto.setPosition((String)map.get("position")); 
+
+			mapper.insertTeamMemberFromRequest(memberDto);
+			mapper.updateTeamMemberCountUp(memberDto.getTeam_code());
+			mapper.deleteJoinRequest(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public void processJoinReject(Map<String, Object> map) throws Exception {
+		try {
+			mapper.deleteJoinRequest(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public List<ScheduleDTO> listMonthSchedule(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return mapper.listMonthSchedule(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public void insertSchedule(ScheduleDTO dto) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.insertSchedule(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
-	public void deleteSchedule(long board_cal_code) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public void updateSchedule(ScheduleDTO dto) throws Exception {
+		try {
+			mapper.updateSchedule(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public void deleteSchedule(long schedule_code) throws Exception {
+		try {
+			mapper.deleteSchedule(schedule_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+
+	// ==========================================
+	// 5. [투표 관리]
+	// ==========================================
+	@Override
+	public void insertVote(VoteDTO dto) throws Exception {
+		try {
+			mapper.insertVote(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	
+	@Override
+	public void insertVoteOption(VoteOptionDTO dto) throws Exception {
+		try {
+			mapper.insertVoteOption(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public List<VoteDTO> listVote(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return mapper.listVote(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
-	public void insertVote(VoteDTO dto) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public VoteDTO readVote(Map<String, Object> map) {
+		try {
+			return mapper.readVote(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
-	public VoteDTO readVote(long board_vote_code, long member_code) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<VoteOptionDTO> listVoteOptions(Map<String, Object> map) {
+		try {
+			return mapper.listVoteOptions(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	
+	@Override
+	public int checkVoteHistory(Map<String, Object> map) {
+		try {
+			return mapper.checkVoteHistory(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
-	public void doVote(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		
+	public void vote(Map<String, Object> map) throws Exception {
+		try {
+			mapper.insertVoteHistory(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public void insertTeamBoard(TeamBoardDTO dto) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.insertTeamBoard(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public List<TeamBoardDTO> listTeamBoard(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return mapper.listTeamBoard(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public int dataCountTeamBoard(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return 0;
+		try {
+			return mapper.dataCountTeamBoard(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public TeamBoardDTO readTeamBoard(long board_team_code) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void updateHitCount(long board_team_code) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.updateHitCount(board_team_code);
+			return mapper.readTeamBoard(board_team_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public void updateTeamBoard(TeamBoardDTO dto) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.updateTeamBoard(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	@Override
 	public void deleteTeamBoard(long board_team_code) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			mapper.deleteTeamBoard(board_team_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
-
 }

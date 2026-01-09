@@ -134,6 +134,7 @@ public class LoginFilter implements Filter {
 				"/uploads/**", 
 				"/dist/**",
 				"/resource/**" 
+				
 		};
 		
 		if(uri.length() <= 1) {

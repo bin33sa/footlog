@@ -9,54 +9,88 @@ import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
 import com.fl.model.TeamMemberDTO;
 import com.fl.model.VoteDTO;
+import com.fl.model.VoteOptionDTO;
 
 public interface MyTeamService {
-    
-    public List<TeamDTO> listMyTeam(long member_code);
+	
+	// ==========================================
+	// 1. [팀 정보 & 메인]
+	// ==========================================
+	public List<TeamDTO> listMyTeam(long member_code);
+	
+	public TeamDTO readTeamInfo(long team_code);
+	
+	public TeamMemberDTO readMyTeamStatus(Map<String, Object> map);
+	
+	public void updateTeamInfo(TeamDTO dto) throws Exception;
+	
+	public void leaveTeam(Map<String, Object> map) throws Exception;
 
-    public TeamMemberDTO readMyTeamStatus(Map<String, Object> map);
+	public int readMemberRoleLevel(long memberCode, long teamCode);
+	// ==========================================
+	// 2. [멤버 관리]
+	// ==========================================
+	public List<TeamMemberDTO> listTeamMember(Map<String, Object> map);
+	
+	public int dataCountTeamMember(Map<String, Object> map);
+	
+	public void updateMemberRole(Map<String, Object> map) throws Exception;
+	
+	public void kickMember(Map<String, Object> map) throws Exception;
 
-    public void leaveTeam(Map<String, Object> map) throws Exception;
+	
+	// ==========================================
+	// 3. [가입 신청 관리]
+	// ==========================================
+	public List<JoinRequestDTO> listJoinRequest(long team_code);
+	
+	public void processJoinAccept(Map<String, Object> map) throws Exception;
+	
+	public void processJoinReject(Map<String, Object> map) throws Exception;
 
-    public List<JoinRequestDTO> listJoinRequest(long team_code);
+	
+	// ==========================================
+	// 4. [일정 관리]
+	// ==========================================
+	public List<ScheduleDTO> listMonthSchedule(Map<String, Object> map);
+	
+	public void insertSchedule(ScheduleDTO dto) throws Exception;
+	
+	public void updateSchedule(ScheduleDTO dto) throws Exception;
+	
+	public void deleteSchedule(long schedule_code) throws Exception;
 
-    public void updateJoinRequestStatus(Map<String, Object> map) throws Exception;
-    
-    public void insertTeamMember(TeamMemberDTO dto) throws Exception;
-    
-    public void updateTeamMemberCountUp(long team_code) throws Exception;
-    
-    public void updateMemberRole(Map<String, Object> map) throws Exception;
+	
+	// ==========================================
+	// 5. [투표 관리]
+	// ==========================================
+	public void insertVote(VoteDTO dto) throws Exception;
+	
+	public void insertVoteOption(VoteOptionDTO dto) throws Exception;
 
-    public void expelMember(Map<String, Object> map) throws Exception;
+	public List<VoteDTO> listVote(Map<String, Object> map);
+	
+	public VoteDTO readVote(Map<String, Object> map);
+	
+	public List<VoteOptionDTO> listVoteOptions(Map<String, Object> map);
+	
+	public int checkVoteHistory(Map<String, Object> map);
+	
+	public void vote(Map<String, Object> map) throws Exception;
 
-    public List<ScheduleDTO> listMonthSchedule(Map<String, Object> map);
-
-    public void insertSchedule(ScheduleDTO dto) throws Exception;
-
-    public void deleteSchedule(long board_cal_code) throws Exception;
-
-    public List<VoteDTO> listVote(Map<String, Object> map);
-
-    public void insertVote(VoteDTO dto) throws Exception;
-
-    public VoteDTO readVote(long board_vote_code, long member_code);
-
-    public void doVote(Map<String, Object> map) throws Exception;
-    
-    public void insertTeamBoard(TeamBoardDTO dto) throws Exception;
-
-    public List<TeamBoardDTO> listTeamBoard(Map<String, Object> map);
-    public int dataCountTeamBoard(Map<String, Object> map);
-
-    public TeamBoardDTO readTeamBoard(long board_team_code);
-
-    public void updateHitCount(long board_team_code) throws Exception;
-
-    public void updateTeamBoard(TeamBoardDTO dto) throws Exception;
-
-    public void deleteTeamBoard(long board_team_code) throws Exception;
-    
-    // 파일 다운로드용 파일 정보 가져오기 (필요시)
-    // public FileDTO readFile(long file_id);
+	
+	// ==========================================
+	// 6. [게시판]
+	// ==========================================
+	public void insertTeamBoard(TeamBoardDTO dto) throws Exception;
+	
+	public List<TeamBoardDTO> listTeamBoard(Map<String, Object> map);
+	
+	public int dataCountTeamBoard(Map<String, Object> map);
+	
+	public TeamBoardDTO readTeamBoard(long board_team_code);
+	
+	public void updateTeamBoard(TeamBoardDTO dto) throws Exception;
+	
+	public void deleteTeamBoard(long board_team_code) throws Exception;
 }
