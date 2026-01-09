@@ -1,6 +1,8 @@
 package com.fl.controller;
 
+import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,18 +19,23 @@ import com.fl.service.MemberService;
 import com.fl.service.MemberServiceImpl;
 import com.fl.service.MyPageService;
 import com.fl.service.MyPageServiceImpl;
+import com.fl.util.FileManager;
+import com.fl.util.MyMultipartFile;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 @Controller
 @RequestMapping("/member/*")
 public class MemberController {
 	
 	private MemberService service = new MemberServiceImpl();
-    private MyPageService myPageService = new MyPageServiceImpl(); 
+    private MyPageService myPageService = new MyPageServiceImpl();
+    private FileManager fileManager = new FileManager();
+	
 
 	// ==========================================
 	// 1. 로그인 및 로그아웃 관련
@@ -117,41 +124,105 @@ public class MemberController {
 	// 3. 회원가입 관련
 	// ==========================================
 
+	// 회원가입 폼
 	@GetMapping("signup")
 	public ModelAndView signupForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		return new ModelAndView("member/signup");
+		ModelAndView mav = new ModelAndView("member/signup");
+		
+		mav.addObject("mode", "sign");
+		
+		return mav;
 	}
 
+	// 회원가입 정보 저장
 	@PostMapping("signup")
 	public ModelAndView signupSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		HttpSession session = req.getSession();
+		
+		// 파일 저장 경로 
+		String root = session.getServletContext().getRealPath("/");
+		String pathname = root + "uploads" + File.separator + "member";
+		
+		String message = "";
+		
 		try {
 			MemberDTO dto = new MemberDTO();
 			
-			// [수정 3] 회원가입 JSP의 name 속성도 확인 필요!
-			// 만약 signup.jsp에서도 name="password"로 했다면 아래처럼 받아야 함
-			dto.setMember_id(req.getParameter("userId"));
-			dto.setPassword(req.getParameter("password")); // userPwd -> password
-			dto.setMember_name(req.getParameter("userName"));
+			dto.setMember_id(req.getParameter("member_id")); // 아이디
+			dto.setPassword(req.getParameter("password")); // 비번
+			dto.setMember_name(req.getParameter("member_name")); // 이름
+			dto.setPhone_number(req.getParameter("phone_number")); // 전번
+			dto.setEmail(req.getParameter("email")); // 이메일 
+			dto.setRegion(req.getParameter("region")); // 활동 지역
+			dto.setPreferred_position(req.getParameter("preferred_position")); // 선호 포지션
 			
-			// 나머지 필드 (전화번호, 이메일 등)도 필요하면 추가 수집
-			// dto.setPhone_number(req.getParameter("tel"));
-			// dto.setEmail(req.getParameter("email"));
-
+			// 프로필 사진파일 업로드 
+			Part p = req.getPart("selectFile");
+			MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
+			if(mp != null) {
+				dto.setProfile_image(mp.getSaveFilename());
+			}
+			
 			service.insertMember(dto);
+			
+			session.setAttribute("mode", "signup");
+			session.setAttribute("member_Name", dto.getMember_name());
+			
 			
 			return new ModelAndView("redirect:/member/signupSuccess");
 			
+		} catch (SQLException e) {
+			if(e.getErrorCode() == 1) {
+				message = "아이디 중복으로 회원가입이 실패했습니다.";
+			} else if(e.getErrorCode() == 1400) {
+				message = "필수사항을 입력하지 않았습니다.";
+			} else {
+				message = "회원 가입이 실패했습니다.";
+			}
+			
 		} catch (Exception e) {
+			message = "회원 가입이 실패했습니다."; 
+			
 			e.printStackTrace();
-			ModelAndView mav = new ModelAndView("member/signup");
-			mav.addObject("message", "회원가입 실패 (입력 정보를 확인해주세요)");
-			return mav;
 		}
+		ModelAndView mav = new ModelAndView("member/signup");
+		
+		mav.addObject("mode", "signup");
+		mav.addObject("message", message);
+		
+		return mav;
 	}
 
 	@GetMapping("signupSuccess")
 	public ModelAndView signupSuccess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		return new ModelAndView("member/signup_success");
+		HttpSession session = req.getSession();
+		
+		String mode = (String)session.getAttribute("mode");
+		String member_name = (String)session.getAttribute("member_name");
+		
+		session.removeAttribute("mode");
+		session.removeAttribute("member_name");
+		
+		if(mode == null) {
+			return new ModelAndView("redirect:/main");
+		}
+		
+		String title;
+		String message = "<b>" + member_name + "</b>님";
+		if(mode.equals("account")) {
+			title = "회원가입";
+			message += "회원가입이 완료 되었습니다.";
+		} else {
+			title = "정보수정";
+			message += "회원정보가 수정 되었습니다.";
+		}
+		
+		ModelAndView mav = new ModelAndView("member/signup_success");
+		
+		mav.addObject("title", title);
+		mav.addObject("message", message);
+		
+		return mav; // 여기까지함 !!! 1월 9일 금욜 
 	}
 
 	// ==========================================

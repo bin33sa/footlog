@@ -8,17 +8,13 @@ import com.fl.model.MemberDTO;
 
 public interface MemberMapper {
 	public MemberDTO loginMember(Map<String, Object> map);
-	
-	public void insertMember1(MemberDTO dto) throws SQLException;
-	public void insertMember2(MemberDTO dto) throws SQLException;
-	public void insertMember12(MemberDTO dto) throws SQLException;
-	public void updateMember1(MemberDTO dto) throws SQLException;
-	public void updateMember2(MemberDTO dto) throws SQLException;
-	public void updateMemberLevel(Map<String, Object> map) throws SQLException;
-	public void deleteProfilePhoto(Map<String, Object> map) throws SQLException;
-	public void deleteMember1(Map<String, Object> map) throws SQLException;
-	public void deleteMember2(Map<String, Object> map) throws SQLException;
+	public void insertMember(MemberDTO dto) throws SQLException;
+	public void updateMember(MemberDTO dto) throws SQLException;
+	public void deleteProfileImage(Map<String, Object> map) throws SQLException;
+	public void deleteMember(Map<String, Object> map) throws SQLException;
 	
 	public MemberDTO findById(String userId);	
+	
+	// 할지 안할지 모르겠지만 일단 남겨놓기 
 	public List<Map<String, Object>> listAgeSection();
 }
