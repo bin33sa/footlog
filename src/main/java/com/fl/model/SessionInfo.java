@@ -5,7 +5,8 @@ public class SessionInfo {
     private String member_id;
     private String member_name;
     private int role_level;
-
+    private String profile_image;
+    
     public Long getMember_code() { return member_code; }
     public void setMember_code(Long member_code) { this.member_code = member_code; }
     
@@ -17,4 +18,12 @@ public class SessionInfo {
     
     public int getRole_level() { return role_level; }
     public void setRole_level(int role_level) { this.role_level = role_level; }
+	public String getProfile_image() {
+		return profile_image;
+	}
+	public void setProfile_image(String profile_image) {
+		this.profile_image = profile_image;
+	}
+	
+  
 }

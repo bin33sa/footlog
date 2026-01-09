@@ -31,23 +31,26 @@
             <div class="col-lg-3">
                 <div class="modern-card p-4 text-center mb-3">
                     <div class="position-relative d-inline-block mb-3">
-                        <img src="${empty sessionScope.member.profile_photo ? pageContext.request.contextPath.concat('/dist/images/') : pageContext.request.contextPath.concat('/uploads/profile/').concat(sessionScope.member.profile_photo)}" 
+                        <img src="${empty dto.profile_image ? pageContext.request.contextPath.concat('/dist/images/avatar.png') : pageContext.request.contextPath.concat('/uploads/profile/').concat(dto.profile_image)}" 
                              class="rounded-circle border border-3 border-dark" 
                              style="width: 100px; height: 100px; object-fit: cover;">
                              
                         <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-primary text-dark">
-                            ${empty sessionScope.member.position ? 'FW' : sessionScope.member.position}
+                            ${empty dto.preferred_position ? '포지션 미설정' : dto.preferred_position}
                         </span>
                     </div>
                     
-                    <h5 class="fw-bold mb-1">${empty sessionScope.member.name ? '게스트' : sessionScope.member.name}</h5>
-                    <p class="text-muted small mb-3">서울 마포구 | FC 슛돌이</p>
+                    <h5 class="fw-bold mb-1">${dto.member_name}</h5>
+                    
+                    <p class="text-muted small mb-3">
+                        ${empty dto.region ? '지역 미설정' : dto.region} | FC 슛돌이
+                    </p>
                     
                     <a href="${pageContext.request.contextPath}/member/profile" class="btn btn-outline-dark btn-sm rounded-pill w-100">
                         프로필 관리 / 사진변경
                     </a>
                 </div>
-
+                
                 <div class="list-group shadow-sm rounded-4 overflow-hidden">
                     <a href="#" class="list-group-item list-group-item-action py-3 fw-bold bg-light">🚀 대시보드</a>
                     <a href="#" class="list-group-item list-group-item-action py-3">내 구단 이동</a>
@@ -60,56 +63,104 @@
 
             <div class="col-lg-9">
                 <div class="row g-3 mb-4">
+                    
                     <div class="col-md-4">
                         <div class="modern-card p-4 bg-dark text-white h-100 d-flex justify-content-between align-items-center">
                             <div>
                                 <p class="mb-1 text-white-50 small fw-bold">NEXT MATCH</p>
-                                <h4 class="fw-bold m-0" style="color: var(--primary-color);">D-2</h4>
+                                <c:choose>
+                                    <c:when test="${not empty stats.next_match_dday}">
+                                         <h4 class="fw-bold m-0" style="color: var(--primary-color);">D-${stats.next_match_dday}</h4>
+                                    </c:when>
+                                    <c:otherwise>
+                                         <h5 class="fw-bold m-0 text-secondary">일정 없음</h5>
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                             <div class="text-end">
-                                <span class="d-block small">vs 리버풀 FC</span>
-                                <span class="d-block small opacity-50">05.24 (토)</span>
+                                <span class="d-block small">
+                                    ${not empty stats.next_match_opponent ? 'vs '.concat(stats.next_match_opponent) : '-'}
+                                </span>
+                                <span class="d-block small opacity-50">
+                                    ${not empty stats.next_match_date ? stats.next_match_date : '예정된 경기 없음'}
+                                </span>
                             </div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
                         <div class="modern-card p-3 h-100 text-center d-flex flex-column justify-content-center">
                             <span class="text-muted small fw-bold">이번 달 경기</span>
-                            <h3 class="fw-bold m-0">4 <span class="fs-6 text-muted">matches</span></h3>
+                            <h3 class="fw-bold m-0">${stats.month_match_count} <span class="fs-6 text-muted">matches</span></h3>
                         </div>
                     </div>
+
                     <div class="col-md-4">
                         <div class="modern-card p-3 h-100 text-center d-flex flex-column justify-content-center">
                             <span class="text-muted small fw-bold">공격 포인트</span>
-                            <h3 class="fw-bold m-0">2 <span class="fs-6 text-muted">goals</span></h3>
+                            <h3 class="fw-bold m-0">${stats.total_point} <span class="fs-6 text-muted">points</span></h3>
                         </div>
                     </div>
                 </div>
 
                 <h5 class="fw-bold mb-3">📅 나의 매치 일정</h5>
+                
                 <div class="modern-card p-0 overflow-hidden mb-5">
-                    <div class="p-4 border-bottom match-card upcoming bg-white">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="badge bg-dark text-primary mb-2">Upcoming</span>
-                                <h5 class="fw-bold mb-1">FC 슛돌이 vs 리버풀 FC</h5>
-                                <p class="text-muted mb-0 small">🏟 서울 월드컵 보조경기장 | ⏰ 2025.05.24 14:00</p>
-                            </div>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill">라인업 확인</button>
-                        </div>
-                    </div>
+                    
+                    <c:choose>
+                        
+                        <%-- 1. 매치 내역이 아예 없을 때 (리스트가 비어있거나 null일 때) --%>
+                        <c:when test="${empty matchList}">
+                             <div class="p-5 text-center">
+                                <div class="mb-3">
+                                    <span class="fs-1">⚽</span> </div>
+                                <h6 class="text-muted fw-bold mb-2">아직 참여한 매치 내역이 없습니다.</h6>
+                                <p class="small text-secondary mb-4">새로운 매치를 생성하거나 용병으로 경기에 참여해보세요!</p>
+                                
+                                <a href="${pageContext.request.contextPath}/match/list" class="btn btn-dark rounded-pill px-4">
+                                    매치 둘러보기
+                                </a>
+                             </div>
+                        </c:when>
+                        
+                        <%-- 2. 매치 내역이 있을 때 --%>
+                        <c:otherwise>
+                            <c:forEach var="dto" items="${matchList}">
+                                
+                                <%-- 예정된 경기 --%>
+                                <c:if test="${dto.status != '완료' && dto.status != 'END'}">
+                                    <div class="p-4 border-bottom match-card upcoming bg-white">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-dark text-primary mb-2">${dto.status}</span>
+                                                <h5 class="fw-bold mb-1">${dto.home_team_name} vs ${dto.away_team_name}</h5>
+                                                <p class="text-muted mb-0 small">🏟 ${dto.region} | ⏰ ${dto.match_date}</p>
+                                            </div>
+                                            <button type="button" class="btn btn-sm btn-outline-dark rounded-pill">상세보기</button>
+                                        </div>
+                                    </div>
+                                </c:if>
 
-                    <div class="p-4 match-card end">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="badge bg-secondary mb-2">종료</span>
-                                <h6 class="fw-bold mb-1 text-muted">FC 슛돌이 vs 바르셀로나</h6>
-                                <p class="text-muted mb-0 small">결과: 2-1 승리</p>
-                            </div>
-                            <span class="fw-bold fs-5 text-muted">WIN</span>
-                        </div>
-                    </div>
-                </div>
+                                <%-- 종료된 경기 --%>
+                                <c:if test="${dto.status == '완료' || dto.status == 'END'}">
+                                    <div class="p-4 match-card end border-bottom">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="badge bg-secondary mb-2">종료</span>
+                                                <h6 class="fw-bold mb-1 text-muted">${dto.home_team_name} vs ${dto.away_team_name}</h6>
+                                                <p class="text-muted mb-0 small">결과: ${dto.home_score} - ${dto.away_score}</p>
+                                            </div>
+                                            <span class="fw-bold fs-5 text-muted">END</span>
+                                        </div>
+                                    </div>
+                                </c:if>
+                                
+                                
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
+                 
+       	       </div>
             </div>
         </div>
     </div>

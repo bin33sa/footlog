@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fl.mapper.MyPageMapper">
+	
+	<!-- 내 매치 리스트 -->
+	<!-- 매치 고유번호, 경기날짜, 경기상태(모집중,확정,종료), 매치 글 제목, 홈/원정 팀이름, 홈/원정 팀로고, 경기지역, 경기점수 가져옴 ㅇㅇ  -->
+	<select id="listMyMatch" parameterType="Long" resultType="com.fl.model.MatchDTO">
+        SELECT 
+            match_code,
+            TO_CHAR(match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
+            status,
+            title,
+            (SELECT team_name FROM team WHERE team_code = match_post.home_code) AS home_team_name,
+            (SELECT team_name FROM team WHERE team_code = match_post.away_code) AS away_team_name,
+            (SELECT emblem_image FROM team WHERE team_code = match_post.home_code) AS home_team_emblem,
+            (SELECT emblem_image FROM team WHERE team_code = match_post.away_code) AS away_team_emblem,
+            NVL((SELECT home_score FROM match_result WHERE match_code = match_post.match_code), 0) AS home_score,
+            NVL((SELECT away_score FROM match_result WHERE match_code = match_post.match_code), 0) AS away_score,
+            (SELECT region FROM team WHERE team_code = match_post.home_code) AS region
+        FROM match_post
+        WHERE 
+            home_code IN (SELECT team_code FROM member_team WHERE member_code = #{memberCode})
+            OR 
+            away_code IN (SELECT team_code FROM member_team WHERE member_code = #{memberCode})
+        ORDER BY match_date DESC
+    </select>
+    
+    <!-- 회원정보 가져오기 -->
+    <select id="readMember" parameterType="Long" resultType="com.fl.model.MemberDTO">
+    SELECT member_code, member_id, member_name, phone_number, email, 
+           region, profile_image, preferred_position, role_level
+    FROM member
+    WHERE member_code = #{memberCode}
+	</select>
+    
+	
+</mapper>

@@ -2,8 +2,10 @@ package com.fl.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fl.model.MatchDTO;
 import com.fl.model.MemberDTO;
 import com.fl.model.SessionInfo;
 import com.fl.mvc.annotation.Controller;
@@ -13,6 +15,8 @@ import com.fl.mvc.annotation.RequestMapping;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MemberService;
 import com.fl.service.MemberServiceImpl;
+import com.fl.service.MyPageService;
+import com.fl.service.MyPageServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +28,7 @@ import jakarta.servlet.http.HttpSession;
 public class MemberController {
 	
 	private MemberService service = new MemberServiceImpl();
+    private MyPageService myPageService = new MyPageServiceImpl(); 
 
 	// ==========================================
 	// 1. 로그인 및 로그아웃 관련
@@ -59,11 +64,13 @@ public class MemberController {
 			session.setMaxInactiveInterval(20 * 60); // 20분
 
 			SessionInfo info = new SessionInfo();
+			
 			info.setMember_code(dto.getMember_code());
 			info.setMember_id(dto.getMember_id());
 			info.setMember_name(dto.getMember_name());
 			info.setRole_level(dto.getRole_level());
-
+			
+			
 			session.setAttribute("member", info);
 
 			String preLoginURI = (String)session.getAttribute("preLoginURI");
@@ -156,14 +163,25 @@ public class MemberController {
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
-		if(info == null) {
-			return new ModelAndView("redirect:/member/login");
+		ModelAndView mav = new ModelAndView("member/mypage");
+		
+		try {
+			
+			MemberDTO myInfo = myPageService.readMember(info.getMember_code());
+			
+			List<MatchDTO> matchList = myPageService.listMyMatch(info.getMember_code());
+			
+			mav.addObject("dto", myInfo);
+			mav.addObject("matchList", matchList);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		// 마이페이지 메인에는 보통 내 정보 요약이나 최근 활동 내역 등을 보여줌
 		// 필요하다면 여기서 service 호출해서 데이터 가져감
-		
-		return new ModelAndView("member/mypage");
+
+		return mav;
 	}
 
 	@GetMapping("profile")
