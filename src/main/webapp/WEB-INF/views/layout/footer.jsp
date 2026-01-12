@@ -150,3 +150,20 @@
 <div class="floating-chat-btn" onclick="alert('1:1 문의 채팅을 연결합니다.')">
     <span class="floating-chat-icon">🎧</span>
 </div>
+
+<script>
+    $(function(){
+        // URL 파라미터 확인 함수
+        const urlParams = new URLSearchParams(window.location.search);
+        const msg = urlParams.get('msg');
+
+        if(msg === 'noteam') {
+            alert('가입한 구단이 없습니다.\n구단 목록 페이지로 이동합니다.');
+            // 알림 후 URL에서 파라미터 제거 (새로고침 시 계속 뜨는 것 방지)
+            history.replaceState({}, null, location.pathname);
+        } else if(msg === 'unauthorized') {
+            alert('접근 권한이 없습니다.');
+            history.replaceState({}, null, location.pathname);
+        }
+    });
+</script>

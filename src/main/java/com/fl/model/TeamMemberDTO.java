@@ -11,9 +11,10 @@ public class TeamMemberDTO {
     private String profile_image;  
     private String phone_number;   
     private String email;          
-    
+    private int back_number;
     private String role_name;
-
+    private String join_date;
+    
 	public Long getTeam_code() {
 		return team_code;
 	}
@@ -92,6 +93,22 @@ public class TeamMemberDTO {
 
 	public void setRole_name(String role_name) {
 		this.role_name = role_name;
+	}
+
+	public int getBack_number() {
+		return back_number;
+	}
+
+	public void setBack_number(int back_number) {
+		this.back_number = back_number;
+	}
+
+	public String getJoin_date() {
+		return join_date;
+	}
+
+	public void setJoin_date(String join_date) {
+		this.join_date = join_date;
 	}
     
     

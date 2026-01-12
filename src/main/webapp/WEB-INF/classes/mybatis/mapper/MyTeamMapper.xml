@@ -45,19 +45,26 @@
 
 
 	<select id="listTeamMember" parameterType="map" resultType="com.fl.model.TeamMemberDTO">
-		SELECT * FROM (
-			SELECT ROWNUM rnum, tb.* FROM (
-				SELECT tm.member_code, m.user_name, m.user_id, 
-				       tm.team_level, tm.position, TO_CHAR(tm.join_date, 'YYYY-MM-DD') as join_date
-				FROM team_member tm
-				JOIN member m ON tm.member_code = m.member_code
-				WHERE tm.team_code = #{team_code} AND tm.status = 1
-				<if test="keyword != null and keyword != ''">
-					AND (m.user_name LIKE '%' || #{keyword} || '%')
-				</if>
-				ORDER BY tm.team_level DESC, m.user_name ASC
-			) tb WHERE ROWNUM &lt;= #{end}
-		) WHERE rnum &gt;= #{start}
+	    SELECT * FROM (
+	        SELECT ROWNUM rnum, tb.* FROM (
+	            SELECT 
+	                tm.member_code, 
+	                m.member_name,  
+	                m.member_id,    
+	                tm.role_level,
+	                tm.position,
+	                tm.back_number,  TO_CHAR(tm.reg_date, 'YYYY-MM-DD') AS join_date
+	                
+	            FROM member_team tm
+	            JOIN member m ON tm.member_code = m.member_code
+	            WHERE tm.team_code = #{team_code} 
+	            
+	            <if test="keyword != null and keyword != ''">
+	                AND (m.member_name LIKE '%' || #{keyword} || '%')
+	            </if>
+	            ORDER BY tm.role_level DESC, m.member_name ASC
+	        ) tb WHERE ROWNUM &lt;= #{end}
+	    ) WHERE rnum &gt;= #{start}
 	</select>
 	
 	<select id="dataCountTeamMember" parameterType="map" resultType="Integer">
@@ -71,8 +78,20 @@
 	</select>
 
 	<update id="updateMemberRole" parameterType="map">
-		UPDATE team_member SET team_level = #{team_level}
-		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	    UPDATE member_team
+	    <set>
+	        <if test="role_level != null and role_level != ''">
+	            role_level = #{role_level},
+	        </if>
+	        <if test="position != null and position != ''">
+	            position = #{position},
+	        </if>
+	        <if test="back_number != null and back_number != ''">
+	            back_number = #{back_number},
+	        </if>
+	    </set>
+	    WHERE team_code = #{team_code} 
+	      AND member_code = #{member_code}
 	</update>
 
 	<delete id="deleteTeamMember" parameterType="map">
