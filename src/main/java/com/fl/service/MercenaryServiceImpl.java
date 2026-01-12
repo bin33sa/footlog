@@ -20,7 +20,7 @@ public class MercenaryServiceImpl implements MercenaryService {
             throw e; // 
         }
     }
-/*
+
     @Override
     public void deleteMercenary(Map<String, Object> map) throws Exception {
         try {
@@ -31,7 +31,7 @@ public class MercenaryServiceImpl implements MercenaryService {
         }
     }
 
-*/
+
     @Override
     public List<MercenaryDTO> listMercenary(Map<String, Object> map) {
         List<MercenaryDTO> list = null;
@@ -42,7 +42,7 @@ public class MercenaryServiceImpl implements MercenaryService {
         }
         return list;
     }
-/*
+
     @Override
     public int dataCount(Map<String, Object> map) {
         int result = 0;
@@ -53,7 +53,7 @@ public class MercenaryServiceImpl implements MercenaryService {
         }
         return result;
     }
-*/
+
     @Override
     public void updateHitCount(long recruitId) throws Exception {
        try {

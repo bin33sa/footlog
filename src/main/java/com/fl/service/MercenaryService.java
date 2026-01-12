@@ -9,11 +9,11 @@ public interface MercenaryService {
 	
     public void insertMercenary(MercenaryDTO dto) throws Exception;
     public void updateMercenary(MercenaryDTO dto) throws Exception;
-//    public void deleteMercenary(Map<String, Object> map) throws Exception;
+    public void deleteMercenary(Map<String, Object> map) throws Exception;
     
     public MercenaryDTO findById(long recruit_id);
     public List<MercenaryDTO> listMercenary(Map<String, Object> map);
     public List<MercenaryDTO> listTeam(Map<String, Object> map);    
-//    public int dataCount(Map<String, Object> map);
+    public int dataCount(Map<String, Object> map);
     public void updateHitCount(long recruit_Id) throws Exception;
 }

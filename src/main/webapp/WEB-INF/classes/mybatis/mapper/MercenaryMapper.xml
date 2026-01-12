@@ -5,10 +5,19 @@
 	
 
     <select id="listMercenary" parameterType="map" resultType="com.fl.model.MercenaryDTO">
-        SELECT recruit_id, team_code, match_code, member_code, 
-               created_at, status, title, content, view_count
-        FROM MERCENARY_POST
-    </select>
+    	SELECT p.recruit_id, p.title, p.member_code, p.created_at, p.view_count,
+           m.member_name, m.role_level  FROM MERCENARY_POST p
+    	JOIN MEMBER m ON p.member_code = m.member_code
+    <where>
+        <if test="category != null and category != ''">
+            AND m.role_level = #{category}  </if>
+        <if test="kwd != null and kwd != ''">
+            AND p.title LIKE '%' || #{kwd} || '%'
+        </if>
+    </where>
+    	ORDER BY p.recruit_id DESC
+    	OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+</select>
     
     <insert id="insertMercenary" parameterType="com.fl.model.MercenaryDTO">
         INSERT INTO MERCENARY_POST (
@@ -28,14 +37,36 @@
     </select>
 	
 	<update id="updateMercenary" parameterType="com.fl.model.MercenaryDTO">
-		UPDATE Mercenary_post SET title = #{title}, content = #{content}
-		WHERE recruit_id = #{recruit_id} AND member_code = #{member_code}
+		UPDATE Mercenary_post 
+    	SET title = #{title}, 
+        content = #{content}, 
+        team_code = #{team_code}  
+        WHERE recruit_id = #{recruit_id} AND member_code = #{member_code}
 	</update>
     
     <select id="findById" parameterType="long" resultType="com.fl.model.MercenaryDTO">
-        SELECT recruit_id, title, content
+        SELECT recruit_id, team_code, match_code, member_code, 
+               created_at, status, title, content, view_count
     	FROM mercenary_post
     	WHERE recruit_id = #{recruit_id}
     </select>
+    
+    <delete id="deleteMercenary" parameterType="map">
+    DELETE FROM MERCENARY_POST 
+    WHERE recruit_id = #{recruit_id} AND member_code = #{member_code}
+	</delete>
+    
+    <select id="dataCount" parameterType="map" resultType="int">
+    SELECT COUNT(*) 
+    FROM MERCENARY_POST p
+    JOIN MEMBER m ON p.member_code = m.member_code
+    <where>
+        <if test="category != null and category != ''">
+            AND m.role_level = #{category}  </if>
+        <if test="kwd != null and kwd != ''">
+            AND p.title LIKE '%' || #{kwd} || '%'
+        </if>
+    </where>   
+</select>
     
 </mapper>

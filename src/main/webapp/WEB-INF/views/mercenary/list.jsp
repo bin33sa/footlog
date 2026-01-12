@@ -75,6 +75,77 @@
 	border-radius: 15px;
 	border: none;
 }
+
+/* 4. 페이징 디자인 추가 */
+.page-navigation {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 8px; /* 숫자 사이 간격 */
+	margin-top: 40px;
+}
+
+/* 페이징 내의 모든 링크와 숫자 공통 스타일 */
+.page-navigation a, .page-navigation span, .page-navigation b {
+	display: inline-block;
+	min-width: 35px;
+	height: 35px;
+	line-height: 35px;
+	text-align: center;
+	text-decoration: none;
+	border-radius: 50%; /* 동그란 모양 */
+	font-size: 0.9rem;
+	font-weight: 600;
+	transition: 0.2s;
+	color: #333;
+}
+
+/* 마우스 올렸을 때 효과 */
+.page-navigation a:hover {
+	background-color: rgba(212, 246, 63, 0.2);
+	color: #000;
+}
+
+/* ★현재 페이지 강조 (가장 중요)★ */
+/* 강사님 유틸이 <b>태그로 현재페이지를 만든다면 아래가 적용됨 */
+.page-navigation b {
+	background-color: #111;
+	color: var(--primary-color) !important;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 화살표(이전/다음) 스타일 */
+.page-navigation a[href*="page="] {
+	color: #999;
+}
+
+/* 테이블 세로줄 및 스타일 수정 */
+.board-table {
+    border-collapse: collapse; /* 테두리 겹침 방지 */
+}
+
+/* 모든 셀에 연한 세로줄 추가 */
+.board-table th, 
+.board-table td {
+    border-left: 1px solid #ccc;  /* 왼쪽 세로줄 */
+    border-right: 1px solid #ccc; /* 오른쪽 세로줄 */
+}
+
+/* 첫 번째 열과 마지막 열의 외곽 세로줄은 제거 (선택 사항) */
+.board-table th:first-child, 
+.board-table td:first-child {
+    border-left: none;
+}
+.board-table th:last-child, 
+.board-table td:last-child {
+    border-right: none;
+}
+
+/* 헤더 부분은 좀 더 진한 구분선 (옵션) */
+.board-table thead th {
+    border-left: 1px solid #333;
+    border-right: 1px solid #333;
+}
 </style>
 </head>
 <body>
@@ -103,9 +174,16 @@
 				<div class="row g-2 align-items-center mb-4">
 					<div class="col-md-6">
 						<div class="d-flex gap-2">
-							<a href="#" class="btn btn-category rounded-pill px-3 active">전체</a>
-							<a href="#" class="btn btn-category rounded-pill px-3">구인</a> <a
-								href="#" class="btn btn-category rounded-pill px-3">구직</a>
+							<a href="${pageContext.request.contextPath}/mercenary/list"
+								class="btn btn-category rounded-pill px-3 ${empty category ? 'active' : ''}">전체</a>
+
+							<a
+								href="${pageContext.request.contextPath}/mercenary/list?category=1"
+								class="btn btn-category rounded-pill px-3 ${category == '1' ? 'active' : ''}">구인</a>
+
+							<a
+								href="${pageContext.request.contextPath}/mercenary/list?category=2"
+								class="btn btn-category rounded-pill px-3 ${category == '2' ? 'active' : ''}">구직</a>
 						</div>
 					</div>
 
@@ -141,17 +219,16 @@
 						<thead>
 							<tr>
 								<th width="80">번호</th>
-								<th class="text-start">제목</th>
+								<th class="text-center">제목</th>
 								<th width="120">작성일</th>
 								<th width="80">조회수</th>
 							</tr>
 						</thead>
 						<tbody>
 							<c:forEach var="dto" items="${list}">
-								<tr
-									onclick="location.href='${pageContext.request.contextPath}/mercenary/article?recruit_id=${dto.recruit_id}&page=${page}';">
+								<tr onclick="location.href='${pageContext.request.contextPath}/mercenary/article?recruit_id=${dto.recruit_id}&page=${page}';">
 									<td>${dto.recruit_id}</td>
-									<td class="text-start fw-bold">${dto.title}</td>
+									<td class="text-center fw-bold">${dto.title}</td>
 									<td class="text-muted">${dto.created_at}</td>
 									<td><span
 										class="badge rounded-pill bg-light text-dark border">${dto.view_count}</span></td>
@@ -166,7 +243,15 @@
 					</table>
 				</div>
 
-				<div class="mt-4">${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
+				<div class="page-navigation">
+					<c:choose>
+						<c:when test="${dataCount == 0}">
+							<span class="text-muted">등록된 게시물이 없습니다.</span>
+						</c:when>
+						<c:otherwise>
+            			${paging}
+        			</c:otherwise>
+					</c:choose>
 				</div>
 
 			</div>
