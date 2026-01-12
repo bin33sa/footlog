@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fl.model.BoardDTO;
 import com.fl.model.MatchDTO;
 import com.fl.model.SessionInfo;
 import com.fl.mvc.annotation.Controller;
@@ -32,6 +31,7 @@ public class MatchController {
 		ModelAndView mav = new ModelAndView("match/list");
 		
 		try {
+			
 			String page = req.getParameter("page");
 			int current_page = 1;
 			if(page != null) {
@@ -69,18 +69,100 @@ public class MatchController {
 			
 			List<MatchDTO> list = service.listMatch(map);
 			
+			String query = "";
+			String cp = req.getContextPath();
+			String listUrl = cp + "/match/list";
+			String articleUrl = cp + "/match/article?page=" + current_page;
+			if(! kwd.isBlank()) {
+				query = "schType=" + schType + "&kwd="+util.encodeUrl(kwd);
+				
+				listUrl += "?" + query;
+				articleUrl += "&" + query;
+			}
+			
+			String paging = util.paging(current_page, total_page, listUrl);
+			
+			
 			mav.addObject("list", list);
+			mav.addObject("dataCount", dataCount);
+			mav.addObject("total_page", total_page);
+			mav.addObject("size", size);
+			mav.addObject("page", current_page);
+			mav.addObject("articleUrl", articleUrl);
+			mav.addObject("schType", schType);
+			mav.addObject("kwd", kwd);
+			mav.addObject("paging", paging);
 			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return mav;
+	}
+	
+	@GetMapping("article")
+	public ModelAndView matchBoard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		
+		String page = req.getParameter("page");
+		String query = "page="+page;
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		try {
+			long match_code = Long.parseLong(req.getParameter("match_code"));
+			String schType = req.getParameter("schType");
+			String kwd = req.getParameter("kwd");
 			
+			if(schType ==null) {
+				schType = "all";
+				kwd = "";
+			}
+			kwd = util.decodeUrl(kwd);
 			
+			if(!kwd.isBlank()) {
+				query += "&schType="+schType+"&kwd="+util.encodeUrl(kwd);
+			}
 			
+			service.updateHitCount(match_code);
+			
+			MatchDTO dto = service.findById(match_code);
+			if(dto==null) {
+				return new ModelAndView("redirect:/match/list?"+query);
+			}
+			dto.setContent(util.htmlSymbols(dto.getContent()));
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("schType",schType);
+			map.put("kwd",kwd);
+			map.put("match_code",match_code);
+			
+			MatchDTO prevDto = service.findByPrev(map);
+			MatchDTO nextDto = service.findByNext(map);
+			
+			ModelAndView mav = new ModelAndView("match/article");
+			
+			map.put("member_code",info.getMember_id());
+			
+			if(info != null) {
+                map.put("member_code", info.getMember_id());
+                // 필요하다면 mav에 로그인 정보 추가
+            }
+			
+			mav.addObject("dto", dto);
+			mav.addObject("page", page);
+			mav.addObject("query", query);
+			mav.addObject("prevDto", prevDto);
+			mav.addObject("nextDto", nextDto);
+			
+			return mav;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return mav;
+		return new ModelAndView("redirect:/match/list?"+query);
 	}
+	
 	@GetMapping("write")
 	public ModelAndView writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/write");
@@ -116,13 +198,7 @@ public class MatchController {
 		return new ModelAndView("redirect:/match/list");
 	}
 	
-	@RequestMapping("article")
-	public ModelAndView matchBoard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ModelAndView mav = new ModelAndView("match/article");
-		
-		
-		return mav;
-	}
+	
 	
 	@RequestMapping("myMatch")
 	public ModelAndView myMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

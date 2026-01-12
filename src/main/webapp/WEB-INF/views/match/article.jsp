@@ -41,12 +41,12 @@
                 
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <div>
-                        <span class="badge bg-primary text-dark rounded-pill mb-2 px-3 py-2">모집중</span>
-                        <h2 class="fw-bold mb-1">9월 20일(토) 상암 보조경기장 6vs6 매치</h2>
+                        <span class="badge bg-primary text-dark rounded-pill mb-2 px-3 py-2">${dto.status}</span> 
+                        <h2 class="fw-bold mb-1">${dto.title}</h2>
                         <div class="d-flex align-items-center text-muted gap-2">
                             <span><i class="bi bi-eye me-1"></i> 124</span>
                             <span>•</span>
-                            <span>작성자: 슛돌이주장</span>
+                            <span>주최팀: ${dto.home_team_name}</span>
                         </div>
                     </div>
                     <button class="btn btn-light rounded-circle"><i class="bi bi-share"></i></button>
@@ -57,23 +57,23 @@
                         <tbody>
                             <tr>
                                 <td class="text-muted" style="width: 100px;">일시</td>
-                                <td class="fw-bold fs-5">2025년 9월 20일 (토) 18:00 ~ 20:00</td>
+                                <td class="fw-bold fs-5">${dto.match_date }</td>
                             </tr>
                             <tr>
                                 <td class="text-muted">구장</td>
-                                <td class="fw-bold">서울 상암 월드컵 보조경기장 <a href="#" class="text-primary small ms-2 text-decoration-underline">지도보기</a></td>
+                                <td class="fw-bold">${dto.stadium_name } <a href="#" class="text-primary small ms-2 text-decoration-underline">지도보기</a></td>
                             </tr>
                             <tr>
                                 <td class="text-muted">진행방식</td>
-                                <td class="fw-bold">6 vs 6 (3파전)</td>
+                                <td class="fw-bold">${dto.matchType }(3파전)</td>
                             </tr>
                             <tr>
                                 <td class="text-muted">참가비</td>
-                                <td class="fw-bold text-primary">10,000원</td>
+                                <td class="fw-bold text-primary">${dto.fee}원</td>
                             </tr>
                             <tr>
                                 <td class="text-muted">실력/성별</td>
-                                <td class="fw-bold">중하(세미프로 금지) / 남성</td>
+                                <td class="fw-bold">중하(세미프로 금지) / ${dto.gender }</td>
                             </tr>
                         </tbody>
                     </table>
@@ -92,15 +92,7 @@
                     </c:if>
                     
                     <p class="text-muted mb-5" style="line-height: 1.8;">
-                        안녕하세요. FC 슛돌이입니다.<br>
-                        이번 주 토요일 상암에서 즐겁게 공 차실 팀 또는 용병을 모집합니다.<br><br>
-                        
-                        - <strong>매너 필수</strong>입니다. 거친 태클 절대 금지입니다.<br>
-                        - 풋살화 착용 필수입니다. (축구화 X)<br>
-                        - 물과 음료는 저희가 준비합니다.<br><br>
-                        
-                        실력은 선출 없고 순수 아마추어 동호회 수준입니다.<br>
-                        늦지 않게 도착해주실 분들만 신청 부탁드립니다!
+                        ${dto.content }
                     </p>
                     
                     <h5 class="fw-bold mb-3">위치 안내</h5>

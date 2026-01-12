@@ -10,6 +10,22 @@
 		(seq_match_post.NEXTVAL, #{home_code},NULL,TO_CHAR(match_date,'YYYY-MM-DD')match_date, '모집중',#{title},#{content},SYSDATE,0,#{matchType},#{gender},#{fee},#{member_code})
 	</insert>
 	
+	<sql id="where-list">
+		<choose>
+			<when test="schType=='all'">
+				( INSTR(title,#{kwd})) &gt; 0
+				   OR INSTR(content, #{kwd}) &gt; 0)
+			</when>
+			<when test="schType == 'created_at'">
+				( TO_CHAR(created_at,'YYYYMMDD') = #{kwd}
+					OR TO_CHAR(created_at,'YYYY-MM-DD')=#{kwd})
+			</when>
+			<otherwise>
+				INSTR(${schType},#{kwd}) &gt; 0
+			</otherwise>
+		</choose>
+	</sql>
+	
 	<!-- 글 수정 -->
 	<update id="updateMatch">
 		UPDATE match_post SET title=#{title}, content=#{content}, match_date=#{match_date}, status=#{status}, matchType=#{matchType}, gender=#{gender},fee=#{fee}
@@ -30,29 +46,50 @@
 			</choose>
 		</where>
 	</delete>
-
 	
+	<!-- 글 개수 -->
+	<select id="dataCount" parameterType="map" resultType="Integer">
+		SELECT NVL(COUNT(*),0)
+		FROM match_post
+		<where>
+			<if test="kwd != null and kwd !=''">
+				<include refid="where-list"/>
+			</if>
+		</where>
+	</select>
+
+	<!-- 매치 리스트 -->
+	<select id="listMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
+		SELECT m.match_code,ht.team_name AS home_team_name,at.team_name AS away_team_name,
+		      TO_CHAR(match_date,'YYYY-MM-DD HH24:MI') match_date,status,title,content,view_count,
+		      matchType,gender,fee,m.member_code, stadium_name,s.region AS region
+		FROM match_post m
+		JOIN team ht ON ht.team_code = m.home_code
+		JOIN stadium s ON s.stadium_code = m.stadium_code
+		LEFT JOIN team at ON at.team_code = m.away_code
+		ORDER BY m.match_date 
+	</select>
 	
 	<!-- 팀코드 가져오기 -->
-	<select id="getTeamcodeById" parameterType="Long" resultType="com.fl.model.MatchDTO">
-		SELECT t.team_code 
-		FROM team t
-		JOIN member_team mt ON t.team_code = mt.team_code
+	<select id="findById" parameterType="Long" resultType="com.fl.model.MatchDTO">
+		SELECT m.match_code,ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
+        m.status,
+        m.title,    m.content,  m.fee,
+        s.stadium_name AS stadium_name, s.region AS region
+		FROM match_post m
+		JOIN team ht ON ht.team_code = m.team_code
+		JOIN stadium s ON s.stadium.code = m.stadium.code
+		LEFT JOIN team at ON at.team_code = m.team_code
+		WHERE m.match_code = ${match_code}
 	</select>
 	
-	<!-- 팀 이름 가져오기 -->
-	<select id="getTeamnameById" parameterType="String" resultType="com.fl.model.MatchDTO">
-		SELECT team_name AS home_team_name
-		FROM team t
-		JOIN match_post mp ON t.team_code = mp.home_code
-	</select>
 	
-	<!-- 글 리스트 -->
-	<select id="listMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
-		SELECT t.team_code,team_name, match_date, title,content,view_count, 
-		FROM team t
-		JOIN member_team mt ON t.team_code = mt.team_code
-		WHERE mt.member_code = #{member_code}
+	<!-- 내 팀 매치 리스트 -->
+	<select id="listMyMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
+		SELECT match_code,home_code,away_code,match_date,status,title,content,view_count,matchType,gender,fee,member_code
+		FROM match_post m
+		JOIN team t ON t.team_code =(m.home_code || m.away_code)
+		WHERE m.member_code = #{member_code}
 	</select>
 	
 	

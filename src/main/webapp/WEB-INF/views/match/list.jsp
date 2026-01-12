@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -74,33 +75,61 @@
                     </div>
                 </div>
 				
-				<div class="d-flex flex-column gap-3" >
-					 <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" >
-                        <div class="match-time-box text-center rounded-3 p-2 bg-light">
-                            <span class="d-block small text-muted">${dto.match_date}</span> 
-                            <span class="d-block fw-bold fs-5">18:00</span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge bg-primary text-dark rounded-pill">${dto.status}</span>
-                                <span class="badge bg-light text-secondary border">${dto.matchType}</span> 
-                                <span class="badge bg-light text-secondary border">${dto.gender}</span>
-                            </div>
-                            <h5 class="fw-bold mb-1">${dto.stadium_name}</h5>
-                            <p class="text-muted small mb-0">
-                                <i class="bi bi-geo-alt-fill me-1"></i>${dto.region}| 호스트: ${dto.home_team_name}
-                            </p>
-                        </div>
-                        <div class="text-end d-none d-md-block">
-                            <span class="d-block fw-bold text-primary mb-1">${dto.fee}</span>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3" 
-                            onclick="location.href='${pageContext.request.contextPath}/match/article'" 
-                            ${status != '모집중' ? 'disabled' : ''}>${status=='모집중'? '신청하기':'마감됨'}</button>
-                        </div>
-                    </div>
-				</div>
-				
-				<!-- 
+				<c:forEach var="dto" items="${list}">
+		    
+		    <fmt:parseDate value="${dto.match_date}" var="tempDate" pattern="yyyy-MM-dd HH:mm"/>
+		
+		    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4 border-bottom" 
+		         onclick="location.href='${pageContext.request.contextPath}/match/article?match_code=${dto.match_code}'" 
+		         style="cursor: pointer;">
+		        
+		        <div class="match-time-box text-center rounded-3 p-2 bg-light" style="min-width: 80px;">
+		            <span class="d-block small text-muted">
+		                <fmt:formatDate value="${tempDate}" pattern="MM.dd(E)"/>
+		            </span> 
+		            <span class="d-block fw-bold fs-5">
+		                <fmt:formatDate value="${tempDate}" pattern="HH:mm"/>
+		            </span>
+		        </div>
+
+        <div class="flex-grow-1">
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <c:choose>
+                    <c:when test="${dto.status == '모집중'}">
+                        <span class="badge bg-primary text-dark rounded-pill">${dto.status}</span>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="badge bg-secondary text-white rounded-pill">${dto.status}</span>
+                    </c:otherwise>
+                </c:choose>
+                
+                <span class="badge bg-light text-secondary border">${dto.matchType}</span> 
+                <span class="badge bg-light text-secondary border">${dto.gender}</span>
+            </div>
+
+            <h5 class="fw-bold mb-1 text-truncate" style="max-width: 400px;">
+                ${dto.title}
+            </h5>
+            
+            <p class="text-muted small mb-0">
+                <i class="bi bi-geo-alt-fill me-1"></i>${dto.region} | 호스트: ${dto.home_team_name}
+            </p>
+        </div>
+
+        <div class="text-end d-none d-md-block" style="min-width: 100px;">
+            <span class="d-block fw-bold text-primary mb-1">
+                <fmt:formatNumber value="${dto.fee}" type="currency"/>
+            </span>
+            
+            <button class="btn btn-sm ${dto.status == '모집중' ? 'btn-outline-dark' : 'btn-secondary'} rounded-pill px-3"
+                    ${dto.status != '모집중' ? 'disabled' : ''} onclick="location.href='${pageContext.request.contextPath}/match/article';">
+                ${dto.status == '모집중' ? '신청가능' : '마감됨'}
+            </button>
+        </div>
+
+    </div>
+</c:forEach>
+    			<!--  
                 <div class="d-flex flex-column gap-3">
                     <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" onclick="location.href='${pageContext.request.contextPath}/match/article'">
                         <div class="match-time-box text-center rounded-3 p-2 bg-light">
@@ -182,16 +211,9 @@
                 </div>  -->
                 
 
-                <nav class="mt-5" aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item disabled"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#" tabindex="-1">&lt;</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 bg-dark text-primary fw-bold" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">&gt;</a></li>
-                    </ul>
-                </nav>
-
+               <div class="page-navigation">
+				    ${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
+				</div>
             </div>
 
         </div>

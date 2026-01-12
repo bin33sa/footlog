@@ -43,27 +43,38 @@ public class MatchServiceImpl implements MatchService{
 
 	@Override
 	public int dataCount(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return 0;
+		int result = 0;
+		try {
+			result = mapper.dataCount(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 
 	@Override
 	public List<MatchDTO> listMatch(Map<String, Object> map) {
+		List<MatchDTO> list = null;
+		try {
+			list = mapper.listMatch(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+	
+	@Override
+	public List<MatchDTO> listMyMatch(Map<String, Object> map) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public MatchDTO getTeamcodeById(long num) {
+	public MatchDTO findById(long num) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
-	@Override
-	public MatchDTO getTeamnameById(String name) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public MatchDTO findByPrev(Map<String, Object> map) {

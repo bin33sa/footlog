@@ -28,6 +28,9 @@ public class MatchDTO {
     private Long fee;
     private Long member_code;
     
+    private String stadium_name; 
+
+    
     
     public String getMatchType() {
 		return matchType;
@@ -195,6 +198,14 @@ public class MatchDTO {
 
 	public void setReply_count(int reply_count) {
 		this.reply_count = reply_count;
+	}
+
+	public String getStadium_name() {
+		return stadium_name;
+	}
+
+	public void setStadium_name(String stadium_name) {
+		this.stadium_name = stadium_name;
 	}
     
     
