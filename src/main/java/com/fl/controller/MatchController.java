@@ -1,6 +1,7 @@
 package com.fl.controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -173,6 +174,16 @@ public class MatchController {
 		ModelAndView mav = new ModelAndView("match/write");
 		Map<String, Object> map = new HashMap<String, Object>();
 		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		if(info == null || (info.getRole_level()!=1 && info.getRole_level()!=60)) {
+			resp.setContentType("text/html; charset=utf-8");
+			PrintWriter out = resp.getWriter();
+			out.print("<script>alert('권한이 없습니다.'); location.href='"+req.getContextPath()+"/match/list';</script>");
+			out.flush();
+			out.close();
+			return null;
+		}
 		
 		List<StadiumDTO> list = stadiumservice.listStadium(map);
 		mav.addObject("stadiumList", list);
@@ -188,18 +199,24 @@ public class MatchController {
 		
 		try {
 			MatchDTO dto = new MatchDTO();
+			long myTeamCode = service.getUserTeamCode(info.getMember_code());
 			
+			if (info == null || (info.getRole_level() != 1 && info.getRole_level() != 60)) {
+		        return new ModelAndView("redirect:/match/list");
+		    }
+			
+			//long memberCode = Long.parseLong(info.getMember_code());
 			dto.setMember_code(info.getMember_code());
 			
 			dto.setTitle(req.getParameter("title"));
 			dto.setContent(req.getParameter("content"));
-			dto.setHome_code(Long.parseLong(req.getParameter("home_code")));
-			dto.setMatch_date(req.getParameter("match_date"));
+			dto.setHome_code(myTeamCode);
+			dto.setMatch_date(req.getParameter("matchDate"));
 			dto.setMatchType(req.getParameter("matchType"));
 			dto.setGender(req.getParameter("gender"));
 			dto.setFee(Long.parseLong(req.getParameter("fee")));
 			dto.setMatchLevel(req.getParameter("matchLevel"));
-			
+		
 			service.insertMatch(dto);
 			
 		} catch (Exception e) {

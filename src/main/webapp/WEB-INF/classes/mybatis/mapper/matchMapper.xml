@@ -20,11 +20,12 @@
 	
 	<!-- 글 등록 -->
 	<insert id="insertMatch" parameterType="com.fl.model.MatchDTO">
-		INSERT INTO match_post
-			(match_code,home_code,away_code,match_date,status,title,content,created_at,view_count, matchType, gender, fee,member_code,matchLevel,stadium_code)
-		VALUES
-		(seq_match_post.NEXTVAL, #{home_code},NULL,TO_DATE(#{match_date},'YYYY-MM-DD'), '모집중',#{title},#{content},SYSDATE,
-		  0,#{matchType},#{gender},#{fee},#{member_code},#{matchLevel},#{stadiumCode})
+	    INSERT INTO match_post
+	        (match_code,home_code,away_code,match_date,status,title,content,created_at,view_count, matchType, gender, fee,member_code,matchLevel,stadium_code)
+	    VALUES
+	    (seq_match_post.NEXTVAL, #{home_code},NULL,
+	     TO_DATE(#{match_date}, 'YYYY-MM-DD"T"HH24:MI'), '모집중',#{title},#{content},SYSDATE,
+	      0,#{matchType},#{gender},#{fee},#{member_code},#{matchLevel},#{stadiumCode})
 	</insert>
 	
 	<!-- 글 수정 -->
@@ -92,7 +93,10 @@
 		WHERE m.member_code = #{member_code}
 	</select>
 	
-	
+	<select id="getUserTeamCode" parameterType="Long" resultType="Long">
+    SELECT team_code 
+    FROM team_member  WHERE member_code = #{member_code}
+    </select>
 	
 	
 </mapper>

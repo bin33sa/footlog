@@ -123,6 +123,24 @@ public class MatchServiceImpl implements MatchService{
 		return null;
 	}
 
+	@Override
+	public Long getUserTeamCode(long member_code) {
+		try {
+			Long teamCode = mapper.getUserTeamCode(member_code);
+			if(teamCode==null) {
+				return 0L;
+			}
+		    return teamCode;
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0L;
+		}
+	
+		
+		
+	}
+
 
 
 }

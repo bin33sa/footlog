@@ -29,7 +29,9 @@
                         <div class="list-group">
                             <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action ">내 매치 일정</a>
                             <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action  active-menu">전체 매치 리스트</a>
-                            <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action ">매치 개설하기</a>
+                             <c:if test="${sessionScope.member.role_level == 1 ||sessionScope.member.role_level ==60 }">
+                            	<a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action ">매치 개설하기</a>
+                            </c:if>
                             <a href="${pageContext.request.contextPath}/mercenary/list" class="list-group-item list-group-item-action ">용병 구하기</a>
                         </div>
                     </div>
@@ -41,7 +43,9 @@
                         <h4 class="fw-bold mb-1">원하는 매치가 없나요?</h4>
                         <p class="text-white-50 mb-0 small">직접 매치를 개설하고 팀원을 모집해보세요.</p>
                     </div>
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="location.href='${pageContext.request.contextPath}/match/write'">매치 개설하기 +</button>
+                    <c:if test="${sessionScope.member.role_level == 1 ||sessionScope.member.role_level ==60 }">
+                    	<button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="location.href='${pageContext.request.contextPath}/match/write'">매치 개설하기 +</button>
+              		</c:if>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mb-4 justify-content-between align-items-center">
