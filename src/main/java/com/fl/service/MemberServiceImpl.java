@@ -40,7 +40,14 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public void updateMember(MemberDTO dto) throws Exception {
-		// TODO Auto-generated method stub
+		try {
+			mapper.updateMember(dto);
+		} catch (Exception e) {
+			SqlSessionManager.setRollbackOnly();
+			
+			e.printStackTrace();
+			throw e;
+		}
 		
 	}
 
