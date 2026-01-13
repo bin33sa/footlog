@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fl.mapper.MemberMapper;
 import com.fl.model.MemberDTO;
 import com.fl.mybatis.support.MapperContainer;
+import com.fl.mybatis.support.SqlSessionManager;
 
 public class MemberServiceImpl implements MemberService {
 	private MemberMapper mapper = MapperContainer.get(MemberMapper.class);
@@ -25,7 +26,15 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public void insertMember(MemberDTO dto) throws Exception {
-		// TODO Auto-generated method stub
+		try {
+			mapper.insertMember(dto);
+		} catch (Exception e) {
+			SqlSessionManager.setRollbackOnly();
+			
+			e.printStackTrace();
+			
+			throw e;
+		}
 		
 	}
 
@@ -54,9 +63,16 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-	public MemberDTO findById(String userId) {
-		// TODO Auto-generated method stub
-		return null;
+	public MemberDTO findById(String member_id) {
+		MemberDTO dto = null;
+		
+		try {
+			dto = mapper.findById(member_id);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dto;
 	}
 
 	@Override

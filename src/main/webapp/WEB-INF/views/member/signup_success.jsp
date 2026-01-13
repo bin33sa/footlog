@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -8,10 +9,8 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     
     <style>
-        /* 1. 배경 및 중앙 정렬 (login.jsp 스타일 참고) */
         body { 
             background-color: #f8f9fa;
             min-height: 100vh; 
@@ -21,83 +20,88 @@
             font-family: 'Pretendard', sans-serif;
         }
 
-        /* 2. 카드 박스 스타일 */
         .success-card { 
             width: 100%;
-            max-width: 400px; 
-            padding: 50px 30px; 
-            border-radius: 20px; 
+            max-width: 420px; 
+            padding: 60px 40px; 
+            border-radius: 24px; 
             background: #fff; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
             text-align: center;
+            border: 1px solid rgba(0,0,0,0.03);
         }
 
-        /* 3. 브랜드 로고 */
         .brand-logo { 
-            font-family: 'Pretendard', sans-serif;
-            font-size: 2rem; 
+            font-size: 1.8rem; 
             font-weight: 900; 
             font-style: italic; 
-            margin-bottom: 30px; 
+            margin-bottom: 40px; 
             display: block; 
             text-decoration: none; 
-            color: #000;
+            color: #111;
+            letter-spacing: -1px;
         }
 
-        /* 4. 완료 아이콘 애니메이션 */
+        /* 체크 아이콘 */
         .check-icon-circle {
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             background-color: #111;
-            color: #D4F63F; /* 네온 라임 */
+            color: #D4F63F; 
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 25px;
-            font-size: 40px;
-            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
+            0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* 5. 버튼 스타일 (signup.jsp의 btn-black 재사용) */
-        .btn-black { 
-            background: #111;
-            color: #fff; 
-            border-radius: 10px; 
-            width: 100%; 
-            padding: 12px; 
-            font-weight: bold; 
-            border: none; 
-            transition: 0.3s;
-            text-decoration: none;
-            display: block;
+        /* 메인 메시지 (크고 진하게) */
+        .success-msg {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 15px;
+            line-height: 1.4;
         }
-        .btn-black:hover { 
-            background: #D4F63F;
-            color: #111; 
+        
+        /* 이름 강조 스타일 */
+        .success-msg b {
+            color: #000;
+            font-weight: 800;
+            border-bottom: 3px solid #D4F63F; 
         }
 
+        /* 서브 메시지 (작고 흐리게) */
+        .sub-msg {
+            color: #6c757d;
+            font-size: 0.95rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        /* 버튼 */
+        .btn-black { 
+            background: #111; color: #fff; 
+            border-radius: 12px; width: 100%; padding: 16px; 
+            font-weight: 700; border: none; transition: all 0.2s;
+            text-decoration: none; display: block; margin-bottom: 10px;
+        }
+        .btn-black:hover { background: #000; color: #fff; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
         .btn-outline {
-            background: #fff;
-            color: #666;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            width: 100%;
-            padding: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            display: block;
-            transition: 0.2s;
+            background: #fff; color: #555; 
+            border: 1px solid #e1e1e1; border-radius: 12px; 
+            width: 100%; padding: 16px; font-weight: 600; 
+            text-decoration: none; display: block; transition: all 0.2s;
         }
-        .btn-outline:hover {
-            background: #f1f1f1;
-            color: #333;
-        }
+        .btn-outline:hover { background: #f8f9fa; color: #111; border-color: #ccc; }
     </style>
 </head>
 <body>
@@ -106,18 +110,21 @@
         <a href="${pageContext.request.contextPath}/main" class="brand-logo">Footlog</a>
         
         <div class="check-icon-circle">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16">
                 <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425a.247.247 0 0 1 .02-.022Z"/>
             </svg>
         </div>
 
-        <h4 class="fw-bold mb-3">회원가입 완료!</h4>
-        <p class="text-muted mb-4 small">
-            풋로그의 회원이 되신 것을 환영합니다.<br>
-            이제 구단을 찾고 매치를 시작해보세요.
+        <div class="success-msg">
+            <c:out value="${message}" escapeXml="false" />
+        </div>
+        
+        <p class="sub-msg">
+            풋로그의 멤버가 되신 것을 환영합니다.<br>
+            지금 바로 로그인해서 팀을 찾아보세요!
         </p>
 
-        <div class="d-grid gap-2">
+        <div class="d-grid">
             <a href="${pageContext.request.contextPath}/member/login" class="btn-black">
                 로그인하러 가기
             </a>
@@ -128,6 +135,5 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -14,6 +14,7 @@ import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
+
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MemberService;
 import com.fl.service.MemberServiceImpl;
@@ -33,8 +34,8 @@ import jakarta.servlet.http.Part;
 public class MemberController {
 	
 	private MemberService service = new MemberServiceImpl();
-    private MyPageService myPageService = new MyPageServiceImpl();
-    private FileManager fileManager = new FileManager();
+	private MyPageService myPageService = new MyPageServiceImpl();
+	private FileManager fileManager = new FileManager();
 	
 
 	// ==========================================
@@ -52,12 +53,11 @@ public class MemberController {
 		
 		try {
 			String userId = req.getParameter("userId");
-			String password = req.getParameter("password"); // userPwd -> password 변경
+			String password = req.getParameter("password");
 
 			Map<String, Object> map = new HashMap<>();
 			map.put("userId", userId);
-
-			map.put("password", password); // 키값 userPwd -> password 변경
+			map.put("password", password);
 			
 			MemberDTO dto = service.loginMember(map);
 			
@@ -71,12 +71,11 @@ public class MemberController {
 			session.setMaxInactiveInterval(20 * 60); // 20분
 
 			SessionInfo info = new SessionInfo();
-			
 			info.setMember_code(dto.getMember_code());
 			info.setMember_id(dto.getMember_id());
 			info.setMember_name(dto.getMember_name());
 			info.setRole_level(dto.getRole_level());
-			
+			info.setProfile_image(dto.getProfile_image());
 			
 			session.setAttribute("member", info);
 
@@ -94,7 +93,6 @@ public class MemberController {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			// 에러 발생 시 다시 로그인 폼으로
 			return new ModelAndView("member/login");
 		}
 	}
@@ -118,28 +116,99 @@ public class MemberController {
 		return new ModelAndView("member/findUserInfo");
 	}
 
-	// ... (아이디/비번 찾기 POST는 생략 - 구현 시 파라미터명 주의) ...
-
 	// ==========================================
 	// 3. 회원가입 관련
 	// ==========================================
+		
+		// 아이디 중복 검사 
+		@PostMapping("userIdCheck")
+		public void userIdCheck(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+			
+			String member_id = req.getParameter("member_id");
+			
+			MemberDTO dto = null;
+			try {
+				dto = service.findById(member_id);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			String passed = "false";
+			if(dto == null) {
+				passed = "true";
+			}
+			
+			
+			resp.setContentType("application/json; charset=UTF-8");
+			
+			
+			resp.getWriter().write("{\"passed\": \"" + passed + "\"}");
+		}
+	
+	// 패스워드 확인 폼
+	@GetMapping("pwd")
+	public ModelAndView pwdForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		ModelAndView mav = new ModelAndView("member/pwd");
+		String mode = req.getParameter("mode");
+		mav.addObject("mode", mode);
+		return mav;
+	}
+	
+	@PostMapping("pwd")
+	public ModelAndView pwdSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		try {
+			MemberDTO dto = service.findById(info.getMember_id());
+			
+			if(dto == null) {
+				session.invalidate();
+				return new ModelAndView("redirect:/");
+			}
+			
+			String password = req.getParameter("password");
+			String mode = req.getParameter("mode");
+			
+			if(! dto.getPassword().equals(password)) {
+				ModelAndView mav = new ModelAndView("member/pwd");
+				mav.addObject("mode", mode);
+				mav.addObject("message", "패스워드가 일치하지 않습니다.");
+				return mav;
+			}
+			
+			if(mode.equals("delete")) {
+				// 회원 탈퇴 처리 (구현 필요)
+				session.removeAttribute("member");
+				session.invalidate();
+			} else if(mode.equals("update")) {
+				ModelAndView mav = new ModelAndView("member/member");
+				mav.addObject("dto", dto);
+				mav.addObject("mode", "update");
+				return mav;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:/");
+	}
 
+	
 	// 회원가입 폼
 	@GetMapping("signup")
 	public ModelAndView signupForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("member/signup");
-		
 		mav.addObject("mode", "sign");
-		
 		return mav;
 	}
 
-	// 회원가입 정보 저장
+	// 회원가입 정보 저장 (프로필 사진 기본값 처리 추가)
 	@PostMapping("signup")
 	public ModelAndView signupSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		HttpSession session = req.getSession();
 		
-		// 파일 저장 경로 
+		// 파일 저장 경로 
 		String root = session.getServletContext().getRealPath("/");
 		String pathname = root + "uploads" + File.separator + "member";
 		
@@ -148,26 +217,30 @@ public class MemberController {
 		try {
 			MemberDTO dto = new MemberDTO();
 			
-			dto.setMember_id(req.getParameter("member_id")); // 아이디
-			dto.setPassword(req.getParameter("password")); // 비번
-			dto.setMember_name(req.getParameter("member_name")); // 이름
-			dto.setPhone_number(req.getParameter("phone_number")); // 전번
-			dto.setEmail(req.getParameter("email")); // 이메일 
-			dto.setRegion(req.getParameter("region")); // 활동 지역
-			dto.setPreferred_position(req.getParameter("preferred_position")); // 선호 포지션
+			dto.setMember_id(req.getParameter("member_id")); 
+			dto.setPassword(req.getParameter("password")); 
+			dto.setMember_name(req.getParameter("member_name")); 
+			dto.setPhone_number(req.getParameter("phone_number")); 
+			dto.setEmail(req.getParameter("email")); 
+			dto.setRegion(req.getParameter("region")); 
+			dto.setPreferred_position(req.getParameter("preferred_position")); 
 			
-			// 프로필 사진파일 업로드 
+			// 프로필 사진파일 업로드 처리
 			Part p = req.getPart("selectFile");
 			MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
+			
 			if(mp != null) {
+				// 1. 파일이 업로드 되었을 때
 				dto.setProfile_image(mp.getSaveFilename());
+			} else {
+				// 2. 파일이 없을 때 기본 이미지 설정 
+				dto.setProfile_image("avatar.png");
 			}
 			
 			service.insertMember(dto);
 			
 			session.setAttribute("mode", "signup");
-			session.setAttribute("member_Name", dto.getMember_name());
-			
+			session.setAttribute("member_name", dto.getMember_name());
 			
 			return new ModelAndView("redirect:/member/signupSuccess");
 			
@@ -179,14 +252,13 @@ public class MemberController {
 			} else {
 				message = "회원 가입이 실패했습니다.";
 			}
-			
+			e.printStackTrace();
 		} catch (Exception e) {
-			message = "회원 가입이 실패했습니다."; 
-			
+			message = "회원 가입이 실패했습니다.";
 			e.printStackTrace();
 		}
-		ModelAndView mav = new ModelAndView("member/signup");
 		
+		ModelAndView mav = new ModelAndView("member/signup");
 		mav.addObject("mode", "signup");
 		mav.addObject("message", message);
 		
@@ -200,6 +272,7 @@ public class MemberController {
 		String mode = (String)session.getAttribute("mode");
 		String member_name = (String)session.getAttribute("member_name");
 		
+		// 세션에서 사용한 값 삭제 (새로고침 시 중복 방지)
 		session.removeAttribute("mode");
 		session.removeAttribute("member_name");
 		
@@ -207,22 +280,13 @@ public class MemberController {
 			return new ModelAndView("redirect:/main");
 		}
 		
-		String title;
-		String message = "<b>" + member_name + "</b>님";
-		if(mode.equals("account")) {
-			title = "회원가입";
-			message += "회원가입이 완료 되었습니다.";
-		} else {
-			title = "정보수정";
-			message += "회원정보가 수정 되었습니다.";
-		}
+	
+		String message = "<b>" + member_name + "</b>님의 회원가입이<br>성공적으로 완료되었습니다.";
 		
 		ModelAndView mav = new ModelAndView("member/signup_success");
-		
-		mav.addObject("title", title);
 		mav.addObject("message", message);
 		
-		return mav; // 여기까지함 !!! 1월 9일 금욜 
+		return mav;
 	}
 
 	// ==========================================
@@ -237,20 +301,16 @@ public class MemberController {
 		ModelAndView mav = new ModelAndView("member/mypage");
 		
 		try {
-			
-			MemberDTO myInfo = myPageService.readMember(info.getMember_code());
-			
-			List<MatchDTO> matchList = myPageService.listMyMatch(info.getMember_code());
-			
-			mav.addObject("dto", myInfo);
-			mav.addObject("matchList", matchList);
-			
+			if(info != null) {
+				MemberDTO myInfo = myPageService.readMember(info.getMember_code());
+				List<MatchDTO> matchList = myPageService.listMyMatch(info.getMember_code());
+				
+				mav.addObject("dto", myInfo);
+				mav.addObject("matchList", matchList);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		// 마이페이지 메인에는 보통 내 정보 요약이나 최근 활동 내역 등을 보여줌
-		// 필요하다면 여기서 service 호출해서 데이터 가져감
 
 		return mav;
 	}
@@ -268,8 +328,6 @@ public class MemberController {
 		if(info == null) {
 			return new ModelAndView("redirect:/member/login");
 		}
-
-	
 		
 		ModelAndView mav = new ModelAndView("member/updateInfo");
 		return mav;
@@ -287,18 +345,13 @@ public class MemberController {
 		try {
 			MemberDTO dto = new MemberDTO();
 			
-			// 수정 불가능한 ID는 세션에서 가져오거나 hidden 필드에서 가져옴
 			dto.setMember_id(info.getMember_id());
-			
-			// 수정할 정보들 수집 (password, email, phone 등)
 			dto.setPassword(req.getParameter("password"));
-			// dto.setEmail(req.getParameter("email"));
-			// ...
+			// 필요한 정보 추가 set
 			
 			service.updateMember(dto);
 			
-			// 정보가 바뀌었으면 세션 정보(이름 등)도 갱신해주는 것이 좋음
-			info.setMember_name(dto.getMember_name()); // 이름이 바뀌었다면
+			info.setMember_name(dto.getMember_name());
 			session.setAttribute("member", info);
 
 		} catch (Exception e) {
