@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fl.mapper.MercenaryMapper;
 import com.fl.model.MercenaryDTO;
+import com.fl.model.MercenaryReplyDTO;
 import com.fl.mybatis.support.MapperContainer;
 
 public class MercenaryServiceImpl implements MercenaryService {
@@ -96,5 +97,41 @@ public class MercenaryServiceImpl implements MercenaryService {
 		
 		return dto;
 	}
+
+	@Override
+	public void insertReply(MercenaryReplyDTO dto) throws Exception {
+		try {
+            mapper.insertReply(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+		
+	}
+
+	@Override
+    public int replyCount(Map<String, Object> map) {
+        return mapper.replyCount(map);
+    }
+
+    @Override
+    public List<MercenaryReplyDTO> listReply(Map<String, Object> map) {
+        return mapper.listReply(map);
+    }
+
+    @Override
+    public void deleteReply(Map<String, Object> map) throws Exception {
+        try {
+            mapper.deleteReply(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<MercenaryReplyDTO> listReplyAnswer(Map<String, Object> map) {
+        return mapper.listReplyAnswer(map);
+    }
 
 }

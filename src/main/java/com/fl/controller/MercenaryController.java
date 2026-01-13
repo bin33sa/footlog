@@ -1,20 +1,24 @@
 package com.fl.controller;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fl.model.MercenaryDTO;
+import com.fl.model.MercenaryReplyDTO;
 import com.fl.model.SessionInfo;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
+import com.fl.mvc.annotation.ResponseBody;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MercenaryService;
 import com.fl.service.MercenaryServiceImpl;
 import com.fl.util.MyUtil;
+
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -41,13 +45,13 @@ public class MercenaryController {
         
         
         try {
-            // 1. 페이지 번호 및 검색/카테고리 파라미터 받기
+           
             String page = req.getParameter("page");
             int current_page = (page == null) ? 1 : Integer.parseInt(page);
             
-            String category = req.getParameter("category"); // 구인(1)/구직(2)
-            String schType = req.getParameter("schType");   // 검색타입
-            String kwd = req.getParameter("kwd");           // 검색어
+            String category = req.getParameter("category"); 
+            String schType = req.getParameter("schType");   
+            String kwd = req.getParameter("kwd");           
             
             if(schType == null) {
                 schType = "all";
@@ -70,7 +74,7 @@ public class MercenaryController {
             total_page = util.pageCount(dataCount, size);
             current_page = Math.min(current_page, total_page);
 
-            // 4. 강사님 방식: offset 계산 (MySQL/MariaDB 기준이면 그대로 사용, Oracle이면 아래 Mapper 참고)
+            
             int offset = (current_page - 1) * size;
             if(offset < 0) offset = 0;
 
@@ -280,4 +284,122 @@ public class MercenaryController {
 	    return new ModelAndView("redirect:/mercenary/list?page=" + page);
 	}
     
+	// 댓글 및 댓글의 답글 저장 : AJAX - JSON
+	@ResponseBody
+	@PostMapping("insertReply")
+	public Map<String, Object> insertReply(HttpServletRequest req, HttpServletResponse resp) { // 파라미터 형식을 통일
+	    Map<String, Object> model = new HashMap<>();
+	    
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+	    
+	    if (info == null) {
+	        model.put("state", "loginFail");
+	        return model;
+	    }
+
+	    try {
+	        // DTO를 메서드 파라미터가 아닌 내부에서 직접 생성 및 세팅
+	        MercenaryReplyDTO dto = new MercenaryReplyDTO();
+	        
+	        // 파라미터 수동 바인딩
+	        dto.setRecruit_id(Long.parseLong(req.getParameter("recruit_id")));
+	        dto.setContent(req.getParameter("content"));
+	        
+	        String parentId = req.getParameter("parent_comment_id");
+	        if(parentId != null && !parentId.isEmpty()) {
+	            dto.setParent_comment_id(Integer.parseInt(parentId));
+	        }
+	        
+	        dto.setMember_code(info.getMember_code()); 
+	        
+	        service.insertReply(dto);
+	        model.put("state", "true");
+	    } catch (Exception e) {
+	        e.printStackTrace(); // 에러 로그 확인용
+	        model.put("state", "false");
+	    }
+	    
+	    return model;
+	}
+		
+		// 댓글 리스트 : AJAX - JSON
+		@GetMapping("listReply")
+		@ResponseBody // 반드시 추가해야 함 
+		public Map<String, Object> listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		    HttpSession session = req.getSession();
+		    SessionInfo info = (SessionInfo)session.getAttribute("member");
+		    
+		    // 비로그인 시에도 댓글 목록은 보여줘야 하므로 403 에러 제거 
+		    try {
+		        Map<String, Object> model = new HashMap<>();
+		        long recruit_id = Long.parseLong(req.getParameter("recruit_id"));
+		        String pageNo = req.getParameter("pageNo");
+		        int current_page = (pageNo != null) ? Integer.parseInt(pageNo) : 1;
+		        
+		        int size = 5; 
+		        Map<String, Object> map = new HashMap<>();
+		        map.put("recruit_id", recruit_id);
+		        
+		        // 로그인 정보가 있을 때만 본인 확인용 코드 추가
+		        if(info != null) {
+		            map.put("member_code", info.getMember_code());
+		            map.put("userLevel", info.getRole_level());
+		        }
+
+		        int replyCount = service.replyCount(map);
+		        int total_page = util.pageCount(replyCount, size);
+		        current_page = Math.min(current_page, total_page);
+		        
+		        int offset = (current_page - 1) * size;
+		        map.put("offset", Math.max(offset, 0));
+		        map.put("size", size);
+		        
+		        List<MercenaryReplyDTO> listReply = service.listReply(map);
+		        
+		        // 페이징 처리 (JS의 loadContent 호출)
+		        String paging = util.pagingMethod(current_page, total_page, "loadContent");
+		        
+		        model.put("listReply", listReply);
+		        model.put("replyCount", replyCount);
+		        model.put("paging", paging);
+		        
+		        return model;
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        resp.sendError(406);
+		        return null;
+		    }
+		}
+
+	// 댓글 삭제 - AJAX (JSON 반환)
+	@PostMapping("deleteReply")
+	@ResponseBody
+	public Map<String, Object> deleteReply(HttpServletRequest req) {
+	    Map<String, Object> model = new HashMap<>();
+	    
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+	    
+	    if (info == null) {
+	        model.put("state", "loginFail");
+	        return model;
+	    }
+
+	    try {
+	        int comment_id = Integer.parseInt(req.getParameter("comment_id"));
+	        
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("comment_id", comment_id);
+	        map.put("member_code", info.getMember_code()); 
+	        map.put("role_level", info.getRole_level());     // 관리자 확인용 (필요시)
+
+	        service.deleteReply(map);
+	        model.put("state", "true");
+	    } catch (Exception e) {
+	        model.put("state", "false");
+	    }
+	    
+	    return model;
+	}
 }

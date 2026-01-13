@@ -79,14 +79,42 @@
             </div>
         </div>
     </div>
+		
+		<div class="reply-container mt-3 p-3">
+            <div class="reply-form-box border rounded p-4 bg-light shadow-sm">
+                <form name="replyForm" method="post">
+                    <div class="form-header mb-2">
+                        <span class="fw-bold"><i class="bi bi-chat-dots"></i> 댓글 작성</span>
+                        <span class="text-muted ms-2" style="font-size: 0.8rem;">- 타인 비방 시 삭제될 수 있습니다.</span>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <div class="flex-grow-1">
+                            <textarea class="form-control border-0 shadow-none" name="content" id="replyContent" 
+                                      placeholder="매너 있는 댓글을 남겨주세요." rows="3" 
+                                      style="resize: none; border-radius: 10px;"></textarea>
+                        </div>
+                        <div class="d-flex align-items-stretch">
+                            <button type="button" class="btn btn-dark btnSendReply px-4 fw-bold" 
+                                    style="border-radius: 10px; background-color: #212529;">등록</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
 
-	<footer>
-		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
-	</footer>
+            <div id="listReply" class="mt-4" 
+                 data-contextPath="${pageContext.request.contextPath}" 
+                 data-postsUrl="${pageContext.request.contextPath}/mercenary"
+                 data-num="${dto.recruit_id}">
+                 <div class="reply-info mb-2"><span class="fw-bold"></span></div>
+                <div class="list-content"></div>
+                <div class="list-footer mt-3">
+                    <div class="page-navigation text-center"></div>
+                </div>
+            </div>
 
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
-
-	<script>
+        
+    <script>
 		// 삭제 로직: 참조하신 코드의 방식을 적용
 		function deleteOk() {
 			if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
@@ -95,7 +123,17 @@
 				location.href = url;
 			}
 		}
-	</script>
+	</script>   
+	 
+	
+        
+	<footer>
+		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
+	</footer>
+	
+	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
 
+	<script type="text/javascript" src="${pageContext.request.contextPath}/dist/js2/postsReply.js"></script>
+	
 </body>
 </html>

@@ -68,5 +68,51 @@
         </if>
     </where>   
 </select>
+
+	<insert id="insertReply" parameterType="com.fl.model.MercenaryReplyDTO">
+        INSERT INTO comment_mercenary (
+            comment_id, parent_comment_id, member_code, recruit_id, content, created_at
+        ) VALUES (
+            MERCENARY_REPLY_SEQ.NEXTVAL, #{parent_comment_id, jdbcType=INTEGER}, 
+            #{member_code}, #{recruit_id}, #{content}, SYSDATE
+        )
+    </insert>
+
+    <select id="replyCount" parameterType="map" resultType="int">
+        SELECT NVL(COUNT(*), 0)
+        FROM comment_mercenary
+        WHERE recruit_id = #{recruit_id} AND parent_comment_id IS NULL
+    </select>
+
+    <select id="listReply" parameterType="map" resultType="com.fl.model.MercenaryReplyDTO">
+        SELECT r.comment_id, r.recruit_id, r.member_code, m.member_name, 
+               r.content, r.created_at, r.parent_comment_id,
+               NVL(a.answerCount, 0) answerCount
+        FROM comment_mercenary r
+        JOIN MEMBER m ON r.member_code = m.member_code
+        LEFT OUTER JOIN (
+            SELECT parent_comment_id, COUNT(*) answerCount
+            FROM comment_mercenary
+            WHERE parent_comment_id IS NOT NULL
+            GROUP BY parent_comment_id
+        ) a ON r.comment_id = a.parent_comment_id
+        WHERE r.recruit_id = #{recruit_id} AND r.parent_comment_id IS NULL
+        ORDER BY r.comment_id DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <delete id="deleteReply" parameterType="map">
+        DELETE FROM comment_mercenary
+        WHERE comment_id = #{comment_id} OR parent_comment_id = #{comment_id}
+    </delete>
+
+    <select id="listReplyAnswer" parameterType="map" resultType="com.fl.model.MercenaryReplyDTO">
+        SELECT r.comment_id, r.recruit_id, r.member_code, m.member_name, 
+               r.content, r.created_at, r.parent_comment_id
+        FROM comment_mercenary r
+        JOIN MEMBER m ON r.member_code = m.member_code
+        WHERE r.parent_comment_id = #{parent_comment_id}
+        ORDER BY r.comment_id DESC
+    </select>
     
 </mapper>

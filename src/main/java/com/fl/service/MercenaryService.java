@@ -4,6 +4,7 @@ package com.fl.service;
 import java.util.List;
 import java.util.Map;
 import com.fl.model.MercenaryDTO;
+import com.fl.model.MercenaryReplyDTO;
 
 public interface MercenaryService {
 	
@@ -16,4 +17,10 @@ public interface MercenaryService {
     public List<MercenaryDTO> listTeam(Map<String, Object> map);    
     public int dataCount(Map<String, Object> map);
     public void updateHitCount(long recruit_Id) throws Exception;
+    
+    public void insertReply(MercenaryReplyDTO dto) throws Exception;
+    public int replyCount(Map<String, Object> map);
+    public List<MercenaryReplyDTO> listReply(Map<String, Object> map);
+    public void deleteReply(Map<String, Object> map) throws Exception;
+    public List<MercenaryReplyDTO> listReplyAnswer(Map<String, Object> map);
 }
