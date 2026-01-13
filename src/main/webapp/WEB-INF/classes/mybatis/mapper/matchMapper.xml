@@ -76,7 +76,7 @@
 	<!-- 팀코드 가져오기 -->
 	<select id="findById" parameterType="Long" resultType="com.fl.model.MatchDTO">
 		SELECT m.match_code,ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, m.status,m.title, 
-		m.content, m.fee,s.stadium_name AS stadium_name, s.region AS region, matchType, gender, matchLevel
+		m.content, m.fee,s.stadium_name AS stadiumName, s.region AS region, matchType, gender, matchLevel
 		FROM match_post m
 		JOIN team ht ON ht.team_code = m.home_code
 		JOIN stadium s ON s.stadium_code = m.stadium_code

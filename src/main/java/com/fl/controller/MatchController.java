@@ -172,7 +172,6 @@ public class MatchController {
 	@GetMapping("write")
 	public ModelAndView writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/write");
-		Map<String, Object> map = new HashMap<String, Object>();
 		
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
@@ -185,7 +184,7 @@ public class MatchController {
 			return null;
 		}
 		
-		List<StadiumDTO> list = stadiumservice.listStadium(map);
+		List<StadiumDTO> list = stadiumservice.listStadiumAll();
 		mav.addObject("stadiumList", list);
 		mav.addObject("mode", "write");
 		
