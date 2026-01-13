@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.MatchMapper">
-
-	<!-- 글 등록 -->
-	<insert id="insertMatch" parameterType="com.fl.model.MatchDTO">
-		INSERT INTO match_post
-			(match_code,home_code,away_code,match_date,status,title,content,created_at,view_count, matchType, gender, fee,member_code)
-		VALUES
-		(seq_match_post.NEXTVAL, #{home_code},NULL,TO_CHAR(match_date,'YYYY-MM-DD')match_date, '모집중',#{title},#{content},SYSDATE,0,#{matchType},#{gender},#{fee},#{member_code})
-	</insert>
 	
 	<sql id="where-list">
 		<choose>
@@ -26,9 +18,19 @@
 		</choose>
 	</sql>
 	
+	<!-- 글 등록 -->
+	<insert id="insertMatch" parameterType="com.fl.model.MatchDTO">
+		INSERT INTO match_post
+			(match_code,home_code,away_code,match_date,status,title,content,created_at,view_count, matchType, gender, fee,member_code,matchLevel,stadium_code)
+		VALUES
+		(seq_match_post.NEXTVAL, #{home_code},NULL,TO_DATE(#{match_date},'YYYY-MM-DD'), '모집중',#{title},#{content},SYSDATE,
+		  0,#{matchType},#{gender},#{fee},#{member_code},#{matchLevel},#{stadiumCode})
+	</insert>
+	
 	<!-- 글 수정 -->
 	<update id="updateMatch">
-		UPDATE match_post SET title=#{title}, content=#{content}, match_date=#{match_date}, status=#{status}, matchType=#{matchType}, gender=#{gender},fee=#{fee}
+		UPDATE match_post SET title=#{title}, content=#{content}, match_date=#{match_date}, status=#{status}, 
+		 		matchType=#{matchType}, gender=#{gender},fee=#{fee}, matchLevel=#{matchLevel}, stadium_code=#{stadium_code}
 		WHERE match_code=#{match_code}
 	</update>
 	
@@ -61,8 +63,8 @@
 	<!-- 매치 리스트 -->
 	<select id="listMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
 		SELECT m.match_code,ht.team_name AS home_team_name,at.team_name AS away_team_name,
-		      TO_CHAR(match_date,'YYYY-MM-DD HH24:MI') match_date,status,title,content,view_count,
-		      matchType,gender,fee,m.member_code, stadium_name,s.region AS region
+		      TO_CHAR(match_date,'YYYY-MM-DD HH24:MI') AS match_date,status,title,content,view_count,
+		      matchType,gender,fee,m.member_code, s.stadium_name AS stadiumName,s.region AS region, matchLevel, m.stadium_code AS stadiumCode
 		FROM match_post m
 		JOIN team ht ON ht.team_code = m.home_code
 		JOIN stadium s ON s.stadium_code = m.stadium_code
@@ -72,14 +74,12 @@
 	
 	<!-- 팀코드 가져오기 -->
 	<select id="findById" parameterType="Long" resultType="com.fl.model.MatchDTO">
-		SELECT m.match_code,ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
-        m.status,
-        m.title,    m.content,  m.fee,
-        s.stadium_name AS stadium_name, s.region AS region
+		SELECT m.match_code,ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, m.status,m.title, 
+		m.content, m.fee,s.stadium_name AS stadium_name, s.region AS region, matchType, gender, matchLevel
 		FROM match_post m
-		JOIN team ht ON ht.team_code = m.team_code
-		JOIN stadium s ON s.stadium.code = m.stadium.code
-		LEFT JOIN team at ON at.team_code = m.team_code
+		JOIN team ht ON ht.team_code = m.home_code
+		JOIN stadium s ON s.stadium_code = m.stadium_code
+		LEFT JOIN team at ON at.team_code = m.away_code
 		WHERE m.match_code = ${match_code}
 	</select>
 	

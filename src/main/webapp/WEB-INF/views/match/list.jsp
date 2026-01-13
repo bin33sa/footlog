@@ -80,7 +80,7 @@
 		    <fmt:parseDate value="${dto.match_date}" var="tempDate" pattern="yyyy-MM-dd HH:mm"/>
 		
 		    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4 border-bottom" 
-		         onclick="location.href='${pageContext.request.contextPath}/match/article?match_code=${dto.match_code}'" 
+		         onclick="location.href='${articleUrl }&match_code=${dto.match_code}'" 
 		         style="cursor: pointer;">
 		        
 		        <div class="match-time-box text-center rounded-3 p-2 bg-light" style="min-width: 80px;">
@@ -105,6 +105,7 @@
                 
                 <span class="badge bg-light text-secondary border">${dto.matchType}</span> 
                 <span class="badge bg-light text-secondary border">${dto.gender}</span>
+                <span class="badge bg-light text-secondary border">${dto.matchLevel}</span>
             </div>
 
             <h5 class="fw-bold mb-1 text-truncate" style="max-width: 400px;">

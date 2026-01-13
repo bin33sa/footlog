@@ -314,11 +314,19 @@ public class MemberController {
 
 		return mav;
 	}
-
+	
+	// 일단 쓸지말지 보류.. (안쓸듯)
 	@GetMapping("profile")
 	public ModelAndView profileForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		return new ModelAndView("member/profile");
 	}
+	
+	// 매치/용병 신청내역 가기 
+	@GetMapping("history")
+	public ModelAndView match_history(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		return new ModelAndView("/member/history");
+	}
+	
 
 	@GetMapping("updateInfo")
 	public ModelAndView updateInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -326,37 +334,82 @@ public class MemberController {
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
 		if(info == null) {
-			return new ModelAndView("redirect:/member/login");
-		}
-		
-		ModelAndView mav = new ModelAndView("member/updateInfo");
-		return mav;
+	        return new ModelAndView("redirect:/member/login");
+	    }
+	    
+	    ModelAndView mav = new ModelAndView("member/updateInfo");
+	    
+	    try {
+	        // 회원 아이디로 전체 정보를 조회
+	        MemberDTO dto = service.findById(info.getMember_id());
+	        
+	        // 조회한 데이터를 "dto"라는 이름으로 추가
+	        mav.addObject("dto", dto);
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return mav;
 	}
-
+	
 	@PostMapping("updateDo")
 	public ModelAndView updateInfoSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
-		
-		if(info == null) {
-			return new ModelAndView("redirect:/member/login");
-		}
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+	    
+	    String root = session.getServletContext().getRealPath("/");
+	    String pathname = root + "uploads" + File.separator + "member";
 
-		try {
-			MemberDTO dto = new MemberDTO();
-			
-			dto.setMember_id(info.getMember_id());
-			dto.setPassword(req.getParameter("password"));
-			// 필요한 정보 추가 set
-			
-			service.updateMember(dto);
-			
-			info.setMember_name(dto.getMember_name());
-			session.setAttribute("member", info);
+	    try {
+	        MemberDTO dto = service.findById(info.getMember_id());
+	        
+	        dto.setMember_name(req.getParameter("member_name"));
+	        dto.setPhone_number(req.getParameter("phone_number"));
+	        dto.setEmail(req.getParameter("email"));
+	        dto.setRegion(req.getParameter("region"));
+	        dto.setPreferred_position(req.getParameter("preferred_position"));
+	        
+	        // 비밀번호 수정 (입력했을 때만)
+	        String pwd = req.getParameter("password");
+	        if(pwd != null && !pwd.trim().isEmpty()) {
+	            dto.setPassword(pwd);
+	        }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ModelAndView("redirect:/member/mypage");
+	        // 파일 처리
+	        String imageDeleted = req.getParameter("imageDeleted");
+	        Part p = req.getPart("selectFile");
+	        MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
+	        
+	        if(mp != null) {
+	            if(dto.getProfile_image() != null && !dto.getProfile_image().equals("avatar.png")) {
+	                fileManager.doFiledelete(pathname, dto.getProfile_image());
+	            }
+	            dto.setProfile_image(mp.getSaveFilename());
+	        } else if("true".equals(imageDeleted)) {
+	            if(dto.getProfile_image() != null && !dto.getProfile_image().equals("avatar.png")) {
+	                fileManager.doFiledelete(pathname, dto.getProfile_image());
+	            }
+	            dto.setProfile_image("avatar.png");
+	        }
+	    
+	        service.updateMember(dto);
+	        
+	        info.setMember_name(dto.getMember_name()); // 이름 변경 대비
+	        info.setProfile_image(dto.getProfile_image()); // 수정된 새 이미지 파일명 저장
+	        session.setAttribute("member", info); // 갱신된 info 객체를 세션에 다시 덮어쓰기
+
+	        // 성공 플래그와 함께 다시 이동
+	        ModelAndView mav = new ModelAndView("member/updateInfo");
+	        mav.addObject("updateComplete", "true");
+	        return mav;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        ModelAndView mav = new ModelAndView("member/updateInfo");
+	        mav.addObject("dto", info); 
+	        mav.addObject("message", "회원 정보 수정 중 오류가 발생했습니다.");
+	        return mav;
+	    }
 	}
 }

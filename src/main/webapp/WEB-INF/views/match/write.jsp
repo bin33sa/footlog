@@ -43,7 +43,7 @@
                     <span class="ms-3 text-muted small">팀원 모집을 위한 매치 정보를 입력해주세요.</span>
                 </div>
 
-                <form action="${pageContext.request.contextPath}/match/register" method="post">
+                <form name="matchForm" action="${pageContext.request.contextPath}/match/register" method="post">
                     
                     <div class="modern-card p-5">
                         
@@ -55,16 +55,15 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label for="matchDate" class="form-label fw-bold">경기 일시</label>
-                                <input type="datetime-local" class="form-control bg-light border-0" id="matchDate" name="matchDate">
+                                <input type="datetime-local" class="form-control bg-light border-0" id="matchDate" name="matchDate" value="${dto.match_date}">
                             </div>
                             <div class="col-md-6">
                                 <label for="stadium" class="form-label fw-bold">구장 선택</label>
                                 <select class="form-select bg-light border-0" id="stadium" name="stadiumId">
-                                    <option selected>구장을 선택해주세요</option>
-                                    <option value="1">상암 월드컵 보조경기장</option>
-                                    <option value="2">용산 아이파크몰 풋살장</option>
-                                    <option value="3">잠실 유수지 풋살장</option>
-                                    <option value="4">고양 백석 구장</option>
+                                    <option value="" selected>구장을 선택해주세요</option>
+                                    <c:forEach var="item" items="${stadiumList}">
+                                    	<option value="${item.stadiumCode}">${item.stadiumName}</option>
+                            		</c:forEach>
                                 </select>
                             </div>
                         </div>
@@ -72,26 +71,26 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label for="matchType" class="form-label fw-bold">경기 방식</label>
-                                <select class="form-select bg-light border-0" id="matchType" name="matchType">
-                                    <option value="5">5 vs 5</option>
-                                    <option value="6" selected>6 vs 6</option>
-                                    <option value="11">11 vs 11</option>
+                                <select class="form-select bg-light border-0" id="matchType" name="matchType" >
+                                    <option value="5" ${dto.matchType== '5'?'selected':''}>5 vs 5</option>
+                                    <option value="6" ${dto.matchType== '6' || empty dto.matchType ?'selected':''}>6 vs 6</option>
+                                    <option value="11" ${dto.matchType== '11'?'selected':''}>11 vs 11</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="gender" class="form-label fw-bold">성별</label>
-                                <select class="form-select bg-light border-0" id="gender" name="gender">
-                                    <option value="M" selected>남성</option>
-                                    <option value="F">여성</option>
-                                    <option value="X">남녀무관(혼성)</option>
+                                <select class="form-select bg-light border-0" id="gender" name="gender" >
+                                    <option value="M" ${dto.gender=='M'|| empty dto.gender?'selected':''}>남성</option>
+                                    <option value="F" ${dto.gender=='F'?'selected':''}>여성</option>
+                                    <option value="X" ${dto.gender=='X'?'selected':''}>남녀무관(혼성)</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="level" class="form-label fw-bold">실력</label>
-                                <select class="form-select bg-light border-0" id="level" name="level">
-                                    <option value="LOW">하 (초보)</option>
-                                    <option value="MID" selected>중 (아마추어)</option>
-                                    <option value="HIGH">상 (선출포함)</option>
+                                <select class="form-select bg-light border-0" id="matchLevel" name="matchLevel" >
+                                    <option value="LOW" ${dto.matchLevel=='LOW'? 'selected':''}>하 (초보)</option>
+                                    <option value="MID" ${dto.matchLevel=='MID'|| empty dto.matchLevel? 'selected':''}>중 (아마추어)</option>
+                                    <option value="HIGH" ${dto.matchLevel=='HIGH'? 'selected':''}>상 (선출포함)</option>
                                 </select>
                             </div>
                         </div>
@@ -99,7 +98,7 @@
                         <div class="mb-4">
                             <label for="fee" class="form-label fw-bold">참가비 (1인당)</label>
                             <div class="input-group">
-                                <input type="number" class="form-control bg-light border-0" id="fee" name="fee" placeholder="10000">
+                                <input type="number" class="form-control bg-light border-0" id="fee" name="fee" placeholder="10000" value="${dto.fee}">
                                 <span class="input-group-text bg-light border-0">원</span>
                             </div>
                             <div class="form-text text-muted small">* 무료 매치일 경우 0을 입력하세요.</div>
@@ -107,14 +106,14 @@
 
                         <div class="mb-4">
                             <label for="content" class="form-label fw-bold">상세 내용</label>
-                            <textarea class="form-control bg-light border-0" id="content" name="content" rows="6" placeholder="경기 규칙, 준비물, 진행 방식 등을 자유롭게 적어주세요."></textarea>
+                            <textarea class="form-control bg-light border-0" id="content" name="content" rows="6" placeholder="경기 규칙, 준비물, 진행 방식 등을 자유롭게 적어주세요." >${dto.content}</textarea>
                         </div>
 
                         <hr class="my-5">
 
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" onclick="history.back()">취소</button>
-                            <button type="submit" class="btn btn-dark rounded-pill px-5 fw-bold">매치 등록하기</button>
+                            <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" onclick="location.href='${pageContext.request.contextPath}/match/list'">취소</button>
+                            <button type="button" class="btn btn-dark rounded-pill px-5 fw-bold" onclick="matchOk()">${mode=="write"?"등록하기":"수정하기"}</button>
                         </div>
 
                     </div>
@@ -131,7 +130,71 @@
 
         </div> 
     </div>
-
+	<script type="text/javascript">
+	function matchOk(){
+		const f = document.matchForm;
+		let str,p;
+		
+		str = f.title.value.trim();
+		if(! str){
+			alert('제목을 입력하세요.');
+			f.title.focus();
+			return;
+		}
+		
+		str = f.matchDate.value.trim();
+		if(! str){
+			alert('경기일자를 입력하세요.');
+			f.matchDate.focus();
+			return;
+		}
+		
+		str = f.stadiumId.value.trim();
+		if(! str){
+			alert('구장을 선택하세요.');
+			f.stadiumId.focus();
+			return;
+		}
+		
+		str = f.matchType.value.trim();
+		if(! str){
+			alert('경기방식을 선택하세요.');
+			f.matchType.focus();
+			return;
+		}
+		
+		str = f.gender.value.trim();
+		if(! str){
+			alert('성별을 선택하세요.');
+			f.gender.focus();
+			return;
+		}
+		
+		str = f.matchLevel.value.trim();
+		if(! str){
+			alert('실력을 선택하세요.');
+			f.matchLevel.focus();
+			return;
+		}
+		
+		str = f.fee.value.trim();
+		if(! str){
+			alert('참가비를 입력하세요.');
+			f.fee.focus();
+			return;
+		}
+		
+		str = f.content.value.trim();
+		if(! str){
+			alert('내용을 입력하세요.');
+			f.content.focus();
+			return;
+		}
+		
+		f.action = '${pageContext.request.contextPath}/match/${mode}';
+		f.submit();
+	}
+	</script>
     <footer>
 	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
 	</footer>

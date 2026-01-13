@@ -342,12 +342,12 @@ function userIdCheck() {
             let passed = data.passed;
             
             if(passed === 'true') {
-                // 세련된 성공 메시지 (초록색 체크)
+                // 성공 메시지 (초록색 체크)
                 let str = '<span class="msg-success"><i class="bi bi-check-circle-fill"></i> 멋진 아이디네요! 사용 가능합니다.</span>';
                 feedback.html(str);
                 $('#idValid').val('true'); 
             } else {
-                // 세련된 에러 메시지 (붉은색 X)
+                // 에러 메시지 (붉은색 X)
                 let str = '<span class="msg-error"><i class="bi bi-x-circle-fill"></i> 이미 사용 중인 아이디입니다.</span>';
                 feedback.html(str);
                 $('#idValid').val('false');
