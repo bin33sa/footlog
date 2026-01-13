@@ -115,4 +115,10 @@
         ORDER BY r.comment_id DESC
     </select>
     
+    <update id="updateHitCount" parameterType="long">
+    UPDATE MERCENARY_POST
+    SET view_count = view_count + 1 
+    WHERE recruit_id = #{recruit_id}
+	</update>
+    
 </mapper>

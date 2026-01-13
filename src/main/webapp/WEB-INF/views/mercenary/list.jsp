@@ -4,12 +4,15 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Footlog - 용병 게시판</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Footlog - 용병 게시판</title>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
 <style>
+.board-table thead th { border: none !important; }
+
 /* 기본 변수 설정 */
 :root {
 	--primary-color: #D4F63F;

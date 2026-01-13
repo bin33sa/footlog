@@ -18,8 +18,8 @@
 	box-shadow: 0 0 0 0.25rem rgba(212, 246, 63, 0.25);
 }
 </style>
-</head>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
+</head>
 
 <body>
 
