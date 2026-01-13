@@ -27,13 +27,17 @@ public class FieldController {
 		int pageNo = 1;
 		int size = 4;
 		String keyword = req.getParameter("keyword");
+		String sort = req.getParameter("sort");
 
-		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword);
+		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword, sort);
 
 		ModelAndView mav = new ModelAndView("field/list");
 		mav.addObject("list", result.getList());
 		mav.addObject("pageNo", result.getPageNo());
 		mav.addObject("totalPage", result.getTotalPage());
+		
+		mav.addObject("keyword", keyword);
+		mav.addObject("sort", sort);
 
 		return mav;
 	}
@@ -51,12 +55,18 @@ public class FieldController {
 		int pageNo = Integer.parseInt(req.getParameter("pageNo"));
 		int size = 4; // list()와 반드시 동일
 		String keyword = req.getParameter("keyword");
+		String sort = req.getParameter("sort");
 		
-		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword);
+		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword, sort);
 
 		ModelAndView mav = new ModelAndView("field/stadiumList");
 		
 		mav.addObject("list", result.getList());
+		mav.addObject("pageNo", result.getPageNo());
+		mav.addObject("totalPage", result.getTotalPage());
+		
+		mav.addObject("keyword", keyword);
+		mav.addObject("sort", sort);
 
 		return mav;
 	}

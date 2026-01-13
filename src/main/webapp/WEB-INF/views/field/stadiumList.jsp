@@ -17,7 +17,7 @@
 					<div class="d-flex justify-content-between align-items-start mb-1">
 						<h5 class="fw-bold mb-0">${dto.stadiumName}</h5>
 						<span class="text-warning fw-bold"><i
-							class="bi bi-star-fill">${dto.region}</i></span>
+							class="bi bi-star-fill">${dto.rating}</i></span>
 					</div>
 					<p class="text-muted small mb-3">${dto.region}</p>
 
@@ -31,8 +31,8 @@
 					<div
 						class="d-flex justify-content-between align-items-end border-top pt-3">
 						<div>
-							<span class="text-muted small">시간당</span>
-							<h5 class="fw-bold mb-0">80,000원</h5>
+							<span class="text-muted small">2시간당</span>
+							<h5 class="fw-bold mb-0">${dto.price}원</h5>
 						</div>
 						<button class="btn btn-sm btn-primary rounded-pill px-4">예약하기</button>
 					</div>

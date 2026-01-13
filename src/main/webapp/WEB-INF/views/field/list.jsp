@@ -89,11 +89,13 @@
 					</div>
 
 					<div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
-						<select class="form-select rounded-pill border-0 shadow-sm"
+						<select 
+							id = "sortSelect"
+							class="form-select rounded-pill border-0 shadow-sm"
 							style="width: 140px;">
-							<option selected>거리순</option>
-							<option value="1">가격 낮은순</option>
-							<option value="2">평점 높은순</option>
+							<option selected>조회 방법</option>
+							<option value="price">가격 낮은순</option>
+							<option value="rating">평점 높은순</option>
 						</select>
 					</div>
 				</div>
@@ -137,6 +139,23 @@
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 	<script type="text/javascript">
+	
+	
+	
+		function getSort(){
+			return $('#sortSelect').val();
+		}
+		
+		$('#sortSelect').on('change',function(){
+			const $list = $('#stadiumList');
+			$list.empty();
+			$list.data('pageNo',1);
+			
+			loadContent(1);
+			
+		});
+		
+		
 		function getKeyword(){
 			return $('#searchInput').val().trim();
 		}
@@ -159,13 +178,15 @@
 		function loadContent(pageNo) {
 			const $list = $('#stadiumList');
 			const keyword = getKeyword();
-
+			const sort = getSort();
+			
 			$.ajax({
 				url : `${pageContext.request.contextPath}/field/listMore`,
 				type : 'get',
 				data : {
 					pageNo : pageNo,
-					keyword : keyword
+					keyword : keyword,
+					sort : sort
 				},
 				dataType : 'html',
 				success : function(html) {
@@ -177,6 +198,9 @@
 			});
 		}
 
+		
+		
+		
 		$(function() {
 			$('#loadMoreBtn').click(function() {
 

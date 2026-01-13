@@ -10,7 +10,7 @@ import com.fl.model.StadiumDTO;
 public interface StadiumService {
 
 	// 구장 목록 출력
-	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword);
+	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword, String sort);
 	public List<StadiumDTO> listStadiumAll();
 	
 	

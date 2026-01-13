@@ -24,7 +24,7 @@ public class StadiumServiceImpl implements StadiumService {
 	}
 	
 	@Override
-	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword) {
+	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword, String sort) {
 		
 		int offset = (pageNo - 1) * size;
 		
@@ -32,6 +32,7 @@ public class StadiumServiceImpl implements StadiumService {
 		map.put("offset", offset);
 		map.put("size", size);
 		map.put("keyword", keyword);
+		map.put("sort", sort);
 		
 		List<StadiumDTO> list = mapper.listStadium(map);
 		int dataCount = mapper.stadiumCount(map);

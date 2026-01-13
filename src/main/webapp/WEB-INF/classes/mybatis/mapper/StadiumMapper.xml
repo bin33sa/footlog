@@ -4,15 +4,18 @@
 <mapper namespace="com.fl.mapper.StadiumMapper">
 
 	<!-- 전체 리스트 조회 -->
-	<select id="listStadiumAll" 
-		resultType="com.fl.model.StadiumDTO">
+	<select id="listStadiumAll" resultType="com.fl.model.StadiumDTO">
 
 		SELECT
-		stadium_code AS stadiumCode,
+		stadium_code AS
+		stadiumCode,
 		stadium_name AS stadiumName, region,
-		stadium_image AS stadiumImage
+		stadium_image AS
+		stadiumImage,
+		price,
+		rating
 		FROM stadium
-		
+
 	</select>
 
 	<!-- 구장페이지에서 목록 조회 -->
@@ -22,7 +25,8 @@
 		SELECT
 		stadium_code AS stadiumCode,
 		stadium_name AS stadiumName, region,
-		stadium_image AS stadiumImage
+		stadium_image AS stadiumImage,
+		price, rating
 		FROM stadium
 		<where>
 			<if test="keyword != null and keyword != ''">
@@ -33,7 +37,17 @@
 				)
 			</if>
 		</where>
-		ORDER BY stadium_code DESC
+		<choose>
+			<when test="sort == 'price'">
+				ORDER BY price ASC
+			</when>
+			<when test="sort == 'rating'">
+				ORDER BY rating DESC
+			</when>
+			<otherwise>
+				ORDER BY stadium_code DESC
+			</otherwise>
+		</choose>
 		OFFSET #{offset} ROWS FETCH FIRST #{size}
 		ROWS ONLY
 	</select>
@@ -46,7 +60,8 @@
 			<if test="keyword != null and keyword != ''">
 				(
 				stadium_name LIKE '%' || #{keyword} || '%'
-				OR region LIKE '%' || #{keyword} || '%'
+				OR region LIKE
+				'%' || #{keyword} || '%'
 				)
 			</if>
 		</where>
