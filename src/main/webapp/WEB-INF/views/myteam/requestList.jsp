@@ -74,10 +74,10 @@
                     <div class="mb-4">
                         <p class="sidebar-title mb-3">구단 관리</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/myteam/main" class="list-group-item list-group-item-action border-0">구단 대시보드</a>
-                            <a href="${pageContext.request.contextPath}/myteam/update" class="list-group-item list-group-item-action border-0">구단 정보 수정</a>
+                            <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 프로필 수정</a>
+                            <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 정보 수정</a>
                             <a href="${pageContext.request.contextPath}/myteam/squad" class="list-group-item list-group-item-action border-0">스쿼드(선수) 관리</a>
-                            <a href="${pageContext.request.contextPath}/myteam/manage/match" class="list-group-item list-group-item-action border-0">매치 관리</a>
+                            <a href="${pageContext.request.contextPath}/myteam/match" class="list-group-item list-group-item-action border-0">매치 관리</a>
                             
                             <a href="${pageContext.request.contextPath}/myteam/requestList" class="list-group-item list-group-item-action border-0 active fw-bold bg-light text-primary">
                                 가입 신청 관리 

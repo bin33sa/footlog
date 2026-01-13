@@ -36,7 +36,7 @@
                             </div>
                             <div>
                                 <span class="badge bg-primary text-dark mb-1">MY TEAM</span>
-                                <h4 class="fw-bold mb-0">FC 풋로그</h4>
+                                <h4 class="fw-bold mb-0">${myTeamName}</h4>
                             </div>
                         </div>
                         <button class="btn btn-icon text-white-50 hover-white"><i class="bi bi-chevron-right fs-4"></i></button>

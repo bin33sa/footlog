@@ -47,7 +47,18 @@ public class MyTeamServiceImpl implements MyTeamService {
 			throw e;
 		}
 	}
+	
+	@Override
+	public void updateTeamMember(TeamMemberDTO dto) throws Exception {
+		try {
+			mapper.updateTeamMember(dto);		
+		} catch (Exception e) {
+			e.printStackTrace();
 
+			throw e;
+		}
+	}
+	
 	@Override
 	public void updateTeamInfo(TeamDTO dto) throws Exception {
 		try {

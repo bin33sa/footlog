@@ -33,8 +33,8 @@
                     <div class="mb-4">
                         <p class="sidebar-title">구단 관리</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/myteam/main" class="list-group-item list-group-item-action">구단 대시보드</a>
-                            <a href="${pageContext.request.contextPath}" class="list-group-item list-group-item-action">구단 정보 수정</a>
+                            <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action">구단 프로필 수정</a>
+                            <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action">구단 정보 수정</a>
                             <a href="${pageContext.request.contextPath}/myteam/squad" class="list-group-item list-group-item-action">스쿼드(선수) 관리</a>
                             <a href="${pageContext.request.contextPath}/myteam/match" class="list-group-item list-group-item-action active-menu">매치 일정 / 투표</a>
                             <a href="${pageContext.request.contextPath}/team/apply" class="list-group-item list-group-item-action">가입 신청 관리</a>

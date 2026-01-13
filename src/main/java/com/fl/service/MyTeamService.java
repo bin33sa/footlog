@@ -37,7 +37,8 @@ public interface MyTeamService {
 	public void updateMemberRole(Map<String, Object> map) throws Exception;
 	
 	public void kickMember(Map<String, Object> map) throws Exception;
-
+	
+	public void updateTeamMember(TeamMemberDTO dto) throws Exception;
 	
 	// ==========================================
 	// 3. [가입 신청 관리]

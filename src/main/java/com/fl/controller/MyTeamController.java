@@ -1,5 +1,6 @@
 package com.fl.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -16,18 +17,22 @@ import com.fl.mvc.annotation.RequestMapping;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MyTeamService;
 import com.fl.service.MyTeamServiceImpl;
+import com.fl.util.FileManager;
+import com.fl.util.MyMultipartFile;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 
 @Controller
 @RequestMapping("/myteam/*")
 public class MyTeamController {
 
     private MyTeamService service = new MyTeamServiceImpl();
-
+    private FileManager fileManager = new FileManager();
+    
     private long setTeamInfoAndRole(HttpSession session, ModelAndView mav) {
         try {
             SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -60,12 +65,16 @@ public class MyTeamController {
     public ModelAndView main(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/main");
         HttpSession session = req.getSession();
-        
+
         long teamCode = setTeamInfoAndRole(session, mav);
-        
+
         if (teamCode == -1) {
             return new ModelAndView("redirect:/team/list?msg=noteam"); 
         }
+
+        session.setAttribute("currentTeamCode", teamCode);
+
+        mav.addObject("teamCode", teamCode);
 
         return mav;
     }
@@ -121,9 +130,9 @@ public class MyTeamController {
         }
     }
 
-    @GetMapping("manage/match")
+    @GetMapping("match")
     public ModelAndView manageMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        ModelAndView mav = new ModelAndView("myteam/manage/match");
+        ModelAndView mav = new ModelAndView("myteam/match");
         HttpSession session = req.getSession();
 
         long teamCode = setTeamInfoAndRole(session, mav);
@@ -168,8 +177,8 @@ public class MyTeamController {
         return mav;
     }
     
-    @PostMapping("updateMember")
-	public ModelAndView updateMember(HttpServletRequest req, HttpServletResponse resp) {
+    @PostMapping("updateSquad")
+	public ModelAndView updateSquad(HttpServletRequest req, HttpServletResponse resp) {
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
 
@@ -202,5 +211,104 @@ public class MyTeamController {
 
 		return new ModelAndView("redirect:/myteam/squad");
 	}
+    
+    @GetMapping("teamUpdate") 
+    public ModelAndView teamUpdateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ModelAndView mav = new ModelAndView("myteam/teamUpdate"); 
+        
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) {
+            return new ModelAndView("redirect:/member/login");
+        }
+
+        try {
+            String teamCodeStr = req.getParameter("teamCode");
+            if(teamCodeStr == null || teamCodeStr.isEmpty()) {
+                 return new ModelAndView("redirect:/myteam/main");
+            }
+            long teamCode = Long.parseLong(teamCodeStr);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("teamCode", teamCode);
+            map.put("memberCode", info.getMember_code());
+            TeamMemberDTO myStatus = service.readMyTeamStatus(map);
+            
+            if(myStatus == null) return new ModelAndView("redirect:/myteam/main?teamCode=" + teamCode);
+
+            mav.addObject("myRoleLevel", myStatus.getRole_level());
+
+            TeamDTO teamInfo = service.readTeamInfo(teamCode);
+            mav.addObject("dto", teamInfo); 
+            
+            mav.addObject("teamCode", teamCode);
+            mav.addObject("mode", "update");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ModelAndView("redirect:/myteam/main");
+        }
+        return mav;
+    }
+
+ 
+    @PostMapping("teamUpdate")
+    public ModelAndView teamUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) {
+            return new ModelAndView("redirect:/member/login");
+        }
+
+        String teamCodeStr = req.getParameter("team_code");
+        String teamName = req.getParameter("team_name");
+        String description = req.getParameter("description");
+        String region = req.getParameter("region");
+
+        if(teamCodeStr == null || teamCodeStr.isEmpty()) {
+            return new ModelAndView("redirect:/myteam/main");
+        }
+        long teamCode = Long.parseLong(teamCodeStr);
+
+        TeamDTO dto = new TeamDTO();
+        dto.setTeam_code(teamCode);
+        dto.setTeam_name(teamName);
+        dto.setDescription(description);
+        dto.setRegion(region);
+
+        String root = session.getServletContext().getRealPath("/");
+        String pathname = root + "uploads" + File.separator + "team"; // 저장 폴더: uploads/team
+
+        try {
+            TeamDTO oldDto = service.readTeamInfo(teamCode);
+            if(oldDto == null) {
+                return new ModelAndView("redirect:/myteam/main");
+            }
+
+            Part p = req.getPart("selectFile"); 
+            MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
+            
+            if(mp != null) {
+                String saveFilename = mp.getSaveFilename();
+                dto.setEmblem_image(saveFilename); 
+
+                if(oldDto.getEmblem_image() != null && oldDto.getEmblem_image().length() != 0) {
+                    fileManager.doFiledelete(pathname, oldDto.getEmblem_image());
+                }
+            } else {
+                dto.setEmblem_image(oldDto.getEmblem_image());
+            }
+
+            service.updateTeamInfo(dto);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ModelAndView("redirect:/myteam/main?teamCode=" + teamCode);
+    }
     
 }

@@ -11,23 +11,48 @@
 	</select>
 
 	<select id="readTeamInfo" parameterType="Long" resultType="com.fl.model.TeamDTO">
-		SELECT team_code, team_name, team_logo, team_info, 
-		       region, city, member_count, max_member, foundation_day
-		FROM team
-		WHERE team_code = #{team_code}
+	    SELECT 
+	        team_code, 
+	        team_name, 
+	        team_url,
+	        contact_number,
+	        region, 
+	        description,      created_at,
+	        emblem_image,
+	        intro_video_url,
+	        member_count
+	    FROM team
+	    WHERE team_code = #{team_code}
 	</select>
 
 	<select id="readMyTeamStatus" parameterType="map" resultType="com.fl.model.TeamMemberDTO">
-		SELECT member_code, team_code, team_level, position, status, join_date
-		FROM team_member
-		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	    SELECT 
+	        team_code, 
+	        member_code, 
+	        role_level, 
+	        position, 
+	        back_number, 
+	        profile_image,   reg_date AS join_date
+	    FROM member_team
+	    WHERE team_code = #{teamCode} 
+	      AND member_code = #{memberCode}
 	</select>
 
+	<update id="updateTeamMember" parameterType="com.fl.model.TeamMemberDTO">
+		UPDATE member_team
+		SET profile_image = #{profile_image}
+		WHERE team_code = #{team_code} 
+		  AND member_code = #{member_code}
+	</update>
+	
 	<update id="updateTeamInfo" parameterType="com.fl.model.TeamDTO">
-		UPDATE team
-		SET team_info = #{team_info}, 
-		    team_logo = #{team_logo, jdbcType=VARCHAR}
-		WHERE team_code = #{team_code}
+	    UPDATE team
+	    SET 
+	        team_name = #{team_name},
+	        description = #{description},
+	        region = #{region},
+	        emblem_image = #{emblem_image}
+	        WHERE team_code = #{team_code}
 	</update>
 
 	<delete id="deleteMyTeamHistory" parameterType="map">

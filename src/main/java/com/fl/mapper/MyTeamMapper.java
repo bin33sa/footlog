@@ -1,5 +1,6 @@
 package com.fl.mapper;
 
+
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,8 @@ public interface MyTeamMapper {
 
 	public void updateMemberRole(Map<String, Object> map);
 
+	public void updateTeamMember(TeamMemberDTO dto);
+	
 	public void deleteTeamMember(Map<String, Object> map);
 
 	public List<JoinRequestDTO> listJoinRequest(long team_code);

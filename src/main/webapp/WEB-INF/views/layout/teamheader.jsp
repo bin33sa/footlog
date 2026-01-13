@@ -40,7 +40,6 @@
 <header id="header" class="site-header bg-white sticky-top border-bottom">
     <nav id="header-nav" class="navbar navbar-expand-lg py-3">
         <div class="container-fluid px-lg-5">
-            
             <a class="navbar-brand fs-3" href="${pageContext.request.contextPath}/main">Footlog</a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#bdNavbar">
@@ -83,11 +82,12 @@
                             팀 관리
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/update">구단 프로필 수정</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}">구단 프로필 수정</a></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/squad">스쿼드 관리</a></li>
                             
                             <c:if test="${myRoleLevel >= 10}">
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/manage/match">매치관리</a></li>
+                            	<li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}">구단 정보 수정</a></li>
+                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/match">매치관리</a></li>
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/requestList">신청현황</a></li>
                             </c:if>
 

@@ -59,10 +59,10 @@
                     <div class="mb-4">
                         <p class="sidebar-title mb-3">구단 관리</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/myteam/main" class="list-group-item list-group-item-action border-0">구단 대시보드</a>
+                            <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 프로필 수정</a>
                             
                             <c:if test="${myRoleLevel >= 10}">
-                                <a href="${pageContext.request.contextPath}/myteam/update" class="list-group-item list-group-item-action border-0">구단 정보 수정</a>
+                                <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 정보 수정</a>
                             </c:if>
 
                             <a href="${pageContext.request.contextPath}/myteam/squad" class="list-group-item list-group-item-action border-0 active fw-bold bg-light text-primary">
@@ -73,7 +73,7 @@
                             </a>
                             
                             <c:if test="${myRoleLevel >= 10}">
-                                <a href="${pageContext.request.contextPath}/myteam/manage/match" class="list-group-item list-group-item-action border-0">매치 관리</a>
+                                <a href="${pageContext.request.contextPath}/myteam/match" class="list-group-item list-group-item-action border-0">매치 관리</a>
                                 <a href="${pageContext.request.contextPath}/myteam/requestList" class="list-group-item list-group-item-action border-0">
                                     가입 신청 관리 
                                     <c:if test="${requestCount > 0}">
@@ -302,7 +302,7 @@
     <div class="modal fade" id="editMemberModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form action="${pageContext.request.contextPath}/myteam/updateMember" method="post">
+                <form action="${pageContext.request.contextPath}/myteam/updateSquad" method="post">
                     <input type="hidden" name="team_code" value="${team_code}">
                     <input type="hidden" name="member_code" id="modalMemberCode">
                     
