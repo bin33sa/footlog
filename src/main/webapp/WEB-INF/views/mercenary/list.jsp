@@ -8,40 +8,25 @@
 <title>Footlog - 용병 게시판</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<<<<<<< HEAD
-<title>Footlog - 용병 게시판</title>
 
-=======
->>>>>>> 474dabfa376ff771e006e16f30e2163efbfad49b
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
 <style>
-<<<<<<< HEAD
-/* [스타일 격리 전략]
-   모든 CSS 선택자 앞에 #mercenary-wrapper를 붙입니다.
-   이러면 이 스타일은 상단 헤더(header.jsp)에 절대로 영향을 줄 수 없습니다.
-*/
-
-/* 변수 선언 (이 페이지 전용) */
-#mercenary-wrapper {
+/* [핵심 1] 변수를 :root에 선언하여 색상이 안 나오는 문제 원천 차단 */
+:root {
     --mc-neon: #D4F63F;
     --mc-dark: #111;
     --mc-border: #ddd;
-=======
-.board-table thead th { border: none !important; }
-
-/* 기본 변수 설정 */
-:root {
-	--primary-color: #D4F63F;
->>>>>>> 474dabfa376ff771e006e16f30e2163efbfad49b
+    --primary-color: #D4F63F;
 }
 
 /* 1. 테이블 스타일 */
 #mercenary-wrapper table {
     width: 100%;
     border-collapse: collapse;
-    background-color: #fff; /* 배경 흰색 고정 */
+    background-color: #fff;
+    table-layout: fixed;
 }
 
 #mercenary-wrapper thead th {
@@ -51,7 +36,6 @@
     font-weight: 700;
     text-align: center;
     border: none;
-    /* 헤더 세로 구분선 */
     border-left: 1px solid #444;
     border-right: 1px solid #444;
 }
@@ -63,7 +47,7 @@
     transition: 0.2s;
 }
 #mercenary-wrapper tbody tr:hover {
-    background-color: rgba(212, 246, 63, 0.1); /* 호버 효과 */
+    background-color: rgba(212, 246, 63, 0.1);
     cursor: pointer;
 }
 
@@ -71,15 +55,17 @@
     padding: 12px;
     vertical-align: middle;
     color: #333;
-    /* 본문 세로 구분선 */
     border-left: 1px solid #eee;
     border-right: 1px solid #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 #mercenary-wrapper tbody td:first-child { border-left: none; }
 #mercenary-wrapper tbody td:last-child { border-right: none; }
 
 
-/* 2. 네온 검색창 (헤더와 충돌 방지) */
+/* 2. 네온 검색창 */
 #mercenary-wrapper .neon-search-box {
     background-color: var(--mc-dark);
     border: 2px solid #333;
@@ -87,30 +73,20 @@
     max-width: 350px;
     display: flex;
     align-items: center;
-    border-radius: 50px; /* 둥글게 */
+    border-radius: 50px;
     overflow: hidden;
 }
 
-/* 부트스트랩 스타일 강제 덮어쓰기 (!important) */
-#mercenary-wrapper .neon-search-box select {
-    background-color: transparent !important;
-    color: #fff !important;
-    border: none !important;
-    box-shadow: none !important;
-    cursor: pointer;
-}
-#mercenary-wrapper .neon-search-box select option {
-    background-color: #111;
-    color: #fff;
-}
+#mercenary-wrapper .neon-search-box select,
 #mercenary-wrapper .neon-search-box input {
     background-color: transparent !important;
     color: #fff !important;
     border: none !important;
     box-shadow: none !important;
 }
-#mercenary-wrapper .neon-search-box input::placeholder {
-    color: #aaa;
+#mercenary-wrapper .neon-search-box select option {
+    background-color: #111;
+    color: #fff;
 }
 #mercenary-wrapper .neon-search-box button {
     color: var(--mc-neon);
@@ -133,17 +109,33 @@
 }
 
 
-/* 4. 페이징 */
+/* [핵심 2] 페이징 강제 가로 정렬 
+   ${paging} 안에 div나 ul이 있어도 무시하고 내부 링크들을 가로로 배치합니다.
+*/
 #mercenary-wrapper .page-nav-wrap {
     display: flex;
     justify-content: center;
+    align-items: center;
     margin-top: 40px;
+    margin-bottom: 20px;
     gap: 5px;
 }
-/* 페이징 내부의 a, span 태그 스타일 */
+
+/* ${paging} 내부의 모든 컨테이너(div 등)를 flex로 만들어버림 */
+#mercenary-wrapper .page-nav-wrap > div,
+#mercenary-wrapper .page-nav-wrap > ul {
+    display: flex !important;
+    gap: 5px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* 링크 스타일 */
 #mercenary-wrapper .page-nav-wrap a, 
 #mercenary-wrapper .page-nav-wrap span,
-#mercenary-wrapper .page-nav-wrap b { 
+#mercenary-wrapper .page-nav-wrap b,
+#mercenary-wrapper .page-nav-wrap li a { 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -154,12 +146,16 @@
     color: #333;
     font-size: 0.9rem;
     background: transparent;
+    border: none; /* 테두리 제거 */
 }
+
 #mercenary-wrapper .page-nav-wrap a:hover {
     background-color: rgba(0,0,0,0.05);
 }
-/* 현재 페이지 (b 태그로 가정) */
-#mercenary-wrapper .page-nav-wrap b {
+
+/* 현재 페이지 강조 */
+#mercenary-wrapper .page-nav-wrap b,
+#mercenary-wrapper .page-nav-wrap .active {
     background-color: var(--mc-dark);
     color: var(--mc-neon) !important;
 }
@@ -223,21 +219,27 @@
 
                     <div class="shadow-sm border rounded-3 overflow-hidden">
                         <table>
+                            <colgroup>
+                                <col width="80">
+                                <col width="*">
+                                <col width="150">
+                                <col width="80">
+                            </colgroup>
                             <thead>
                                 <tr>
-                                    <th width="80">번호</th>
+                                    <th>번호</th>
                                     <th>제목</th>
-                                    <th width="120">작성일</th>
-                                    <th width="80">조회수</th>
+                                    <th>작성일</th>
+                                    <th>조회수</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <c:forEach var="dto" items="${list}">
                                     <tr onclick="location.href='${pageContext.request.contextPath}/mercenary/article?recruit_id=${dto.recruit_id}&page=${page}';">
-                                        <td>${dto.recruit_id}</td>
-                                        <td class="text-center fw-bold">${dto.title}</td>
-                                        <td class="text-muted">${dto.created_at}</td>
-                                        <td><span class="badge rounded-pill bg-light text-dark border">${dto.view_count}</span></td>
+                                        <td class="text-center">${dto.recruit_id}</td>
+                                        <td class="fw-bold ps-3">${dto.title}</td>
+                                        <td class="text-center text-muted">${dto.created_at}</td>
+                                        <td class="text-center"><span class="badge rounded-pill bg-light text-dark border">${dto.view_count}</span></td>
                                     </tr>
                                 </c:forEach>
                                 <c:if test="${empty list}">
@@ -267,12 +269,11 @@
             f.kwd.focus();
             return;
         }
-        f.method = "get"; // 검색은 보통 GET 방식
+        f.method = "get"; 
         f.action = "${pageContext.request.contextPath}/mercenary/list";
         f.submit();
     }
     
-    // 엔터키 입력 시 검색 실행
     const inputEL = document.querySelector("#mercenary-wrapper input[name=kwd]");
     if(inputEL){
         inputEL.addEventListener('keydown', function (evt) {
