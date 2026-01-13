@@ -1,7 +1,7 @@
 package com.fl.controller;
 
 import java.io.IOException;
-import java.sql.SQLException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,9 +182,11 @@ public class MercenaryController {
         try {
         	long recruit_id = Long.parseLong(req.getParameter("recruit_id"));
             // 조회수 증가 및 상세 데이터 조회
-        	// service.updateHitCount(recruit_id);
+        	 String page = req.getParameter("page");
+        	 
+        	 service.updateHitCount(recruit_id);
+        	 
              MercenaryDTO dto = service.findById(recruit_id);
-             String page = req.getParameter("page");
         	
             if (dto == null) {
                 return new ModelAndView("redirect:/mercenary/list");
@@ -402,4 +404,6 @@ public class MercenaryController {
 	    
 	    return model;
 	}
+	
+	
 }

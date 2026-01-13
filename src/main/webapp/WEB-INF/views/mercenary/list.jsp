@@ -5,13 +5,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>Footlog - 용병 게시판</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<<<<<<< HEAD
 <title>Footlog - 용병 게시판</title>
 
+=======
+>>>>>>> 474dabfa376ff771e006e16f30e2163efbfad49b
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
 <style>
+<<<<<<< HEAD
 /* [스타일 격리 전략]
    모든 CSS 선택자 앞에 #mercenary-wrapper를 붙입니다.
    이러면 이 스타일은 상단 헤더(header.jsp)에 절대로 영향을 줄 수 없습니다.
@@ -22,6 +28,13 @@
     --mc-neon: #D4F63F;
     --mc-dark: #111;
     --mc-border: #ddd;
+=======
+.board-table thead th { border: none !important; }
+
+/* 기본 변수 설정 */
+:root {
+	--primary-color: #D4F63F;
+>>>>>>> 474dabfa376ff771e006e16f30e2163efbfad49b
 }
 
 /* 1. 테이블 스타일 */

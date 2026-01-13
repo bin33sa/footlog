@@ -29,7 +29,9 @@
                         <div class="list-group">
                             <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action ">내 매치 일정</a>
                             <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action  active-menu">전체 매치 리스트</a>
-                            <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action ">매치 개설하기</a>
+                             <c:if test="${sessionScope.member.role_level == 1 ||sessionScope.member.role_level ==60 }">
+                            	<a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action ">매치 개설하기</a>
+                            </c:if>
                             <a href="${pageContext.request.contextPath}/mercenary/list" class="list-group-item list-group-item-action ">용병 구하기</a>
                         </div>
                     </div>
@@ -41,7 +43,9 @@
                         <h4 class="fw-bold mb-1">원하는 매치가 없나요?</h4>
                         <p class="text-white-50 mb-0 small">직접 매치를 개설하고 팀원을 모집해보세요.</p>
                     </div>
-                    <button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="location.href='${pageContext.request.contextPath}/match/write'">매치 개설하기 +</button>
+                    <c:if test="${sessionScope.member.role_level == 1 ||sessionScope.member.role_level ==60 }">
+                    	<button class="btn btn-primary rounded-pill px-4 fw-bold" onclick="location.href='${pageContext.request.contextPath}/match/write'">매치 개설하기 +</button>
+              		</c:if>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mb-4 justify-content-between align-items-center">
@@ -80,7 +84,7 @@
 		    <fmt:parseDate value="${dto.match_date}" var="tempDate" pattern="yyyy-MM-dd HH:mm"/>
 		
 		    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4 border-bottom" 
-		         onclick="location.href='${pageContext.request.contextPath}/match/article?match_code=${dto.match_code}'" 
+		         onclick="location.href='${articleUrl }&match_code=${dto.match_code}'" 
 		         style="cursor: pointer;">
 		        
 		        <div class="match-time-box text-center rounded-3 p-2 bg-light" style="min-width: 80px;">
@@ -105,6 +109,7 @@
                 
                 <span class="badge bg-light text-secondary border">${dto.matchType}</span> 
                 <span class="badge bg-light text-secondary border">${dto.gender}</span>
+                <span class="badge bg-light text-secondary border">${dto.matchLevel}</span>
             </div>
 
             <h5 class="fw-bold mb-1 text-truncate" style="max-width: 400px;">

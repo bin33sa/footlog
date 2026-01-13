@@ -28,7 +28,9 @@ public class MatchDTO {
     private Long fee;
     private Long member_code;
     
-    private String stadium_name; 
+    private int stadiumCode;
+    private String stadiumName; 
+    private String matchLevel;
 
     
     
@@ -200,12 +202,28 @@ public class MatchDTO {
 		this.reply_count = reply_count;
 	}
 
-	public String getStadium_name() {
-		return stadium_name;
+	public String getStadiumName() {
+		return stadiumName;
 	}
 
-	public void setStadium_name(String stadium_name) {
-		this.stadium_name = stadium_name;
+	public void setStadiumName(String stadiumName) {
+		this.stadiumName = stadiumName;
+	}
+
+	public String getMatchLevel() {
+		return matchLevel;
+	}
+
+	public void setMatchLevel(String matchLevel) {
+		this.matchLevel = matchLevel;
+	}
+
+	public int getStadiumCode() {
+		return stadiumCode;
+	}
+
+	public void setStadiumCode(int stadiumCode) {
+		this.stadiumCode = stadiumCode;
 	}
     
     

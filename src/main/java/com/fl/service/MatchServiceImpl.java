@@ -71,8 +71,13 @@ public class MatchServiceImpl implements MatchService{
 
 	@Override
 	public MatchDTO findById(long num) {
-		// TODO Auto-generated method stub
-		return null;
+		MatchDTO dto = null;
+		try {
+			dto = mapper.findById(num);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dto;
 	}
 	
 
@@ -116,6 +121,24 @@ public class MatchServiceImpl implements MatchService{
 	public MatchDTO findByFileId(long fileNum) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public Long getUserTeamCode(long member_code) {
+		try {
+			Long teamCode = mapper.getUserTeamCode(member_code);
+			if(teamCode==null) {
+				return 0L;
+			}
+		    return teamCode;
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0L;
+		}
+	
+		
+		
 	}
 
 

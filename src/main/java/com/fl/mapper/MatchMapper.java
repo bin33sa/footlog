@@ -16,8 +16,8 @@ public interface MatchMapper {
 	public int dataCount(Map<String, Object> map);
 	public List<MatchDTO> listMatch(Map<String, Object> map);
 	public List<MatchDTO> listMyMatch(Map<String, Object> map);
-	public MatchDTO getTeamcodeById(long num);
-	public MatchDTO getTeamnameById(String name);
+	public MatchDTO findById(long num);
+	public Long getUserTeamCode(long member_code);
 	public MatchDTO findByPrev(Map<String, Object> map);
 	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws SQLException;

@@ -116,16 +116,20 @@
                         </c:when>
                         
                         <c:otherwise>
-                            <div class="d-flex align-items-center">
-                                <div class="d-flex align-items-center me-3">
-                                    <img src="${pageContext.request.contextPath}/dist/images/avatar.png" class="rounded-circle border me-2" width="32" height="32" style="object-fit: cover;">
-                                    <span class="fw-bold">${sessionScope.member.member_name}님</span>
-                                </div>
-                                
-                                <a href="${pageContext.request.contextPath}/member/mypage" class="btn btn-outline-secondary rounded-pill btn-sm me-2">마이페이지</a>
-                                <a href="${pageContext.request.contextPath}/member/logout" class="btn btn-dark rounded-pill btn-sm">로그아웃</a>
-                            </div>
-                        </c:otherwise>
+						    <div class="d-flex align-items-center">
+						        <div class="d-flex align-items-center me-3">
+						            <img src="${pageContext.request.contextPath}/uploads/member/${sessionScope.member.profile_image}" 
+						                 class="rounded-circle border me-2" 
+						                 width="32" height="32" 
+						                 style="object-fit: cover;"
+						                 onerror="this.src='${pageContext.request.contextPath}/dist/images/avatar.png'"> <!-- 이미지 깨질땐 기본이미지 로 -->
+						                 <span class="fw-bold">${sessionScope.member.member_name}님</span>
+						        </div>
+						        
+						        <a href="${pageContext.request.contextPath}/member/mypage" class="btn btn-outline-secondary rounded-pill btn-sm me-2">마이페이지</a>
+						        <a href="${pageContext.request.contextPath}/member/logout" class="btn btn-dark rounded-pill btn-sm">로그아웃</a>
+						    </div>
+						</c:otherwise>
                     </c:choose>
                 </div>
             </div>

@@ -27,12 +27,25 @@
 	<!-- role_level(권한레벨): 0이면 일반회원, 99이면 관리자 -->
 	<!-- is_deleted(탈퇴여부): 0이면 탈퇴X, 1이면 탈퇴O -->
 	<insert id="insertMember" parameterType="com.fl.model.MemberDTO">
-		INSERT INTO member(member_code, member_id, password,
-			 member_name, phone_number, email, region, profile_image, preferred_position, 
-			 role_level, is_deleted, deleted_at)
-		VALUES (seq_member.NEXTVAL, #{member_id}, #{password}, #{member_name}, 
-				#{phone_number}, #{email}, #{region}, #{profile_image}, #{preferred_position},
-				0, 0, #{deleted_at})
+		INSERT INTO member(
+			member_code, member_id, password, member_name, 
+			phone_number, email, region, profile_image, 
+			preferred_position, role_level, is_deleted, deleted_at
+		)
+		VALUES (
+			seq_member.NEXTVAL, 
+			#{member_id}, 
+			#{password}, 
+			#{member_name}, 
+			#{phone_number}, 
+			#{email}, 
+			#{region, jdbcType=VARCHAR}, 
+			#{profile_image, jdbcType=VARCHAR}, 
+			#{preferred_position, jdbcType=VARCHAR},
+			0, 
+			0, 
+			SYSDATE
+		)
 	</insert>
 	
 	<!-- 아이디 찾기 -->
