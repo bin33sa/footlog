@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.fl.model.MatchDTO;
 import com.fl.model.SessionInfo;
+import com.fl.model.StadiumDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
@@ -14,6 +15,8 @@ import com.fl.mvc.annotation.RequestMapping;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MatchService;
 import com.fl.service.MatchServiceImpl;
+import com.fl.service.StadiumService;
+import com.fl.service.StadiumServiceImpl;
 import com.fl.util.MyUtil;
 
 import jakarta.servlet.ServletException;
@@ -24,6 +27,7 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/match/*")
 public class MatchController {
 	private MatchService service = new MatchServiceImpl();
+	private StadiumService stadiumservice = new StadiumServiceImpl();
 	private MyUtil util = new MyUtil();
 	
 	@GetMapping("list")
@@ -33,6 +37,7 @@ public class MatchController {
 		try {
 			
 			String page = req.getParameter("page");
+
 			int current_page = 1;
 			if(page != null) {
 				current_page = Integer.parseInt(page);
@@ -105,8 +110,8 @@ public class MatchController {
 		String page = req.getParameter("page");
 		String query = "page="+page;
 		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		//HttpSession session = req.getSession();
+		//SessionInfo info = (SessionInfo)session.getAttribute("member");
 		
 		try {
 			long match_code = Long.parseLong(req.getParameter("match_code"));
@@ -141,12 +146,12 @@ public class MatchController {
 			
 			ModelAndView mav = new ModelAndView("match/article");
 			
-			map.put("member_code",info.getMember_id());
+			//map.put("member_code",info.getMember_id());
 			
-			if(info != null) {
-                map.put("member_code", info.getMember_id());
+			//if(info != null) {
+            //    map.put("member_code", info.getMember_id());
                 // 필요하다면 mav에 로그인 정보 추가
-            }
+            //}
 			
 			mav.addObject("dto", dto);
 			mav.addObject("page", page);
@@ -166,6 +171,11 @@ public class MatchController {
 	@GetMapping("write")
 	public ModelAndView writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/write");
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		
+		List<StadiumDTO> list = stadiumservice.listStadium(map);
+		mav.addObject("stadiumList", list);
 		mav.addObject("mode", "write");
 		
 		return mav;
@@ -188,6 +198,7 @@ public class MatchController {
 			dto.setMatchType(req.getParameter("matchType"));
 			dto.setGender(req.getParameter("gender"));
 			dto.setFee(Long.parseLong(req.getParameter("fee")));
+			dto.setMatchLevel(req.getParameter("matchLevel"));
 			
 			service.insertMatch(dto);
 			
@@ -197,7 +208,6 @@ public class MatchController {
 		
 		return new ModelAndView("redirect:/match/list");
 	}
-	
 	
 	
 	@RequestMapping("myMatch")

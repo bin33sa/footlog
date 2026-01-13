@@ -9,8 +9,8 @@
 		resultType="com.fl.model.StadiumDTO">
 		
 		SELECT
-			stadium_code ,
-			stadium_name, region, stadium_image
+			stadium_code AS stadiumCode,
+			stadium_name AS stadiumName, region, stadium_image AS stadiumImage
 		FROM stadium
 		ORDER BY stadium_code DESC
 	</select>

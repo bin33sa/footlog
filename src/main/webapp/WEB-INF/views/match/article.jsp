@@ -57,15 +57,15 @@
                         <tbody>
                             <tr>
                                 <td class="text-muted" style="width: 100px;">일시</td>
-                                <td class="fw-bold fs-5">${dto.match_date }</td>
+                                <td class="fw-bold fs-5">${dto.match_date}</td>
                             </tr>
                             <tr>
                                 <td class="text-muted">구장</td>
-                                <td class="fw-bold">${dto.stadium_name } <a href="#" class="text-primary small ms-2 text-decoration-underline">지도보기</a></td>
+                                <td class="fw-bold">${dto.stadiumName} <a href="#" class="text-primary small ms-2 text-decoration-underline">지도보기</a></td>
                             </tr>
                             <tr>
                                 <td class="text-muted">진행방식</td>
-                                <td class="fw-bold">${dto.matchType }(3파전)</td>
+                                <td class="fw-bold">${dto.matchType} (3파전)</td>
                             </tr>
                             <tr>
                                 <td class="text-muted">참가비</td>
@@ -73,7 +73,7 @@
                             </tr>
                             <tr>
                                 <td class="text-muted">실력/성별</td>
-                                <td class="fw-bold">중하(세미프로 금지) / ${dto.gender }</td>
+                                <td class="fw-bold">${dto.matchLevel} / ${dto.gender}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -83,16 +83,8 @@
                     
                     <h5 class="fw-bold mb-3">매치 소개</h5>
                     
-                    <c:if test="${not empty dto.imageFilename}">
-                        <div class="mb-4">
-                            <img src="${pageContext.request.contextPath}/uploads/match/${dto.imageFilename}" 
-                                 class="img-fluid rounded-4 w-100 shadow-sm object-fit-cover" 
-                                 alt="매치 이미지">
-                        </div>
-                    </c:if>
-                    
                     <p class="text-muted mb-5" style="line-height: 1.8;">
-                        ${dto.content }
+                        ${dto.content}
                     </p>
                     
                     <h5 class="fw-bold mb-3">위치 안내</h5>

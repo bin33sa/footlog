@@ -71,8 +71,13 @@ public class MatchServiceImpl implements MatchService{
 
 	@Override
 	public MatchDTO findById(long num) {
-		// TODO Auto-generated method stub
-		return null;
+		MatchDTO dto = null;
+		try {
+			dto = mapper.findById(num);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dto;
 	}
 	
 
