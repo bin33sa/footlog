@@ -13,6 +13,15 @@ import com.fl.mybatis.support.MapperContainer;
 public class StadiumServiceImpl implements StadiumService {
 	private StadiumMapper mapper = MapperContainer.get(StadiumMapper.class); 
 	
+	//전체리스트 불러오기
+	@Override
+	public List<StadiumDTO> listStadiumAll() {
+		
+		List<StadiumDTO> list = mapper.listStadiumAll();
+		
+		
+		return list;
+	}
 	
 	@Override
 	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword) {

@@ -11,6 +11,7 @@ public interface StadiumService {
 
 	// 구장 목록 출력
 	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword);
+	public List<StadiumDTO> listStadiumAll();
 	
 	
 	// 구장내 경기장 목록출력 , 경기장 페이징 처리?
