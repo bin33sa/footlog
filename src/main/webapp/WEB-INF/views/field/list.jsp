@@ -80,7 +80,9 @@
 				<div
 					class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
 					<div class="search-bar-wrapper w-100">
-						<i class="bi bi-search position-absolute ms-3 text-muted"></i> <input
+						<i class="bi bi-search position-absolute ms-3 text-muted"></i> 
+						<input
+							id="searchInput"
 							type="text"
 							class="form-control rounded-pill ps-5 py-2 border-0 shadow-sm"
 							placeholder="지역명, 구장명으로 검색">
@@ -100,10 +102,10 @@
 
 
 				<div class="stadium row g-4" id="stadiumList"
-					data-pageNo="${pageNo}" data-totalPage="${totalPage}">
-			
-				<!-- 리스트jsp -->
-			
+					data-page-no="${pageNo}" data-total-page="${totalPage}">
+
+					<!-- 리스트jsp -->
+					<jsp:include page="/WEB-INF/views/field/stadiumList.jsp" />
 				</div>
 
 
@@ -135,50 +137,71 @@
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 	<script type="text/javascript">
+		function getKeyword(){
+			return $('#searchInput').val().trim();
+		}
+		
+		$('#searchInput').on('keydown',function(e){
+			if(e.key === 'Enter'){
+				e.preventDefault();
+				
+				const $list = $('#stadiumList');
+				
+				$list.empty();
+				$list.data('pageNo',1);
+				
+				loadContent(1);
+				
+			}
+		});
+	
+	
 		function loadContent(pageNo) {
 			const $list = $('#stadiumList');
+			const keyword = getKeyword();
 
-			
 			$.ajax({
-				url : `${pageContext.request.contextPath}/stadium/list`,
+				url : `${pageContext.request.contextPath}/field/listMore`,
 				type : 'get',
-				data : {page : pageNo},
+				data : {
+					pageNo : pageNo,
+					keyword : keyword
+				},
 				dataType : 'html',
 				success : function(html) {
 					$list.append(html);
 				},
 				error : function() {
-					cosole.error('구장 목록 로드 실패');
+					console.error('구장 목록 로드 실패');
 				}
 			});
 		}
 
 		$(function() {
-			$('#loadMoreBtn').click(
-					function() {
-						
-						const $list = $('#stadiumList');
-						
-						let pageNo = $list.data('page-no') || 1;
+			$('#loadMoreBtn').click(function() {
 
-						let totalPage = $list.data('total-page');
+				const $list = $('#stadiumList');
 
-						if(totalPage == null){
-							console.error('data-total-page 누락');
-							return;
-						}
-						
-						pageNo = Number(pageNo);
-						totalPage = Number(totalPage);
-						
-						if (pageNo < totalPage) {
-							pageNo++;
-							$list.data('page-no',pageNo);
-							loadContent(pageNo);
-						} else {
-							$('#loadMoreBtn').hide(); // 더불러올게 없으면 일단 버튼숨김
-						}
-					});
+				let pageNo = $list.data('pageNo') || 1;
+
+				let totalPage = $list.data('totalPage');
+
+				if (totalPage == null) {
+					console.error('data-totalPage 누락');
+					return;
+				}
+
+				pageNo = Number(pageNo);
+				totalPage = Number(totalPage);
+
+				if (pageNo < totalPage) {
+					pageNo++;
+					$list.data('pageNo', pageNo);
+					loadContent(pageNo);
+				} else {
+					$('#loadMoreBtn').hide(); // 더불러올게 없으면 일단 버튼숨김
+				}
+			});
 		});
 	</script>
 

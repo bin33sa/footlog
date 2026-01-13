@@ -1,15 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
-
 
 	<c:forEach var="dto" items="${list}">
 
@@ -23,7 +15,7 @@
 				</div>
 				<div class="p-4">
 					<div class="d-flex justify-content-between align-items-start mb-1">
-						<h5 class="fw-bold mb-0">${dto.stadium_name}</h5>
+						<h5 class="fw-bold mb-0">${dto.stadiumName}</h5>
 						<span class="text-warning fw-bold"><i
 							class="bi bi-star-fill">${dto.region}</i></span>
 					</div>
@@ -49,5 +41,3 @@
 		</div>
 
 	</c:forEach>
-</body>
-</html>

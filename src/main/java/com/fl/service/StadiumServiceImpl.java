@@ -1,10 +1,12 @@
 package com.fl.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fl.mapper.StadiumMapper;
 import com.fl.model.ArenaDTO;
+import com.fl.model.PageResult;
 import com.fl.model.StadiumDTO;
 import com.fl.mybatis.support.MapperContainer;
 
@@ -13,29 +15,24 @@ public class StadiumServiceImpl implements StadiumService {
 	
 	
 	@Override
-	public List<StadiumDTO> listStadium(Map<String, Object> map) {
-
-		List<StadiumDTO> list;
-
-		int pageNo = (int) map.get("pageNo");
-		int size   = (int) map.get("size");
-
+	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword) {
+		
 		int offset = (pageNo - 1) * size;
+		
+		Map<String,Object> map = new HashMap<>();
 		map.put("offset", offset);
+		map.put("size", size);
+		map.put("keyword", keyword);
+		
+		List<StadiumDTO> list = mapper.listStadium(map);
+		int dataCount = mapper.stadiumCount(map);
+		
+		int totalPage = (int) Math.ceil((double) dataCount / size);
 
-		try {
-			list = mapper.listStadium(map);
-		} catch (Exception e) {
-			throw e;
-		}
-
-		return list;
+		return new PageResult<>(list, pageNo, totalPage, dataCount); 
 	}
 
-	@Override
-	public int stadiumCount(Map<String, Object> map) {
-		return mapper.stadiumCount(map);
-	}
+	
 	@Override
 	public List<ArenaDTO> listArena(Map<String, Object> map) {
 		// TODO Auto-generated method stub

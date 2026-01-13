@@ -1,10 +1,8 @@
 package com.fl.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+import com.fl.model.PageResult;
 import com.fl.model.StadiumDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
@@ -20,60 +18,47 @@ import jakarta.servlet.http.HttpServletResponse;
 @Controller
 @RequestMapping("/field/*")
 public class FieldController {
-	
-	
+
 	private StadiumService service = new StadiumServiceImpl();
 
-	
 	@RequestMapping("list")
-	public ModelAndView list(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	public ModelAndView list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-		StadiumService service = new StadiumServiceImpl();
+		int pageNo = 1;
+		int size = 4;
+		String keyword = req.getParameter("keyword");
 
-		int pageNo = 1;   // ⭐ 초기 페이지
-		int size   = 6;   // ⭐ 한 페이지 개수
-
-		Map<String,Object> map = new HashMap<>();
-		map.put("pageNo", pageNo);
-		map.put("size", size);
-
-		List<StadiumDTO> list = service.listStadium(map);
-
-		int dataCount = service.stadiumCount(map);
-		int totalPage = (int)Math.ceil((double)dataCount / size);
+		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword);
 
 		ModelAndView mav = new ModelAndView("field/list");
-		mav.addObject("list", list);
-		mav.addObject("pageNo", pageNo);
-		mav.addObject("totalPage", totalPage);
+		mav.addObject("list", result.getList());
+		mav.addObject("pageNo", result.getPageNo());
+		mav.addObject("totalPage", result.getTotalPage());
 
 		return mav;
 	}
+
 	@RequestMapping("view")
 	public ModelAndView detail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("field/view");
-		
+
 		return mav;
 	}
-	
-	
+
 	@GetMapping("listMore")
-	public ModelAndView listMore(int pageNo) {
+	public ModelAndView listMore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
 
-		int size = 6; // list()와 반드시 동일
+		int pageNo = Integer.parseInt(req.getParameter("pageNo"));
+		int size = 4; // list()와 반드시 동일
+		String keyword = req.getParameter("keyword");
+		
+		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword);
 
-		Map<String, Object> map = new HashMap<>();
-		map.put("pageNo", pageNo);
-		map.put("size", size);
-
-		List<StadiumDTO> list = service.listStadium(map);
-
-		ModelAndView mav = new ModelAndView("field/stadiumListFragment");
-		mav.addObject("list", list);
+		ModelAndView mav = new ModelAndView("field/stadiumList");
+		
+		mav.addObject("list", result.getList());
 
 		return mav;
 	}
-
 
 }

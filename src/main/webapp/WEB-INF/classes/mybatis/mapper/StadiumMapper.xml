@@ -6,20 +6,38 @@
 	<!-- 구장목록 조회 -->
 	<select id="listStadium" parameterType="map"
 		resultType="com.fl.model.StadiumDTO">
-		
+
 		SELECT
-			stadium_code AS stadiumCode,
-			stadium_name AS stadiumName, region, stadium_image AS stadiumImage
+		stadium_code AS stadiumCode,
+		stadium_name AS stadiumName, region,
+		stadium_image AS stadiumImage
 		FROM stadium
+		<where>
+			<if test="keyword != null and keyword != ''">
+				(
+				stadium_name LIKE '%' || #{keyword} || '%'
+				OR region LIKE
+				'%' || #{keyword} || '%'
+				)
+			</if>
+		</where>
 		ORDER BY stadium_code DESC
+		OFFSET #{offset} ROWS FETCH FIRST #{size}
+		ROWS ONLY
 	</select>
-	
+
 	<!-- 구장 수(페이징 처리 용) -->
-	<select id="stadiumCount"
-          parameterType="map"
-          resultType="int">
-    SELECT COUNT(*)
-    FROM stadium
-  </select>
-	
+	<select id="stadiumCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM stadium
+		<where>
+			<if test="keyword != null and keyword != ''">
+				(
+				stadium_name LIKE '%' || #{keyword} || '%'
+				OR region LIKE '%' || #{keyword} || '%'
+				)
+			</if>
+		</where>
+	</select>
+
 </mapper>

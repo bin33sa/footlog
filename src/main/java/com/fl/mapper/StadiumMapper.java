@@ -8,7 +8,6 @@ import com.fl.model.StadiumDTO;
 public interface StadiumMapper {
 
 	  public List<StadiumDTO> listStadium(Map<String, Object> map);
-	
 	  
 	  int stadiumCount(Map<String, Object> map);
 }
