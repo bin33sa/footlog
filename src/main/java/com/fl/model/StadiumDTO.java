@@ -1,28 +1,28 @@
 package com.fl.model;
 
 public class StadiumDTO {
-	private Long stadiumCode;    
-    private String stadiumName;  
+	private Long stadium_code;    
+    private String stadium_name;  
     private String region;        
     private String phoneNumber;  
     private String description;   
     private String introUrl;     
-    private String stadiumImage; 
+    private String stadium_image; 
 
     private int likeCount;  
     private int arenaCount; 
     private int userLiked;
-	public Long getStadiumCode() {
-		return stadiumCode;
+	public Long getStadium_code() {
+		return stadium_code;
 	}
-	public void setStadiumCode(Long stadiumCode) {
-		this.stadiumCode = stadiumCode;
+	public void setStadium_code(Long stadium_code) {
+		this.stadium_code = stadium_code;
 	}
-	public String getStadiumName() {
-		return stadiumName;
+	public String getStadium_name() {
+		return stadium_name;
 	}
-	public void setStadiumName(String stadiumName) {
-		this.stadiumName = stadiumName;
+	public void setStadium_name(String stadium_name) {
+		this.stadium_name = stadium_name;
 	}
 	public String getRegion() {
 		return region;
@@ -48,11 +48,11 @@ public class StadiumDTO {
 	public void setIntroUrl(String introUrl) {
 		this.introUrl = introUrl;
 	}
-	public String getStadiumImage() {
-		return stadiumImage;
+	public String getStadium_image() {
+		return stadium_image;
 	}
-	public void setStadiumImage(String stadiumImage) {
-		this.stadiumImage = stadiumImage;
+	public void setStadium_image(String stadium_image) {
+		this.stadium_image = stadium_image;
 	}
 	public int getLikeCount() {
 		return likeCount;
