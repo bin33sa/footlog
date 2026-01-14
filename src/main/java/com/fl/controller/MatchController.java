@@ -34,11 +34,15 @@ public class MatchController {
 	@GetMapping("list")
 	public ModelAndView matchList(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/list");
+		return mav;
+	}
+	
+	@GetMapping("listAjax")
+	public ModelAndView matchListAjax(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		ModelAndView mav = new ModelAndView("match/listAjax");
 		
 		try {
-			
 			String page = req.getParameter("page");
-
 			int current_page = 1;
 			if(page != null) {
 				current_page = Integer.parseInt(page);
@@ -47,27 +51,31 @@ public class MatchController {
 			//검색
 			String schType = req.getParameter("schType");
 			String kwd = req.getParameter("kwd");
+			String region = req.getParameter("region");
+			String matchDate = req.getParameter("matchDate");
+			
 			if(schType == null) {
-				schType = "all";
+				schType = "";
 				kwd = "";
 			}
-			
 			kwd = util.decodeUrl(kwd);
 			
-			int size = 10;
+			int size = 6;
 			int total_page = 0;
 			int dataCount = 0;
 			
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("schType", schType);
 			map.put("kwd", kwd);
+			map.put("region", region);
+			map.put("matchDate", matchDate);
 			
 			dataCount = service.dataCount(map);
 			
 			total_page = util.pageCount(dataCount, size);
 			current_page = Math.min(total_page, current_page);
 			
-			int offset = (current_page -1 ) * size;
+			int offset = (current_page - 1 ) * size;
 			if(offset<0) offset=0;
 			
 			map.put("offset", offset);
@@ -77,33 +85,28 @@ public class MatchController {
 			
 			String query = "";
 			String cp = req.getContextPath();
-			String listUrl = cp + "/match/list";
 			String articleUrl = cp + "/match/article?page=" + current_page;
 			if(! kwd.isBlank()) {
 				query = "schType=" + schType + "&kwd="+util.encodeUrl(kwd);
-				
-				listUrl += "?" + query;
 				articleUrl += "&" + query;
 			}
 			
-			String paging = util.paging(current_page, total_page, listUrl);
-			
-			
 			mav.addObject("list", list);
+			mav.addObject("size", size);
 			mav.addObject("dataCount", dataCount);
 			mav.addObject("total_page", total_page);
-			mav.addObject("size", size);
 			mav.addObject("page", current_page);
 			mav.addObject("articleUrl", articleUrl);
 			mav.addObject("schType", schType);
 			mav.addObject("kwd", kwd);
-			mav.addObject("paging", paging);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return mav;
 	}
+	
+	
 	
 	@GetMapping("article")
 	public ModelAndView matchBoard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -120,7 +123,7 @@ public class MatchController {
 			String kwd = req.getParameter("kwd");
 			
 			if(schType ==null) {
-				schType = "all";
+				schType = "";
 				kwd = "";
 			}
 			kwd = util.decodeUrl(kwd);

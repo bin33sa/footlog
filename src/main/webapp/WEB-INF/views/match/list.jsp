@@ -50,23 +50,24 @@
 
                 <div class="d-flex flex-wrap gap-2 mb-4 justify-content-between align-items-center">
                     <div class="d-flex gap-2 flex-grow-1">
-                        <input type="date" class="form-control rounded-pill border-0 shadow-sm" style="max-width: 160px;"> 
-                        <select class="form-select rounded-pill border-0 shadow-sm" style="max-width: 120px;">
-                            <option selected>지역 전체</option>
-                            <option value="1">서울</option>
-                            <option value="2">경기</option>
-                            <option value="3">인천</option>
-                            <option value="4">강원</option>
-                            <option value="5">충북</option>
-                            <option value="6">충남</option>
-                            <option value="7">전북</option>
-                            <option value="8">전남</option>
-                            <option value="9">경북</option>
-                            <option value="10">경남</option>
-                            <option value="11">제주</option>
+                        <input type="date" id="searchDate" class="form-control rounded-pill border-0 shadow-sm" style="max-width: 160px;"> 
+                        <select name="region" class="form-select rounded-pill border-0 shadow-sm" style="max-width: 120px;">
+                            <option value="" ${schType=="all"? "selected":"" }>지역 전체</option>
+                            <option value="서울" ${schType=="서울"? "selected":"" }>서울</option>
+                            <option value="경기" ${schType=="경기"? "selected":"" }>경기</option>
+                            <option value="인천" ${schType=="인천"? "selected":"" }>인천</option>
+                            <option value="강원" ${schType=="강원"? "selected":"" }>강원</option>
+                            <option value="충북" ${schType=="충북"? "selected":"" }>충북</option>
+                            <option value="충남" ${schType=="충남"? "selected":"" }>충남</option>
+                            <option value="전북" ${schType=="전북"? "selected":"" }>전북</option>
+                            <option value="전남" ${schType=="전남"? "selected":"" }>전남</option>
+                            <option value="경북" ${schType=="경북"? "selected":"" }>경북</option>
+                            <option value="경남" ${schType=="경남"? "selected":"" }>경남</option>
+                            <option value="제주" ${schType=="제주"? "selected":"" }>제주</option>
                         </select>
                         <div class="position-relative flex-grow-1">
-                            <input type="text" class="form-control rounded-pill ps-5 border-0 shadow-sm" placeholder="구장명, 팀명 검색"> 
+                            <input type="text" id="keyword" class="form-control rounded-pill ps-5 border-0 shadow-sm" placeholder="구장명, 팀명 검색"> 
+                            <input type="hidden" id="searchKeyword" value="">
                             <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                         </div>
                     </div>
@@ -78,146 +79,13 @@
                         <label class="btn btn-outline-dark border-0 rounded-end-pill px-3" for="btnradio2">임박순</label>
                     </div>
                 </div>
+                
+				<div class="list-content" data-pageNo="0" data-totalPage="0"></div>
 				
-				<c:forEach var="dto" items="${list}">
-		    
-		    <fmt:parseDate value="${dto.match_date}" var="tempDate" pattern="yyyy-MM-dd HH:mm"/>
-		
-		    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4 border-bottom" 
-		         onclick="location.href='${articleUrl }&match_code=${dto.match_code}'" 
-		         style="cursor: pointer;">
-		        
-		        <div class="match-time-box text-center rounded-3 p-2 bg-light" style="min-width: 80px;">
-		            <span class="d-block small text-muted">
-		                <fmt:formatDate value="${tempDate}" pattern="MM.dd(E)"/>
-		            </span> 
-		            <span class="d-block fw-bold fs-5">
-		                <fmt:formatDate value="${tempDate}" pattern="HH:mm"/>
-		            </span>
-		        </div>
-
-        <div class="flex-grow-1">
-            <div class="d-flex align-items-center gap-2 mb-1">
-                <c:choose>
-                    <c:when test="${dto.status == '모집중'}">
-                        <span class="badge bg-primary text-dark rounded-pill">${dto.status}</span>
-                    </c:when>
-                    <c:otherwise>
-                        <span class="badge bg-secondary text-white rounded-pill">${dto.status}</span>
-                    </c:otherwise>
-                </c:choose>
-                
-                <span class="badge bg-light text-secondary border">${dto.matchType}</span> 
-                <span class="badge bg-light text-secondary border">${dto.gender}</span>
-                <span class="badge bg-light text-secondary border">${dto.matchLevel}</span>
-            </div>
-
-            <h5 class="fw-bold mb-1 text-truncate" style="max-width: 400px;">
-                ${dto.title}
-            </h5>
-            
-            <p class="text-muted small mb-0">
-                <i class="bi bi-geo-alt-fill me-1"></i>${dto.region} | 호스트: ${dto.home_team_name}
-            </p>
-        </div>
-
-        <div class="text-end d-none d-md-block" style="min-width: 100px;">
-            <span class="d-block fw-bold text-primary mb-1">
-                <fmt:formatNumber value="${dto.fee}" type="currency"/>
-            </span>
-            
-            <button class="btn btn-sm ${dto.status == '모집중' ? 'btn-outline-dark' : 'btn-secondary'} rounded-pill px-3"
-                    ${dto.status != '모집중' ? 'disabled' : ''} onclick="location.href='${pageContext.request.contextPath}/match/article';">
-                ${dto.status == '모집중' ? '신청가능' : '마감됨'}
-            </button>
-        </div>
-
-    </div>
-</c:forEach>
-    			<!--  
-                <div class="d-flex flex-column gap-3">
-                    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" onclick="location.href='${pageContext.request.contextPath}/match/article'">
-                        <div class="match-time-box text-center rounded-3 p-2 bg-light">
-                            <span class="d-block small text-muted">9.20(토)</span> 
-                            <span class="d-block fw-bold fs-5">18:00</span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge bg-primary text-dark rounded-pill">모집중</span>
-                                <span class="badge bg-light text-secondary border">6 vs 6</span> 
-                                <span class="badge bg-light text-secondary border">남성</span>
-                            </div>
-                            <h5 class="fw-bold mb-1">상암 월드컵 보조경기장 3파전</h5>
-                            <p class="text-muted small mb-0">
-                                <i class="bi bi-geo-alt-fill me-1"></i>서울 마포구 | 호스트: 슛돌이주장
-                            </p>
-                        </div>
-                        <div class="text-end d-none d-md-block">
-                            <span class="d-block fw-bold text-primary mb-1">10,000원</span>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3">신청가능</button>
-                        </div>
-                    </div>
-
-                    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" onclick="location.href='match/detail'">
-                        <div class="match-time-box text-center rounded-3 p-2 bg-light">
-                            <span class="d-block small text-muted">9.20(토)</span> <span class="d-block fw-bold fs-5">20:00</span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge bg-danger text-white rounded-pill">마감임박</span>
-                                <span class="badge bg-light text-secondary border">5 vs 5</span>
-                                <span class="badge bg-light text-secondary border">남녀무관</span>
-                            </div>
-                            <h5 class="fw-bold mb-1">용산 아이파크몰 풋살장</h5>
-                            <p class="text-muted small mb-0">
-                                <i class="bi bi-geo-alt-fill me-1"></i>서울 용산구 | 호스트: 메시
-                            </p>
-                        </div>
-                        <div class="text-end d-none d-md-block">
-                            <span class="d-block fw-bold text-dark mb-1">12,000원</span>
-                            <button class="btn btn-sm btn-dark rounded-pill px-3">신청하기</button>
-                        </div>
-                    </div>
-
-                    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4 opacity-75" style="background-color: #f9f9f9;">
-                        <div class="match-time-box text-center rounded-3 p-2">
-                            <span class="d-block small text-muted">9.19(금)</span> <span class="d-block fw-bold fs-5 text-decoration-line-through">19:00</span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge bg-secondary text-white rounded-pill">마감</span>
-                                <span class="badge bg-light text-secondary border">6 vs 6</span>
-                            </div>
-                            <h5 class="fw-bold mb-1 text-muted">잠실 유수지 풋살장 매치</h5>
-                            <p class="text-muted small mb-0">서울 송파구</p>
-                        </div>
-                        <div class="text-end d-none d-md-block">
-                            <button class="btn btn-sm btn-secondary rounded-pill px-3" disabled>마감됨</button>
-                        </div>
-                    </div>
-
-                    <div class="match-item modern-card p-3 mb-0 d-flex align-items-center gap-4" onclick="location.href='match/detail'">
-                        <div class="match-time-box text-center rounded-3 p-2 bg-light">
-                            <span class="d-block small text-muted">9.21(일)</span> <span class="d-block fw-bold fs-5">10:00</span>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge bg-primary text-dark rounded-pill">모집중</span>
-                                <span class="badge bg-light text-secondary border">6 vs 6</span>
-                            </div>
-                            <h5 class="fw-bold mb-1">고양 백석 구장 오전 운동</h5>
-                            <p class="text-muted small mb-0">경기 고양시</p>
-                        </div>
-                        <div class="text-end d-none d-md-block">
-                            <span class="d-block fw-bold text-primary mb-1">5,000원</span>
-                            <button class="btn btn-sm btn-outline-dark rounded-pill px-3">신청가능</button>
-                        </div>
-                    </div>
-                </div>  -->
-                
-
-               <div class="page-navigation">
-				    ${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
+               <div class="list-footer text-center mt-5 mb-5">
+					<button id="loadMoreBtn" class="btn btn-light rounded-pill px-5 py-3 shadow-sm text-muted fw-bold hover-scale w-50">
+						더 많은 매치 보기 <i class="bi bi-arrow-down-circle ms-2"></i>
+					</button>
 				</div>
             </div>
 
@@ -231,5 +99,89 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+	<script type="text/javascript">
+	$(function(){
+		$('div.list-footer').hide();
+		loadContent(1);
+		
+		$('#keyword').keydown(function(e){
+			if(e.key == 13||e.key=='Enter'){
+				e.preventDefault();
+				searchStart();
+				}
+		});
+		$('#searchDate').change(function(){
+			searchStart();
+		});
+		
+		$('select[name=region]').change(function(){
+			searchStart();
+		})
+		
+		function searchStart(){
+			$('div.list-content').empty();
+			$('.list-content').attr('data-pageNo',0);
+			
+			let keyword = $('#keyword').val().trim();
+			$('#searchKeyword').val(keyword);
+			
+			loadContent(1);
+		}
+		
+		$('#loadMoreBtn').click(function(){
+			let pageNo = Number($('.list-content').attr('data-pageNo')) || 0;
+			loadContent(pageNo + 1);
+		});
+		
+		function loadContent(page) {
+			let keyword = $('#searchKeyword').val();
+			let dateVal = $('#searchDate').val();
+			let regionVal = $('select[name=region]').val();
+			
+			let url = '${pageContext.request.contextPath}/match/listAjax';
+			
+			let schType = 'all';
+			let kwd = keyword;
+			
+			
+			if(dateVal){
+			    schType = 'match_date'; 
+			    kwd = dateVal; 
+			}
+			
+			let params = {page:page, schType:schType, kwd:kwd, region:regionVal, matchDate:dateVal};
+			
+			
+			const fn = function(data) {
+				if(! data || data.trim() === ""){
+					$('div.list-footer').hide();
+					
+					if(page === 1){
+						$('.list-content').html('<div class="text-center p-5">등록된 매치가 없습니다.</div>');
+
+						$('.list-content').attr('data-pageNo', 0);
+						$('.list-content').attr('data-totalPage', 0);
+					}
+					return;
+				}
+				
+				$('.list-content').append(data);
+				// $('.list-content').attr('data-pageNo',page);
+				
+				let pageNo = Number($('.list-content').attr('data-pageNo')) || 0;
+				let totalPage = Number($('.list-content').attr('data-totalPage')) || 0;
+				
+				if(pageNo < totalPage) {
+					$('div.list-footer').show();
+				} else {
+					$('div.list-footer').hide();
+				}
+			};
+			
+			ajaxRequest(url, 'get', params, 'text', fn);
+		}
+	});
+		
+	</script>
 </body>
 </html>

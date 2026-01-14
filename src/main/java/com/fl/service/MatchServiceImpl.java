@@ -28,7 +28,6 @@ public class MatchServiceImpl implements MatchService{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	@Override
@@ -38,7 +37,6 @@ public class MatchServiceImpl implements MatchService{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 	}
 
 	@Override
@@ -80,7 +78,6 @@ public class MatchServiceImpl implements MatchService{
 		return dto;
 	}
 	
-
 	@Override
 	public MatchDTO findByPrev(Map<String, Object> map) {
 		// TODO Auto-generated method stub
@@ -136,11 +133,5 @@ public class MatchServiceImpl implements MatchService{
 			e.printStackTrace();
 			return 0L;
 		}
-	
-		
-		
 	}
-
-
-
 }
