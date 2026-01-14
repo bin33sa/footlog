@@ -3,11 +3,11 @@
 <mapper namespace="com.fl.mapper.MyTeamMapper">
 
 	<select id="listMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
-		SELECT t.team_code, t.team_name, t.emblem_image AS team_logo
-		FROM team t
-		JOIN member_team tm ON t.team_code = tm.team_code
-		WHERE tm.member_code = #{member_code}
-		ORDER BY t.team_name
+	    SELECT t.team_code, t.team_name, t.emblem_image
+	    FROM team t
+	    JOIN member_team tm ON t.team_code = tm.team_code
+	    WHERE tm.member_code = #{member_code}
+	    ORDER BY t.team_name
 	</select>
 
 	<select id="readTeamInfo" parameterType="Long" resultType="com.fl.model.TeamDTO">

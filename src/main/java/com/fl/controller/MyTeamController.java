@@ -44,7 +44,7 @@ public class MyTeamController {
 
             if (myTeams == null || myTeams.isEmpty()) return -1;
 
-            TeamDTO currentTeam = myTeams.get(0);
+            TeamDTO currentTeam = myTeams.get(0); 
             long teamCode = currentTeam.getTeam_code();
             
             int myRoleLevel = service.readMemberRoleLevel(memberCode, teamCode);
@@ -52,6 +52,7 @@ public class MyTeamController {
             mav.addObject("team_code", teamCode);
             mav.addObject("myRoleLevel", myRoleLevel);
             mav.addObject("myTeamName", currentTeam.getTeam_name());
+            mav.addObject("myTeam", currentTeam); 
 
             return teamCode;
 
@@ -179,12 +180,6 @@ public class MyTeamController {
     
     @PostMapping("updateSquad")
 	public ModelAndView updateSquad(HttpServletRequest req, HttpServletResponse resp) {
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
-
-		if (info == null) {
-			return new ModelAndView("redirect:/member/login");
-		}
 
 		try {
 
@@ -218,11 +213,7 @@ public class MyTeamController {
         
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
-        
-        if(info == null) {
-            return new ModelAndView("redirect:/member/login");
-        }
-
+     
         try {
             String teamCodeStr = req.getParameter("teamCode");
             if(teamCodeStr == null || teamCodeStr.isEmpty()) {
@@ -257,11 +248,6 @@ public class MyTeamController {
     public ModelAndView teamUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         HttpSession session = req.getSession();
-        SessionInfo info = (SessionInfo) session.getAttribute("member");
-        
-        if(info == null) {
-            return new ModelAndView("redirect:/member/login");
-        }
 
         String teamCodeStr = req.getParameter("team_code");
         String teamName = req.getParameter("team_name");
