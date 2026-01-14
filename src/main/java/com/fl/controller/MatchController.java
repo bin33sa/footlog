@@ -208,6 +208,7 @@ public class MatchController {
 			dto.setMember_code(info.getMember_code());
 			
 			dto.setTitle(req.getParameter("title"));
+			dto.setStadiumCode(Integer.parseInt(req.getParameter("stadiumCode")));
 			dto.setContent(req.getParameter("content"));
 			dto.setHome_code(myTeamCode);
 			dto.setMatch_date(req.getParameter("matchDate"));

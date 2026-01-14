@@ -95,7 +95,7 @@
 	
 	<select id="getUserTeamCode" parameterType="Long" resultType="Long">
     SELECT team_code 
-    FROM team_member  WHERE member_code = #{member_code}
+    FROM member_team  WHERE member_code = #{member_code}
     </select>
 	
 	

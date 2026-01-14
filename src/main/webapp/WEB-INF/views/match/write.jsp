@@ -59,7 +59,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="stadium" class="form-label fw-bold">구장 선택</label>
-                                <select class="form-select bg-light border-0" id="stadium" name="stadiumId">
+                                <select class="form-select bg-light border-0" id="stadium" name="stadiumCode">
                                     <option value="" selected>구장을 선택해주세요</option>
                                     <c:forEach var="item" items="${stadiumList}">
                                     	<option value="${item.stadiumCode}">${item.stadiumName}</option>
@@ -72,25 +72,25 @@
                             <div class="col-md-4">
                                 <label for="matchType" class="form-label fw-bold">경기 방식</label>
                                 <select class="form-select bg-light border-0" id="matchType" name="matchType" >
-                                    <option value="5" ${dto.matchType== '5'?'selected':''}>5 vs 5</option>
-                                    <option value="6" ${dto.matchType== '6' || empty dto.matchType ?'selected':''}>6 vs 6</option>
-                                    <option value="11" ${dto.matchType== '11'?'selected':''}>11 vs 11</option>
+                                    <option value="5vs5" ${dto.matchType== '5'?'selected':''}>5 vs 5</option>
+                                    <option value="6vs6" ${dto.matchType== '6' || empty dto.matchType ?'selected':''}>6 vs 6</option>
+                                    <option value="11vs11" ${dto.matchType== '11'?'selected':''}>11 vs 11</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="gender" class="form-label fw-bold">성별</label>
                                 <select class="form-select bg-light border-0" id="gender" name="gender" >
-                                    <option value="M" ${dto.gender=='M'|| empty dto.gender?'selected':''}>남성</option>
-                                    <option value="F" ${dto.gender=='F'?'selected':''}>여성</option>
-                                    <option value="X" ${dto.gender=='X'?'selected':''}>남녀무관(혼성)</option>
+                                    <option value="남성" ${dto.gender=='M'|| empty dto.gender?'selected':''}>남성</option>
+                                    <option value="여성" ${dto.gender=='F'?'selected':''}>여성</option>
+                                    <option value="남녀무관(혼성)" ${dto.gender=='X'?'selected':''}>남녀무관(혼성)</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="level" class="form-label fw-bold">실력</label>
                                 <select class="form-select bg-light border-0" id="matchLevel" name="matchLevel" >
-                                    <option value="LOW" ${dto.matchLevel=='LOW'? 'selected':''}>하 (초보)</option>
-                                    <option value="MID" ${dto.matchLevel=='MID'|| empty dto.matchLevel? 'selected':''}>중 (아마추어)</option>
-                                    <option value="HIGH" ${dto.matchLevel=='HIGH'? 'selected':''}>상 (선출포함)</option>
+                                    <option value="하 (초보)" ${dto.matchLevel=='LOW'? 'selected':''}>하 (초보)</option>
+                                    <option value="중 (아마추어)" ${dto.matchLevel=='MID'|| empty dto.matchLevel? 'selected':''}>중 (아마추어)</option>
+                                    <option value="상 (선출포함)" ${dto.matchLevel=='HIGH'? 'selected':''}>상 (선출포함)</option>
                                 </select>
                             </div>
                         </div>
@@ -149,10 +149,10 @@
 			return;
 		}
 		
-		str = f.stadiumId.value.trim();
+		str = f.stadiumCode.value.trim();
 		if(! str){
 			alert('구장을 선택하세요.');
-			f.stadiumId.focus();
+			f.stadiumCode.focus();
 			return;
 		}
 		
