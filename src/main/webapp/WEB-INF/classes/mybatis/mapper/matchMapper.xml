@@ -3,27 +3,19 @@
 <mapper namespace="com.fl.mapper.MatchMapper">
 	
 	<sql id="where-list">
-    <if test="region != null and region != '' and region != 'all'">
-        AND s.region = #{region}
-    </if>
-    
-    <if test="kwd != null and kwd != ''">
-        <choose>
-            <when test="schType == 'all'">
+	    <if test="region != null and region != '' and region != 'all'">
+	        AND s.region = #{region}
+	    </if>
+    	 <if test="matchDate!=null and matchDate!=''">
+                AND TO_CHAR(m.match_date, 'YYYY-MM-DD') = #{matchDate}
+         </if>
+         
+   		 <if test="kwd != null and kwd != ''">
+           
                 AND ( INSTR(m.title, #{kwd}) &gt; 0
                    OR INSTR(ht.team_name, #{kwd}) &gt; 0 
                    OR INSTR(stadium_name, #{kwd}) &gt; 0 )
-            </when>
-            
-            <when test="schType == 'match_date'">
-                AND TO_CHAR(m.match_date, 'YYYY-MM-DD') = #{kwd}
-            </when>
-            
-            <otherwise>
-                AND INSTR(${schType}, #{kwd}) &gt; 0
-            </otherwise>
-        </choose>
-    </if>
+         </if>
 </sql>
 	
 	<!-- 글 등록 -->

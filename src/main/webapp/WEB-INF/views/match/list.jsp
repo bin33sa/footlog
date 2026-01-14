@@ -144,12 +144,7 @@
 			let kwd = keyword;
 			
 			
-			if(dateVal){
-			    schType = 'match_date'; 
-			    kwd = dateVal; 
-			}
-			
-			let params = {page:page, schType:schType, kwd:kwd, region:regionVal, matchDate:dateVal};
+			let params = {page:page, schType:'all', kwd:kwd, region:regionVal, matchDate:dateVal};
 			
 			
 			const fn = function(data) {
