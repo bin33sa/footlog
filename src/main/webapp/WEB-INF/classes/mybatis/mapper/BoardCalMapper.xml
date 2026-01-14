@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.fl.mapper.BoardCalMapper">
+
+    <select id="listCalendar" parameterType="map" resultType="com.fl.model.BoardCalDTO">
+        SELECT board_cal_code, member_code, team_code, match_code, title, content, 
+               TO_CHAR(start_date, 'YYYY-MM-DD"T"HH24:MI:SS') as start_date, 
+               TO_CHAR(end_date, 'YYYY-MM-DD"T"HH24:MI:SS') as end_date, 
+               created_at
+        FROM board_cal
+        WHERE (start_date &gt;= TO_DATE(REPLACE(#{start}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS') 
+               AND start_date &lt;= TO_DATE(REPLACE(#{end}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS'))
+           OR (end_date &gt;= TO_DATE(REPLACE(#{start}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS') 
+               AND end_date &lt;= TO_DATE(REPLACE(#{end}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS'))
+        ORDER BY start_date ASC
+    </select>
+
+
+    <insert id="insertCalendar" parameterType="com.fl.model.BoardCalDTO">
+        INSERT INTO board_cal (
+            board_cal_code, member_code, team_code, match_code, 
+            title, content, start_date, end_date, created_at
+        ) VALUES (
+            board_cal_seq.NEXTVAL, 
+            #{member_code}, #{team_code}, #{match_code}, 
+            #{title}, #{content, jdbcType=VARCHAR}, 
+            TO_DATE(REPLACE(#{start_date}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS'), 
+            TO_DATE(REPLACE(#{end_date}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS'), 
+            SYSDATE
+        )
+    </insert>
+
+    <select id="findById" parameterType="long" resultType="com.fl.model.BoardCalDTO">
+        SELECT board_cal_code, member_code, team_code, match_code, title, content, 
+               TO_CHAR(start_date, 'YYYY-MM-DD"T"HH24:MI:SS') as start_date, 
+               TO_CHAR(end_date, 'YYYY-MM-DD"T"HH24:MI:SS') as end_date
+        FROM board_cal
+        WHERE board_cal_code = #{board_cal_code}
+    </select>
+
+    <update id="updateCalendar" parameterType="com.fl.model.BoardCalDTO">
+        UPDATE board_cal 
+        SET title = #{title},
+            content = #{content, jdbcType=VARCHAR},
+            start_date = TO_DATE(REPLACE(#{start_date}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS'),
+            end_date = TO_DATE(REPLACE(#{end_date}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')
+        WHERE board_cal_code = #{board_cal_code}
+    </update>
+
+    <delete id="deleteCalendar" parameterType="map">
+        DELETE FROM board_cal WHERE board_cal_code = #{board_cal_code}
+    </delete>
+
+</mapper>
