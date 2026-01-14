@@ -1,6 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+
+<fmt:formatDate value="<%= new java.util.Date() %>" pattern="yyyy-MM-dd" var="today"/>
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -57,14 +61,14 @@
                 </div>
             </div>
 
-            <div class="col-lg-8 col-12">
+            <div class="col-lg-8 col-12" >
                 
                 <div class="modern-card p-0 overflow-hidden mb-4">
                     <div class="position-relative" style="height: 400px;">
                         <img src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=1000&auto=format&fit=crop&q=80" class="w-100 h-100 object-fit-cover" alt="stadium">
                         <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);">
-                            <h2 class="text-white fw-bold mb-1">상암 월드컵 보조경기장</h2>
-                            <p class="text-white-50 mb-0"><i class="bi bi-geo-alt-fill me-1"></i>서울 마포구 성산동 515</p>
+                            <h2 class="text-white fw-bold mb-1">${dto.stadiumName}</h2>
+                            <p class="text-white-50 mb-0"><i class="bi bi-geo-alt-fill me-1"></i>${dto.region}</p>
                         </div>
                     </div>
 
@@ -94,16 +98,15 @@
                                 <hr class="my-4">
                                 <h5 class="fw-bold mb-3">구장 소개</h5>
                                 <p class="text-muted" style="line-height: 1.8;">
-                                    국제 규격의 인조잔디 구장으로 최상의 잔디 상태를 유지하고 있습니다.<br>
-                                    야간 경기를 위한 조명 시설이 완비되어 있으며, 넓은 주차 공간을 보유하고 있습니다.<br>
-                                    풋살화(TF) 착용 필수이며, 스터드가 있는 축구화는 착용이 불가능합니다.
+                                   	${dto.stadiumName} 구장소개글로 바꿔야함 여기.
+                                  
                                 </p>
                             </div>
                             
                             <div class="col-md-4 border-start ps-md-4">
                                 <div class="text-center bg-light p-4 rounded-4 mb-3">
                                     <h6 class="text-muted mb-2">평균 별점</h6>
-                                    <h1 class="fw-bold mb-0">4.9 <span class="fs-6 text-muted">/ 5.0</span></h1>
+                                    <h1 class="fw-bold mb-0">${dto.rating} <span class="fs-6 text-muted">/ 5.0</span></h1>
                                     <div class="text-warning small mb-2">
                                         <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
                                     </div>
@@ -120,37 +123,16 @@
                             
                             <div class="mb-4">
                                 <label class="form-label fw-bold">날짜</label>
-                                <input type="date" class="form-control form-control-lg border-0 shadow-sm" value="2025-09-20">
+                                <input type="date" id="reservationDate" class="form-control form-control-lg border-0 shadow-sm" value="${today}" min="${today}" required>
                             </div>
 
                             <div class="mb-4">
                                 <label class="form-label fw-bold d-block mb-2">시간 선택</label>
-                                <div class="row g-2">
-                                    <div class="col-4 col-md-3">
-                                        <input type="radio" class="btn-check" name="time" id="t1" disabled>
-                                        <label class="btn btn-outline-secondary w-100 py-2 rounded-3 text-decoration-line-through" for="t1">10:00</label>
-                                    </div>
-                                    <div class="col-4 col-md-3">
-                                        <input type="radio" class="btn-check" name="time" id="t2">
-                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t2">12:00</label>
-                                    </div>
-                                    <div class="col-4 col-md-3">
-                                        <input type="radio" class="btn-check" name="time" id="t3">
-                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t3">14:00</label>
-                                    </div>
-                                    <div class="col-4 col-md-3">
-                                        <input type="radio" class="btn-check" name="time" id="t4">
-                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t4">16:00</label>
-                                    </div>
-                                    <div class="col-4 col-md-3">
-                                        <input type="radio" class="btn-check" name="time" id="t5">
-                                        <label class="btn btn-outline-primary w-100 py-2 rounded-3" for="t5">18:00</label>
-                                    </div>
-                                    <div class="col-4 col-md-3">
-                                        <input type="radio" class="btn-check" name="time" id="t6" disabled>
-                                        <label class="btn btn-outline-secondary w-100 py-2 rounded-3 text-decoration-line-through" for="t6">20:00</label>
-                                    </div>
+
+
+                                <div class="row g-2" id="timeSlotArea">
                                 </div>
+                                
                                 <div class="mt-2 small text-muted">
                                     <span class="me-2"><i class="bi bi-square-fill text-secondary opacity-25"></i> 마감</span>
                                     <span><i class="bi bi-square-fill text-primary opacity-50"></i> 예약가능</span>
@@ -161,7 +143,7 @@
                             <div class="d-flex justify-content-between align-items-center mt-4">
                                 <div>
                                     <span class="text-muted small">총 결제금액 (2시간)</span>
-                                    <h3 class="fw-bold text-dark mb-0">80,000원</h3>
+                                    <h3 class="fw-bold text-dark mb-0">${dto.price}원</h3>
                                 </div>
                                 <button class="btn btn-dark btn-lg rounded-pill px-5 fw-bold" onclick="alert('예약 페이지로 이동합니다.')">
                                     예약하기
@@ -199,7 +181,7 @@
 
                 <div class="text-center mb-5">
                     <button class="btn btn-light rounded-pill px-4" onclick="location.href='${pageContext.request.contextPath}/field/list'">
-                        목록으로 돌아가기
+                        목록으로 돌아가기 stadiumCode = ${dto.stadiumCode}
                     </button>
                 </div>
 
@@ -225,6 +207,60 @@
 	
 	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+	<script type="text/javascript">
+	
+	
+$(function () {
+  $('#reservationDate').on('change', function () {
+    const date = this.value;
+
+    console.log(date);
+    $.get('${pageContext.request.contextPath}/field/times', {
+      stadiumCode: '${dto.stadiumCode}',
+      date: date
+    }, function (res) {
+      renderTimeSlots(res);
+    }, 'json');
+    
+  });
+
+  // 페이지 처음 들어왔을 때도 한번 불러오게
+  $('#reservationDate').trigger('change');
+  
+});
+
+function renderTimeSlots(res) {
+	
+  const $area = $('#timeSlotArea');
+  $area.empty();
+
+  res.available.forEach(time => {
+    $area.append(`
+      <div class="col-4 col-md-3">
+        <button type="button"
+                class="btn btn-outline-primary w-100 py-2 rounded-3 time-btn"
+                data-time="\${time}">
+          \${time}
+        </button>
+      </div>
+    `);
+  });
+
+  res.reserved.forEach(time => {
+    $area.append(`
+      <div class="col-4 col-md-3">
+        <button type="button"
+                class="btn btn-outline-secondary w-100 py-2 rounded-3 text-decoration-line-through"
+                disabled>
+          \${time}
+        </button>
+      </div>
+    `);
+  });
+}
+</script>
+
 
 </body>
 </html>

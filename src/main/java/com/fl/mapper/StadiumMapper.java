@@ -10,5 +10,7 @@ public interface StadiumMapper {
 	  public List<StadiumDTO> listStadium(Map<String, Object> map);
 	  public List<StadiumDTO> listStadiumAll();
 	  
+	  public StadiumDTO findById(int stadiumCode);
+	  
 	  int stadiumCount(Map<String, Object> map);
 }

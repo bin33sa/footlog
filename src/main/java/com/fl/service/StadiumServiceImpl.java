@@ -13,6 +13,16 @@ import com.fl.mybatis.support.MapperContainer;
 public class StadiumServiceImpl implements StadiumService {
 	private StadiumMapper mapper = MapperContainer.get(StadiumMapper.class); 
 	
+	
+	 public StadiumDTO findById(int stadiumCode){
+	
+		 StadiumDTO dto = mapper.findById(stadiumCode);
+		 
+		 
+		 return dto;
+	 }
+	
+	
 	//전체리스트 불러오기
 	@Override
 	public List<StadiumDTO> listStadiumAll() {

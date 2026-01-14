@@ -13,6 +13,7 @@ public interface StadiumService {
 	public PageResult<StadiumDTO> listStadium(int pageNo, int size, String keyword, String sort);
 	public List<StadiumDTO> listStadiumAll();
 	
+	public StadiumDTO findById(int stadiumCode);
 	
 	// 구장내 경기장 목록출력 , 경기장 페이징 처리?
 	public List<ArenaDTO> listArena(Map<String,Object> map);

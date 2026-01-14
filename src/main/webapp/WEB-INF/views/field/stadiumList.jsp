@@ -6,7 +6,7 @@
 	<c:forEach var="dto" items="${list}">
 
 		<div class="col-md-6"
-			onclick="location.href='${pageContext.request.contextPath}/field/view'">
+			onclick="location.href='${pageContext.request.contextPath}/field/view?stadiumCode=${dto.stadiumCode}'">
 			<div class="modern-card stadium-card p-0 h-100">
 				<div class="stadium-img-wrapper position-relative">
 					<img
