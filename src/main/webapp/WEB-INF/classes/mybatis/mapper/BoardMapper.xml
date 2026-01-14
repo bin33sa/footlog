@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fl.mapper.BoardMapper">
+	
+
+    <select id="listBoard" parameterType="map" resultType="com.fl.model.BoardDTO">
+    SELECT b.board_main_code, b.title, m.member_name, 
+           b.created_at, b.view_count, b.category,
+           (SELECT COUNT(*) FROM comment_main r WHERE r.board_main_code = b.board_main_code) as replyCount
+    FROM board_main b
+    JOIN member m ON b.member_code = m.member_code
+    <where>
+        <if test="category != null and category != 0">
+            AND b.category = #{category}
+        </if>
+        <if test="kwd != null and kwd != ''">
+            <choose>
+                <when test="schType == 'all'">
+                    AND (INSTR(b.title, #{kwd}) &gt; 0 OR INSTR(b.content, #{kwd}) &gt; 0 OR INSTR(m.member_name, #{kwd}) &gt; 0)
+                </when>
+                <when test="schType == 'title'">
+                    AND INSTR(b.title, #{kwd}) &gt; 0
+                </when>
+                <when test="schType == 'content'">
+                    AND INSTR(b.content, #{kwd}) &gt; 0
+                </when>
+                <when test="schType == 'name'">
+                    AND INSTR(m.member_name, #{kwd}) &gt; 0
+                </when>
+            </choose>
+        </if>
+    </where>
+    ORDER BY b.board_main_code DESC
+    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+</select>
+    
+    <insert id="insertBoard" parameterType="com.fl.model.BoardDTO">
+        INSERT INTO board_main (
+            board_main_code, member_code, title, content, 
+            created_at, category, view_count, video_url
+        ) VALUES (
+            SEQ_BOARD_MAIN.NEXTVAL, #{member_code}, #{title}, #{content},
+            SYSDATE, #{category}, 0, #{video_url, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <select id="listTeam" parameterType="map" resultType="com.fl.model.BoardDTO">
+		select t.team_code, team_name
+		from team t 
+		join member_team m on t.team_code = m.team_code
+		where m.member_code = #{member_code}
+    </select>
+	
+	<update id="updateBoard" parameterType="com.fl.model.BoardDTO">
+        UPDATE board_main 
+        SET title = #{title}, 
+            content = #{content}, 
+            category = #{category},
+            video_url = #{video_url, jdbcType=VARCHAR}
+        WHERE board_main_code = #{board_main_code} AND member_code = #{member_code}
+    </update>
+    
+    <select id="findById" parameterType="long" resultType="com.fl.model.BoardDTO">
+        SELECT b.board_main_code, b.member_code, b.title, b.content, 
+               b.created_at, b.category, b.view_count, b.video_url, m.member_name
+        FROM board_main b
+        JOIN MEMBER m ON b.member_code = m.member_code
+        WHERE b.board_main_code = #{board_main_code}
+    </select>
+    
+    <delete id="deleteBoard" parameterType="map">
+        DELETE FROM board_main 
+        WHERE board_main_code = #{board_main_code} AND member_code = #{member_code}
+    </delete>
+    
+    <select id="dataCount" parameterType="map" resultType="int">
+        SELECT COUNT(*) 
+        FROM board_main b
+        <where>
+            <if test="category != null and category != ''">
+                AND b.category = #{category}
+            </if>
+            <if test="kwd != null and kwd != ''">
+                AND b.title LIKE '%' || #{kwd} || '%'
+            </if>
+        </where>   
+    </select>
+
+	<insert id="insertReply" parameterType="com.fl.model.BoardReplyDTO">
+        INSERT INTO comment_main (
+            comment_id, board_main_code, member_code, parent_comment_id, content, created_at
+        ) VALUES (
+            SEQ_COMMENT_MAIN.NEXTVAL, #{board_main_code}, #{member_code},
+            #{parent_comment_id, jdbcType=INTEGER}, #{content}, SYSDATE
+        )
+    </insert>
+
+    <select id="replyCount" parameterType="map" resultType="int">
+    SELECT NVL(COUNT(*), 0)
+    FROM comment_main
+    WHERE board_main_code = #{board_main_code} AND parent_comment_id IS NULL
+</select>
+
+    <select id="listReply" parameterType="map" resultType="com.fl.model.BoardReplyDTO">
+        SELECT r.comment_id, r.board_main_code, r.member_code, m.member_name, 
+               r.content, r.created_at, r.parent_comment_id
+        FROM comment_main r
+        JOIN MEMBER m ON r.member_code = m.member_code
+        WHERE r.board_main_code = #{board_main_code} AND r.parent_comment_id IS NULL
+        ORDER BY r.comment_id DESC
+        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+    </select>
+
+    <delete id="deleteReply" parameterType="map">
+    DELETE FROM comment_main
+    WHERE comment_id = #{comment_id} OR parent_comment_id = #{comment_id}
+</delete>
+
+    <select id="listReplyAnswer" parameterType="map" resultType="com.fl.model.BoardReplyDTO">
+    SELECT r.comment_id, r.board_main_code, r.member_code, m.member_name, 
+           r.content, r.created_at, r.parent_comment_id
+    FROM comment_main r
+    JOIN MEMBER m ON r.member_code = m.member_code
+    WHERE r.parent_comment_id = #{parent_comment_id}
+    ORDER BY r.comment_id DESC
+</select>
+    
+    <update id="updateHitCount" parameterType="long">
+    UPDATE board_main
+    SET view_count = view_count + 1 
+    WHERE board_main_code = #{board_main_code}
+	</update>
+    
+</mapper>

@@ -3,6 +3,7 @@ package com.fl.model;
 import java.util.List;
 
 public class BoardDTO {
+	private int replyCount;
 	private Long board_main_code;   
     private Long member_code;       
     private String title;
@@ -104,6 +105,12 @@ public class BoardDTO {
 	}
 	public void setListFile(List<FileDTO> listFile) {
 		this.listFile = listFile;
+	}
+	public int getReplyCount() {
+		return replyCount;
+	}
+	public void setReplyCount(int replyCount) {
+		this.replyCount = replyCount;
 	}
     
     
