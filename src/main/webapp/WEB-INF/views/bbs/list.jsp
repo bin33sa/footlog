@@ -53,7 +53,7 @@
                 <div class="row g-2 align-items-center mb-4">
                     <div class="col-md-6">
                         <div class="d-flex gap-2">
-                            <a href="${pageContext.request.contextPath}/bbs/list?category=${category}" class="btn btn-category rounded-pill px-3 ${empty schType or schType=='all' ? 'active' : ''}">전체</a>
+                            <a href="${pageContext.request.contextPath}/bbs/list" class="btn btn-category rounded-pill px-3 ${empty category or category==0 ? 'active' : ''}">전체</a>
                         </div>
                     </div>
                     <div class="col-md-6">

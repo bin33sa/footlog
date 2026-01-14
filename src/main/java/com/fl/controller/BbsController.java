@@ -39,6 +39,8 @@ public class BbsController {
             int current_page = (page == null) ? 1 : Integer.parseInt(page);
 
             String category = req.getParameter("category"); // 1:공지, 2:자유 등
+            
+            
             String schType = req.getParameter("schType");
             String kwd = req.getParameter("kwd");
 
@@ -53,7 +55,10 @@ public class BbsController {
             map.put("category", category);
             map.put("schType", schType);
             map.put("kwd", kwd);
-
+            
+            int categoryNum = (category == null || category.isEmpty()) ? 0 : Integer.parseInt(category);
+            map.put("category", categoryNum);
+            
             int dataCount = service.dataCount(map);
             int total_page = util.pageCount(dataCount, size);
             current_page = Math.min(current_page, total_page);
@@ -200,6 +205,55 @@ public class BbsController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return model;
+    }
+    
+ // 7. 댓글 등록 (AJAX - Post)
+    @PostMapping("insertReply")
+    @ResponseBody
+    public Map<String, Object> insertReplySubmit(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        // 1. 세션 확인
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if (info == null) {
+            model.put("state", "loginFail");
+            return model;
+        }
+
+        String state = "false";
+        try {
+            // 2. 전달받은 값 콘솔 출력 (디버깅용)
+            String boardCodeStr = req.getParameter("board_main_code");
+            String content = req.getParameter("content");
+            
+            System.out.println(">>> 전달받은 게시글 번호: " + boardCodeStr);
+            System.out.println(">>> 전달받은 내용: " + content);
+            System.out.println(">>> 작성자 코드: " + info.getMember_code());
+
+            if(boardCodeStr == null || content == null || content.trim().isEmpty()) {
+                 System.out.println("!!! 오류: 파라미터가 비어있습니다 !!!");
+                 model.put("state", "false");
+                 return model;
+            }
+
+            BoardReplyDTO dto = new BoardReplyDTO();
+            dto.setBoard_main_code(Long.parseLong(boardCodeStr));
+            dto.setContent(content);
+            dto.setMember_code(info.getMember_code());
+
+            service.insertReply(dto);
+            state = "true";
+            System.out.println(">>> 댓글 저장 성공!");
+            
+        } catch (Exception e) {
+            System.out.println(">>> 댓글 저장 중 에러 발생!");
+            e.printStackTrace(); // 3. 에러 발생 시 콘솔에 빨간 글씨로 원인이 나옵니다.
+        }
+
+        model.put("state", state);
         return model;
     }
 }

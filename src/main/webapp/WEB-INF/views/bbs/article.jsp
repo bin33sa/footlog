@@ -119,76 +119,119 @@
 	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
 
 	<script>
-		// 게시글 삭제
-		function deleteOk() {
-			if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-				location.href = '${pageContext.request.contextPath}/bbs/delete?board_main_code=${dto.board_main_code}&page=${page}&category=${category}';
-			}
-		}
+    // 1. ajaxFun 정의 (가장 먼저 선언)
+    function ajaxFun(url, method, query, dataType, fn) {
+        $.ajax({
+            type: method,
+            url: url,
+            data: query,
+            dataType: dataType,
+            success: function(data) {
+                fn(data);
+            },
+            beforeSend: function(jqXHR) {
+                jqXHR.setRequestHeader("AJAX", true);
+            },
+            error: function(jqXHR) {
+                if (jqXHR.status === 403) {
+                    location.href = '${pageContext.request.contextPath}/member/login';
+                    return false;
+                }
+                console.log("AJAX 에러: " + jqXHR.responseText);
+            }
+        });
+    }
 
-		// --- AJAX 댓글 로직 (용병 게시판과 동일한 구조) ---
-		$(function() {
-			listPage(1); // 페이지 로드 시 첫 페이지 댓글 불러오기
-		});
+    // 2. 게시글 삭제 함수
+    function deleteOk() {
+        if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
+            location.href = '${pageContext.request.contextPath}/bbs/delete?board_main_code=${dto.board_main_code}&page=${page}&category=${category}';
+        }
+    }
 
-		function listPage(page) {
-			let url = "${pageContext.request.contextPath}/bbs/listReply";
-			let query = "board_main_code=${dto.board_main_code}&pageNo=" + page;
+    // 3. 페이지 로드 시 실행
+    $(function() {
+        listPage(1);
+    });
 
-			const fn = function(data) {
-				printReply(data);
-			};
+    // 4. 댓글 목록 가져오기
+    function listPage(page) {
+        let url = "${pageContext.request.contextPath}/bbs/listReply";
+        let query = "board_main_code=${dto.board_main_code}&pageNo=" + page;
 
-			ajaxFun(url, "get", query, "json", fn);
-		}
+        const fn = function(data) {
+            printReply(data);
+        };
 
-		function printReply(data) {
-			let count = data.replyCount;
-			$("#replyCount").text(count);
+        ajaxFun(url, "get", query, "json", fn);
+    }
 
-			let out = "";
-			if (count > 0) {
-				data.listReply
-						.forEach(function(item) {
-							out += '<div class="d-flex gap-3 bg-white p-3 rounded-4 shadow-sm border border-light">';
-							out += '  <div class="w-100">';
-							out += '    <div class="d-flex justify-content-between align-items-center mb-1">';
-							out += '      <h6 class="fw-bold mb-0">'
-									+ item.member_name + '</h6>';
-							out += '      <small class="text-muted">'
-									+ item.created_at + '</small>';
-							out += '    </div>';
-							out += '    <p class="mb-0 text-dark">'
-									+ item.content + '</p>';
-							out += '  </div>';
-							out += '</div>';
-						});
-			}
-			$("#listReply").html(out);
-			$("#listReplyPaging").html(data.paging);
-		}
+    function printReply(data) {
+        console.log("받은 데이터:", data); // 브라우저 콘솔(F12)에서 데이터 구조 확인용
+        
+        let count = data.replyCount || 0;
+        $("#replyCount").text(count);
 
-		function sendReply() {
-			let content = $("#replyContent").val().trim();
-			if (!content) {
-				$("#replyContent").focus();
-				return;
-			}
+        let out = "";
+        if (count > 0 && data.listReply) {
+            data.listReply.forEach(function(item) {
+                // DB 컬럼명과 DTO 필드명을 확인하여 매칭 (보통 MyBatis는 자동으로 CamelCase 변환을 하거나 필드명을 그대로 씁니다)
+                let name = item.member_name || "이름없음"; 
+                let content = item.content || "";
+                let date = item.created_at || "";
+                
+                // 404 에러 방지: PROFILE_IMAGE 컬럼명 사용
+                let photo = item.profile_image ? item.profile_image : 'default.png';
+                let photoPath = "${pageContext.request.contextPath}/uploads/member/" + photo;
 
-			let url = "${pageContext.request.contextPath}/bbs/insertReply";
-			let query = "board_main_code=${dto.board_main_code}&content="
-					+ encodeURIComponent(content);
+                out += '<div class="d-flex gap-3 bg-white p-3 rounded-4 shadow-sm border border-light mb-3">';
+                out += '  <div class="flex-shrink-0">';
+                out += '    <img src="' + photoPath + '" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;" onerror="this.src=\'https://cdn-icons-png.flaticon.com/512/149/149071.png\'">';
+                out += '  </div>';
+                out += '  <div class="w-100">';
+                out += '    <div class="d-flex justify-content-between align-items-center mb-1">';
+                out += '      <h6 class="fw-bold mb-0">' + name + '</h6>';
+                out += '      <small class="text-muted">' + date + '</small>';
+                out += '    </div>';
+                out += '    <p class="mb-0 text-dark" style="white-space:pre-wrap;">' + content + '</p>';
+                out += '  </div>';
+                out += '</div>';
+            });
+        } else {
+            out = '<div class="text-center p-4 text-muted">등록된 댓글이 없습니다.</div>';
+        }
+        
+        $("#listReply").html(out);
+        $("#listReplyPaging").html(data.paging || "");
+    }
 
-			const fn = function(data) {
-				if (data.state === "true") {
-					$("#replyContent").val("");
-					listPage(1);
-				} else {
-					alert("댓글 등록에 실패했습니다.");
-				}
-			};
-			ajaxFun(url, "post", query, "json", fn);
-		}
-	</script>
+    // 6. 댓글 등록 함수
+    function sendReply() {
+        let content = $("#replyContent").val().trim();
+        if (!content) {
+            $("#replyContent").focus();
+            return;
+        }
+
+        let url = "${pageContext.request.contextPath}/bbs/insertReply";
+        let query = {
+            board_main_code: "${dto.board_main_code}",
+            content: content
+        };
+
+        const fn = function(data) {
+            if (data.state === "true") {
+                $("#replyContent").val("");
+                listPage(1);
+            } else if(data.state === "loginFail") {
+                alert("로그인이 필요합니다.");
+                location.href = "${pageContext.request.contextPath}/member/login";
+            } else {
+                alert("댓글 등록에 실패했습니다.");
+            }
+        };
+        ajaxFun(url, "post", query, "json", fn);
+    }
+</script>
 </body>
 </html>

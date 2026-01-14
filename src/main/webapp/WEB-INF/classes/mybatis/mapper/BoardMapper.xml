@@ -99,18 +99,20 @@
     <select id="replyCount" parameterType="map" resultType="int">
     SELECT NVL(COUNT(*), 0)
     FROM comment_main
-    WHERE board_main_code = #{board_main_code} AND parent_comment_id IS NULL
+    WHERE board_main_code = #{board_main_code}
 </select>
 
-    <select id="listReply" parameterType="map" resultType="com.fl.model.BoardReplyDTO">
-        SELECT r.comment_id, r.board_main_code, r.member_code, m.member_name, 
-               r.content, r.created_at, r.parent_comment_id
-        FROM comment_main r
-        JOIN MEMBER m ON r.member_code = m.member_code
-        WHERE r.board_main_code = #{board_main_code} AND r.parent_comment_id IS NULL
-        ORDER BY r.comment_id DESC
-        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-    </select>
+<select id="listReply" parameterType="map" resultType="com.fl.model.BoardReplyDTO">
+    SELECT r.comment_id, r.board_main_code, r.member_code, m.member_name, 
+           r.content, r.created_at, r.parent_comment_id
+    FROM comment_main r
+    JOIN MEMBER m ON r.member_code = m.member_code
+    WHERE r.board_main_code = #{board_main_code}
+    /* 0으로 필터링되는 문제를 방지하기 위해 parent_comment_id 조건을 일시 제거하거나 NULL 체크 추가 */
+    AND r.parent_comment_id IS NULL 
+    ORDER BY r.comment_id DESC
+    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+</select>
 
     <delete id="deleteReply" parameterType="map">
     DELETE FROM comment_main

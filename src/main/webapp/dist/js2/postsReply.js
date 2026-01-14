@@ -1,6 +1,20 @@
-// postsReply.js 전체를 아래 내용으로 교체하세요.
+// 1. 가장 먼저 ajaxFun을 전역(window)에 선언하여 다른 스크립트에서 즉시 사용할 수 있게 합니다.
+window.ajaxFun = function(url, method, params, dataType, fn) {
+    $.ajax({
+        type: method, 
+        url: url, 
+        data: params, 
+        dataType: dataType,
+        success: function(data) {
+            fn(data);
+        },
+        error: function(e) {
+            console.log("AJAX 에러: " + e.responseText);
+        }
+    });
+};
 
-(function() { // 즉시 실행 함수로 감싸서 변수 충돌 방지
+(function() { 
     let postsUrl;
     let recruit_id;
 
@@ -12,23 +26,21 @@
             recruit_id = replySessionEL.getAttribute('data-num');
             
             // 초기 목록 로드
-            loadContent(1);
+            window.loadContent(1);
             
-            // 등록 버튼 이벤트 (중복 연결 방지)
             $('.btnSendReply').off('click').on('click', function() {
-                sendReply();
+                window.sendReply();
             });
         }
     });
 
-    // 전역에서 pagingMethod가 찾을 수 있도록 윈도우 객체에 할당
     window.loadContent = function(page) {
         if(!postsUrl) return;
         
         const url = `${postsUrl}/listReply`;
         const params = { recruit_id: recruit_id, pageNo: page };
         
-        ajaxRequestLocal(url, 'get', params, 'json', function(data) {
+        window.ajaxFun(url, 'get', params, 'json', function(data) {
             const htmlText = renderRepliesLocal(data.listReply, data.pageNo);
             $('#listReply .reply-info .fw-bold').html(`댓글 ${data.replyCount}개`); 
             $('#listReply .list-content').html(`<table class="table table-borderless"><tbody>${htmlText}</tbody></table>`);
@@ -36,7 +48,7 @@
         });
     };
 
-    function sendReply() {
+    window.sendReply = function() {
         let content = $('#replyContent').val().trim();
         if(!content) {
             $('#replyContent').focus();
@@ -46,7 +58,7 @@
         const url = `${postsUrl}/insertReply`;
         const params = { recruit_id: recruit_id, content: content }; 
         
-        ajaxRequestLocal(url, 'post', params, 'json', function(data) {
+        window.ajaxFun(url, 'post', params, 'json', function(data) {
             if(data.state === 'true') {
                 $('#replyContent').val('');
                 window.loadContent(1); 
@@ -74,13 +86,14 @@
                 </td>
             </tr>`).join('');
     }
-
-    // 함수 이름 충돌 방지를 위해 이름을 변경함
-    function ajaxRequestLocal(url, method, params, dataType, fn) {
-        $.ajax({
-            type: method, url: url, data: params, dataType: dataType,
-            success: data => fn(data),
-            error: e => console.log("AJAX 에러: " + e.responseText)
-        });
-    }
 })();
+
+// --- 유틸리티 함수 (기존 유지) ---
+function isHidden(el) {
+    const styles = window.getComputedStyle(el);
+    return styles.display === 'none' || styles.visibility === 'hidden' || styles.opacity === '0';
+}
+function isImageFile(filename){
+    let format = /(\.gif|\.jpg|\.jpeg|\.png)$/i;
+    return format.test(filename);
+}

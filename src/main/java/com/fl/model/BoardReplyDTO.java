@@ -1,7 +1,7 @@
 package com.fl.model;
 
 public class BoardReplyDTO {
-    private int comment_id;            // 댓글 코드 (PK)
+    private long comment_id;            // 댓글 코드 (PK)
     private Integer parent_comment_id; // 부모 댓글 코드 (FK, 답글 기능용)
     private long member_code;          // 회원 코드 (FK)
     private long board_main_code;      // 게시판 코드 (FK) - recruit_id에서 변경
@@ -13,10 +13,10 @@ public class BoardReplyDTO {
     private int answerCount;           // 해당 댓글에 달린 답글(대댓글) 개수
     
     // Getter 및 Setter
-    public int getComment_id() {
+    public long getComment_id() {
         return comment_id;
     }
-    public void setComment_id(int comment_id) {
+    public void setComment_id(long comment_id) {
         this.comment_id = comment_id;
     }
     public Integer getParent_comment_id() {
@@ -34,8 +34,8 @@ public class BoardReplyDTO {
     public long getBoard_main_code() { // 변수명 변경에 따른 Getter 수정
         return board_main_code;
     }
-    public long setBoard_main_code(long board_main_code) { // 변수명 변경에 따른 Setter 수정
-        return board_main_code;
+    public void setBoard_main_code(long board_main_code) {
+        this.board_main_code = board_main_code;
     }
     public String getContent() {
         return content;
