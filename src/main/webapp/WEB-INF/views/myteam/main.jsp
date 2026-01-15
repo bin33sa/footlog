@@ -31,18 +31,26 @@
                     <div class="d-flex align-items-center justify-content-between p-4">
                         <button class="btn btn-icon text-white-50 hover-white"><i class="bi bi-chevron-left fs-4"></i></button>
                         <div class="d-flex align-items-center gap-3">
+                            
                             <div class="bg-white rounded-circle d-flex align-items-center justify-content-center text-dark overflow-hidden" style="width: 50px; height: 50px;">
-							    <c:choose>						    
-							        <c:when test="${not empty myTeam.emblem_image}">
-							            <img src="${pageContext.request.contextPath}/uploads/team/${emblem_image}" 
-							                 alt="Team Emblem" 
-							                 style="width: 100%; height: 100%; object-fit: cover;">
-							        </c:when>
-							        <c:otherwise>
-							            <i class="bi bi-shield-fill fs-3"></i>
-							        </c:otherwise>
-							    </c:choose>
-							</div>
+                                
+                                <c:set var="defaultEmblem" value="${pageContext.request.contextPath}/dist/images/icon.jpg" />
+
+                                <c:choose>                         
+                                    <c:when test="${not empty myTeam.emblem_image}">
+                                        <img src="${pageContext.request.contextPath}/uploads/team/${myTeam.emblem_image}" 
+                                             alt="Team Emblem" 
+                                             style="width: 100%; height: 100%; object-fit: cover;"
+                                             onerror="this.src='${defaultEmblem}'">
+                                    </c:when>                             
+                                    <c:otherwise>
+                                        <img src="${defaultEmblem}" 
+                                             alt="Default Team"
+                                             style="width: 100%; height: 100%; object-fit: cover;">
+                                    </c:otherwise>
+                                </c:choose>
+                            </div>
+
                             <div>
                                 <span class="badge bg-primary text-dark mb-1">MY TEAM</span>
                                 <h4 class="fw-bold mb-0">${myTeamName}</h4>
@@ -55,7 +63,8 @@
                 <div class="row g-4 mb-5">
                     <div class="col-md-6">
                         <div class="modern-card dashboard-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center bg-light"
-                             onclick="location.href='${pageContext.request.contextPath}/myteam/match'"> <div class="mb-3 p-3 rounded-circle bg-white shadow-sm">
+                             onclick="location.href='${pageContext.request.contextPath}/myteam/match?teamCode=${myTeam.team_code}'"> 
+                            <div class="mb-3 p-3 rounded-circle bg-white shadow-sm">
                                 <i class="bi bi-calendar-check-fill fs-2 text-primary"></i>
                             </div>
                             <h5 class="fw-bold mb-1">매치 일정 / 투표</h5>
@@ -65,7 +74,7 @@
 
                     <div class="col-md-6">
                         <div class="modern-card dashboard-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center bg-light"
-                             onclick="location.href='${pageContext.request.contextPath}/myteam/squad'">
+                             onclick="location.href='${pageContext.request.contextPath}/myteam/squad?teamCode=${myTeam.team_code}'">
                             <div class="mb-3 p-3 rounded-circle bg-white shadow-sm">
                                 <i class="bi bi-people-fill fs-2 text-success"></i>
                             </div>

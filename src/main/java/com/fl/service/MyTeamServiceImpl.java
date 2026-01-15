@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.mapper.MyTeamMapper;
+import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.TeamBoardDTO;
@@ -345,6 +346,74 @@ public class MyTeamServiceImpl implements MyTeamService {
 	public void deleteTeamBoard(long board_team_code) throws Exception {
 		try {
 			mapper.deleteTeamBoard(board_team_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public void insertGallery(GalleryDTO dto) throws Exception {
+		try {
+			mapper.insertGallery(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public List<GalleryDTO> listGallery(Map<String, Object> map) {
+		List<GalleryDTO> list = null;
+		try {
+			list = mapper.listGallery(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+	@Override
+	public int galleryDataCount(Map<String, Object> map) {
+		int result = 0;
+		try {
+			result = mapper.galleryDataCount(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public GalleryDTO readGallery(long gallery_code) {
+		GalleryDTO dto = null;
+		try {
+			mapper.updateGalleryHitCount(gallery_code);
+			dto = mapper.readGallery(gallery_code);
+			
+			if(dto != null) {
+				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return dto;
+	}
+
+	@Override
+	public void updateGallery(GalleryDTO dto) throws Exception {
+		try {
+			mapper.updateGallery(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public void deleteGallery(long gallery_code) throws Exception {
+		try {
+			mapper.deleteGallery(gallery_code);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;

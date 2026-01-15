@@ -94,4 +94,17 @@ public interface MyTeamService {
 	public void updateTeamBoard(TeamBoardDTO dto) throws Exception;
 	
 	public void deleteTeamBoard(long board_team_code) throws Exception;
+	
+	
+	public void insertGallery(com.fl.model.GalleryDTO dto) throws Exception;
+	
+	public List<com.fl.model.GalleryDTO> listGallery(Map<String, Object> map);
+	
+	public int galleryDataCount(Map<String, Object> map);
+	
+	public com.fl.model.GalleryDTO readGallery(long gallery_code);
+	
+	public void updateGallery(com.fl.model.GalleryDTO dto) throws Exception;
+	
+	public void deleteGallery(long gallery_code) throws Exception;
 }

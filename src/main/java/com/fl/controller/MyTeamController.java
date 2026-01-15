@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.TeamDTO;
@@ -19,6 +20,7 @@ import com.fl.service.MyTeamService;
 import com.fl.service.MyTeamServiceImpl;
 import com.fl.util.FileManager;
 import com.fl.util.MyMultipartFile;
+import com.fl.util.MyUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +34,7 @@ public class MyTeamController {
 
     private MyTeamService service = new MyTeamServiceImpl();
     private FileManager fileManager = new FileManager();
+    private MyUtil util = new MyUtil();
     
     private long setTeamInfoAndRole(HttpSession session, ModelAndView mav) {
         try {
@@ -49,11 +52,11 @@ public class MyTeamController {
             
             int myRoleLevel = service.readMemberRoleLevel(memberCode, teamCode);
             
-            mav.addObject("team_code", teamCode);
+  
             mav.addObject("myRoleLevel", myRoleLevel);
             mav.addObject("myTeamName", currentTeam.getTeam_name());
             mav.addObject("myTeam", currentTeam); 
-
+            mav.addObject("teamCode", teamCode);
             return teamCode;
 
         } catch (Exception e) {
@@ -222,8 +225,9 @@ public class MyTeamController {
             long teamCode = Long.parseLong(teamCodeStr);
 
             Map<String, Object> map = new HashMap<>();
-            map.put("teamCode", teamCode);
-            map.put("memberCode", info.getMember_code());
+            map.put("team_code", teamCode);
+            map.put("member_code", info.getMember_code());
+            
             TeamMemberDTO myStatus = service.readMyTeamStatus(map);
             
             if(myStatus == null) return new ModelAndView("redirect:/myteam/main?teamCode=" + teamCode);
@@ -297,4 +301,212 @@ public class MyTeamController {
         return new ModelAndView("redirect:/myteam/main?teamCode=" + teamCode);
     }
     
+    @GetMapping("deleteMember")
+    public ModelAndView deleteMember(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        String teamCodeStr = req.getParameter("teamCode");
+        String memberCodeStr = req.getParameter("memberCode");
+
+        try {
+            if(teamCodeStr == null || memberCodeStr == null) {
+                return new ModelAndView("redirect:/myteam/main");
+            }
+
+            long teamCode = Long.parseLong(teamCodeStr);
+            long targetMemberCode = Long.parseLong(memberCodeStr); 
+            long myMemberCode = info.getMember_code();            
+
+            if(targetMemberCode == myMemberCode) {
+                ModelAndView mav = new ModelAndView("redirect:/myteam/squad?teamCode=" + teamCode);
+                mav.addObject("msg", "자기 자신은 내보낼 수 없습니다. '구단 탈퇴' 메뉴를 이용하세요.");
+                return mav;
+            }
+
+            int myRole = service.readMemberRoleLevel(myMemberCode, teamCode);
+            int targetRole = service.readMemberRoleLevel(targetMemberCode, teamCode);
+
+            if(targetRole >= myRole) {
+                ModelAndView mav = new ModelAndView("redirect:/myteam/squad?teamCode=" + teamCode);
+                return mav;
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("team_code", teamCode);
+            map.put("member_code", targetMemberCode);
+
+            service.leaveTeam(map);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ModelAndView("redirect:/myteam/squad?teamCode=" + teamCodeStr);
+    }
+    
+    @GetMapping("selfLeave")
+    public ModelAndView selfLeave(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) return new ModelAndView("redirect:/member/login");
+
+        String teamCodeStr = req.getParameter("teamCode");
+        if(teamCodeStr == null) return new ModelAndView("redirect:/myteam/main");
+
+        long teamCode = Long.parseLong(teamCodeStr);
+        long myMemberCode = info.getMember_code();
+
+        try {
+            int myRole = service.readMemberRoleLevel(myMemberCode, teamCode);
+            if(myRole >= 99) {
+                 return new ModelAndView("redirect:/myteam/main?teamCode=" + teamCode); 
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("team_code", teamCode);
+            map.put("member_code", myMemberCode);
+
+            service.leaveTeam(map);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ModelAndView("redirect:/"); 
+    }
+    
+ 	@GetMapping("gallery")
+ 	public ModelAndView gallery(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+ 		ModelAndView mav = new ModelAndView("myteam/gallery"); 
+
+ 		HttpSession session = req.getSession();
+ 		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+ 		String teamCodeStr = req.getParameter("teamCode");
+ 		if (teamCodeStr == null) {
+ 			return new ModelAndView("redirect:/myteam/main");
+ 		}
+ 		long teamCode = Long.parseLong(teamCodeStr);
+
+ 		String page = req.getParameter("page");
+ 		int current_page = 1;
+ 		if (page != null) {
+ 			try {
+ 				current_page = Integer.parseInt(page);
+ 			} catch (Exception e) {
+ 			}
+ 		}
+
+ 		int rows = 12; 
+ 		
+ 		Map<String, Object> map = new HashMap<>();
+ 		map.put("team_code", teamCode);
+
+ 		int dataCount = service.galleryDataCount(map); 
+
+ 		int total_page = util.pageCount(dataCount, rows);
+ 		
+ 		if (current_page > total_page) {
+ 			current_page = total_page;
+ 		}
+
+ 		int offset = (current_page - 1) * rows;
+ 		if(offset < 0) offset = 0;
+
+ 		map.put("offset", offset);
+ 		map.put("size", rows);
+
+ 		List<GalleryDTO> list = service.listGallery(map); 
+
+ 		String cp = req.getContextPath();
+ 		String listUrl = cp + "/myteam/gallery?teamCode=" + teamCode;
+ 		
+ 		String paging = util.pagingUrl(current_page, total_page, listUrl);
+
+ 		mav.addObject("list", list);
+ 		mav.addObject("dataCount", dataCount);
+ 		mav.addObject("page", current_page);
+ 		mav.addObject("total_page", total_page);
+ 		mav.addObject("paging", paging);
+ 		mav.addObject("teamCode", teamCode);
+ 		
+ 		if(info != null) {
+ 			int myRoleLevel = service.readMemberRoleLevel(info.getMember_code(), teamCode);
+ 			mav.addObject("myRoleLevel", myRoleLevel);
+ 		}
+
+ 		return mav;
+ 	}
+    
+ 	@GetMapping("update")
+	public ModelAndView profileUpdate(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+		ModelAndView mav = new ModelAndView("myteam/update");
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+		String teamCodeStr = req.getParameter("teamCode");
+		if (teamCodeStr == null || teamCodeStr.isEmpty()) {
+			return new ModelAndView("redirect:/myteam/main");
+		}
+		long teamCode = Long.parseLong(teamCodeStr);
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("team_code", teamCode);
+		map.put("member_code", info.getMember_code());
+
+		TeamMemberDTO dto = service.readMyTeamStatus(map);
+		
+		if (dto == null) {
+			return new ModelAndView("redirect:/myteam/main?teamCode=" + teamCode);
+		}
+
+		mav.addObject("dto", dto);
+		mav.addObject("teamCode", teamCode);
+		mav.addObject("myRoleLevel", dto.getRole_level());
+
+		return mav;
+	}
+
+ 	@PostMapping("update")
+	public ModelAndView profileUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String teamCodeStr = req.getParameter("teamCode");
+		long teamCode = Long.parseLong(teamCodeStr);
+		
+		String root = session.getServletContext().getRealPath("/");
+		String pathname = root + "uploads" + File.separator + "profile";
+		
+		FileManager fileManager = new FileManager();
+		
+		try {
+			Part part = req.getPart("selectFile");
+			MyMultipartFile uploadedFile = fileManager.doFileUpload(part, pathname);
+			
+			if (uploadedFile != null) {
+				TeamMemberDTO dto = new TeamMemberDTO();
+				dto.setTeam_code(teamCode);
+				dto.setMember_code(info.getMember_code());
+				
+				String saveFilename = uploadedFile.getSaveFilename();
+				dto.setProfile_image(saveFilename);
+				
+				service.updateTeamMember(dto);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return new ModelAndView("redirect:/myteam/main?teamCode=" + teamCode);
+	}
+ 	
+ 	
 }

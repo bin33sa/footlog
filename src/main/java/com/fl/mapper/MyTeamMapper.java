@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.fl.model.FileDTO;
+import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.TeamBoardDTO;
@@ -84,4 +86,20 @@ public interface MyTeamMapper {
 	public void updateTeamBoard(TeamBoardDTO dto);
 	
 	public void deleteTeamBoard(long board_team_code);
+	
+	public void insertGallery(GalleryDTO dto);
+	
+	public List<GalleryDTO> listGallery(Map<String, Object> map);
+	
+	public int galleryDataCount(Map<String, Object> map);
+	
+	public GalleryDTO readGallery(long gallery_code);
+	
+	public List<FileDTO> listGalleryFiles(long gallery_code);
+	
+	public void updateGalleryHitCount(long gallery_code);
+	
+	public void updateGallery(GalleryDTO dto);
+	
+	public void deleteGallery(long gallery_code);
 }

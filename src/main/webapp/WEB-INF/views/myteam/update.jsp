@@ -1,11 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>Footlog - 구단 정보 수정</title>
+    <title>Footlog - 프로필 사진 수정</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
@@ -16,17 +16,57 @@
     <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
     
     <style>
-        .modern-card { border: none; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); border-radius: 0.35rem; }
         .sidebar-title { font-size: 0.85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
-        .emblem-preview-box {
-            width: 150px; height: 150px; border-radius: 50%; border: 3px solid #dee2e6;
-            overflow: hidden; background-color: #f8f9fa; position: relative;
-            margin: 0 auto 15px auto; display: flex; align-items: center; justify-content: center;
+        
+        .profile-preview-box {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #dee2e6;
+            margin: 0 auto 20px;
+            position: relative;
+            background-color: #f8f9fa;
         }
-        .emblem-preview-box img { width: 100%; height: 100%; object-fit: cover; }
-        .emblem-upload-btn { cursor: pointer; font-size: 0.9rem; color: #0d6efd; font-weight: 600; }
-        .emblem-upload-btn:hover { text-decoration: underline; }
+        
+        .profile-preview-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .update-card {
+            max-width: 500px;
+            margin: 0 auto;
+            border: none;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+            border-radius: 15px;
+        }
     </style>
+    
+    <script type="text/javascript">
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewImg = document.getElementById('previewImg');
+                    previewImg.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function sendOk() {
+            const f = document.profileForm;
+            const fileInput = f.selectFile;
+            if(!fileInput.value) {
+                alert("변경할 프로필 사진을 선택해주세요.");
+                return;
+            }
+            f.action = "${pageContext.request.contextPath}/myteam/update";
+            f.submit();
+        }
+    </script>
 </head>
 
 <body>
@@ -43,10 +83,10 @@
                     <div class="mb-4">
                         <p class="sidebar-title mb-3">구단 관리</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 프로필 수정</a>
+                            <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0 active fw-bold bg-light text-primary">구단 프로필 수정</a>
                             
                             <c:if test="${myRoleLevel >= 10}">
-                                <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0 active fw-bold bg-light text-primary">구단 정보 수정</a>
+                                <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">구단 정보 수정</a>
                             </c:if>
 
                             <a href="${pageContext.request.contextPath}/myteam/squad?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">
@@ -60,6 +100,9 @@
                                 <a href="${pageContext.request.contextPath}/myteam/manage/match?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">매치 관리</a>
                                 <a href="${pageContext.request.contextPath}/myteam/requestList?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">
                                     가입 신청 관리 
+                                    <c:if test="${requestCount > 0}">
+                                        <span class="badge bg-danger rounded-pill ms-1">${requestCount}</span>
+                                    </c:if>
                                 </a>
                             </c:if>
                         </div>
@@ -68,119 +111,66 @@
             </div>
 
             <div class="col-lg-10 col-12">
-                
-                <div class="page-title-box mb-4">
-                    <h3 class="fw-bold text-dark mb-1">구단 정보 수정</h3>
-                    <p class="text-muted mb-0">팀명, 엠블럼, 소개글 등 구단의 기본 정보를 변경합니다.</p>
+                <div class="container py-5">
+                    <div class="text-center mb-5">
+                        <h2 class="fw-bold">프로필 사진 변경</h2>
+                        <p class="text-muted">우리 팀 스쿼드에 표시될 나의 사진을 설정하세요.</p>
+                    </div>
+
+                    <div class="card update-card p-4">
+                        <div class="card-body">
+                            <form name="profileForm" method="post" enctype="multipart/form-data">
+                                <input type="hidden" name="teamCode" value="${teamCode}">
+                                <input type="hidden" name="team_code" value="${teamCode}">
+                                
+                                <div class="profile-preview-box">
+                                    <c:choose>
+                                        <c:when test="${not empty dto.profile_image}">
+                                            <img id="previewImg" src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" alt="Profile Image">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <img id="previewImg" src="${pageContext.request.contextPath}/dist/images/avatar.png" alt="Default Image">
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
+
+                                <div class="text-center mb-4">
+                                    <h5 class="fw-bold mb-1">${sessionScope.member.member_name}</h5>
+                                    <p class="text-secondary small">
+                                        No. ${dto.back_number} | ${dto.position}
+                                    </p>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="selectFile" class="form-label fw-bold">새로운 사진 선택</label>
+                                    <input type="file" name="selectFile" id="selectFile" class="form-control" 
+                                           accept="image/*" onchange="previewImage(this);">
+                                    <div class="form-text">JPG, PNG, GIF 파일만 업로드 가능합니다.</div>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-primary py-2 fw-bold" onclick="sendOk();">
+                                        <i class="bi bi-check-lg me-1"></i> 변경 내용 저장
+                                    </button>
+                                    
+                                    <button type="button" class="btn btn-light py-2" onclick="location.href='${pageContext.request.contextPath}/myteam/main?teamCode=${teamCode}';">
+                                        취소하고 돌아가기
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-
-                <form name="teamUpdateForm" action="${pageContext.request.contextPath}/myteam/update" method="post" enctype="multipart/form-data">
-                    
-                    <input type="hidden" name="teamCode" value="${teamCode}">
-                    
-                    <div class="row">
-                        <div class="col-lg-4 mb-4">
-                            <div class="modern-card p-4 h-100 text-center">
-                                <h5 class="fw-bold mb-4 text-start border-bottom pb-2">팀 엠블럼</h5>
-                                
-                                <div class="emblem-preview-box">
-                                    <img id="emblemPreview" 
-                                         src="${pageContext.request.contextPath}/uploads/team/${dto.emblem_image}" 
-                                         onerror="this.src='${pageContext.request.contextPath}/resources/images/default_team.png'">
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="uploadEmblem" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                        <i class="bi bi-camera-fill me-1"></i> 이미지 변경
-                                    </label>
-                                    <input type="file" id="uploadEmblem" name="selectFile" class="d-none" accept="image/*" onchange="previewImage(this);">
-                                </div>
-                                <p class="text-muted small">권장 사이즈: 500x500px<br>지원 파일: JPG, PNG</p>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-8 mb-4">
-                            <div class="modern-card p-4 h-100">
-                                <h5 class="fw-bold mb-4 border-bottom pb-2">기본 정보</h5>
-                                
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">팀 이름 <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="team_name" value="${dto.team_name}" placeholder="팀 이름을 입력하세요">
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">활동 지역</label>
-                                        <select class="form-select" name="region">
-                                            <option value="서울" ${dto.region == '서울' ? 'selected' : ''}>서울</option>
-                                            <option value="경기" ${dto.region == '경기' ? 'selected' : ''}>경기</option>
-                                            <option value="인천" ${dto.region == '인천' ? 'selected' : ''}>인천</option>
-                                            <option value="부산" ${dto.region == '부산' ? 'selected' : ''}>부산</option>
-                                            <option value="기타" ${dto.region == '기타' ? 'selected' : ''}>기타</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">홈 구장</label>
-                                        <input type="text" class="form-control" name="home_ground" value="${dto.home_ground}" placeholder="주로 사용하는 구장">
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-								    <label class="form-label fw-bold">팀 소개</label>
-								    <textarea class="form-control" name="description" rows="5" placeholder="팀 소개를 적어주세요.">${dto.description}</textarea>
-								</div>
-                                
-                                <div class="alert alert-light border text-center mt-5 mb-0 p-4">
-                                    <i class="bi bi-info-circle text-primary me-2"></i>
-                                    수정된 정보는 즉시 구단 페이지에 반영됩니다.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-3 mb-5">
-                        <button type="button" class="btn btn-secondary px-4 me-2" onclick="location.href='${pageContext.request.contextPath}/myteam/main?teamCode=${teamCode}'">취소</button>
-                        <button type="button" class="btn btn-primary px-4 fw-bold" onclick="sendOk();">수정 내용 저장</button>
-                    </div>
-                </form>
-
             </div>
         </div> 
     </div>
 
     <footer>
-	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
-	</footer>
-	
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
+       <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+    </footer>
+    
+    <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('emblemPreview').src = e.target.result;
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function sendOk() {
-            const f = document.teamUpdateForm;
-
-            if(!f.team_name.value.trim()) {
-                alert("팀 이름은 필수 입력 항목입니다.");
-                f.team_name.focus();
-                return;
-            }
-
-            if(confirm("입력한 내용으로 구단 정보를 수정하시겠습니까?")) {
-                f.submit();
-            }
-        }
-    </script>
 
 </body>
 </html>

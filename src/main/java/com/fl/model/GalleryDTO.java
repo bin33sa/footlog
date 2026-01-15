@@ -10,10 +10,13 @@ public class GalleryDTO {
     private String created_at;   
     private int view_count;      
     private String content;      
-
+    
+    private Long team_code;
+    
     private String member_name;
     private String member_id;
-   
+    private String profile_image;
+    
     private int like_count;      
     private int reply_count;     
     
@@ -113,6 +116,22 @@ public class GalleryDTO {
 
 	public void setListFile(List<FileDTO> listFile) {
 		this.listFile = listFile;
+	}
+
+	public Long getTeam_code() {
+		return team_code;
+	}
+
+	public void setTeam_code(Long team_code) {
+		this.team_code = team_code;
+	}
+
+	public String getProfile_image() {
+		return profile_image;
+	}
+
+	public void setProfile_image(String profile_image) {
+		this.profile_image = profile_image;
 	}
     
     

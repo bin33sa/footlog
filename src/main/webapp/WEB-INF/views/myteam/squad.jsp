@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
@@ -33,8 +33,26 @@
         .squad-tab-item.active { color: #0d6efd; border-bottom-color: #0d6efd; }
         .squad-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid #dee2e6; }
         
-        /* 프로필 이미지 영역 */
-        .profile-placeholder { width: 80px; height: 80px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border-radius: 50%; margin: 10px auto; }
+        /* [수정됨] 프로필 이미지 영역 스타일 */
+        .profile-placeholder { 
+            width: 80px; 
+            height: 80px; 
+            background-color: #f8f9fa; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 50%; 
+            margin: 10px auto; 
+            overflow: hidden; /* 이미지가 원을 넘지 않게 자름 */
+            border: 1px solid #dee2e6;
+        }
+        
+        /* [추가됨] 이미지 꽉 차게 설정 */
+        .profile-img-fit {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
         
         /* 사이드바 스타일 */
         .sidebar-title { font-size: 0.85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -73,7 +91,7 @@
                             </a>
                             
                             <c:if test="${myRoleLevel >= 10}">
-                                <a href="${pageContext.request.contextPath}/myteam/match" class="list-group-item list-group-item-action border-0">매치 관리</a>
+                                <a href="${pageContext.request.contextPath}/myteam/manage/match?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">매치 관리</a>
                                 <a href="${pageContext.request.contextPath}/myteam/requestList" class="list-group-item list-group-item-action border-0">
                                     가입 신청 관리 
                                     <c:if test="${requestCount > 0}">
@@ -88,22 +106,24 @@
 
             <div class="col-lg-10 col-12">
                 
-                <div class="d-flex justify-content-between align-items-end mb-5">
+                <c:set var="defaultProfile" value="${pageContext.request.contextPath}/dist/images/avatar.png" />
+
+                <div class="d-flex justify-content-between align-items-end mb-5 border-bottom pb-4">
                     <div>
-                        <h2 class="fw-bold mb-1">
+                        <h2 class="fw-bold display-6 mb-1 text-dark">
                             <c:choose>
-                                <c:when test="${myRoleLevel >= 10}">스쿼드 관리</c:when>
+                                <c:when test="${not empty myTeamName}">${myTeamName}</c:when>
                                 <c:otherwise>구단 스쿼드</c:otherwise>
                             </c:choose>
                         </h2>
-                        <span class="text-muted">
-                            ${myTeamName} 선수 명단 
-                            <c:if test="${not empty list}">(총 ${list.size()}명)</c:if>
+                        <span class="text-muted fs-5">
+                            선수 명단 
+                            <c:if test="${not empty list}">(총 <span class="fw-bold text-primary">${list.size()}</span>명)</c:if>
                         </span>
                     </div>
                     
                     <c:if test="${myRoleLevel >= 10}">
-                        <button class="btn btn-dark rounded-pill px-4 fw-bold" onclick="alert('초대 링크가 복사되었습니다! (준비중)')">
+                        <button class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" onclick="alert('초대 링크가 복사되었습니다! (준비중)')">
                             <i class="bi bi-link-45deg me-1"></i> 팀원 초대하기
                         </button>
                     </c:if>
@@ -134,8 +154,15 @@
                                         </c:if>
 
                                         <div class="position-relative">
-                                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width:60px; height:60px;">
-                                                <i class="bi bi-person-fill fs-3 text-secondary"></i>
+                                            <div class="bg-white rounded-circle d-flex align-items-center justify-content-center shadow-sm overflow-hidden" style="width:60px; height:60px;">
+                                                <c:choose>
+                                                    <c:when test="${not empty dto.profile_image}">
+                                                        <img src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" class="profile-img-fit" onerror="this.src='${defaultProfile}'">
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <img src="${defaultProfile}" class="profile-img-fit">
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
                                             <c:if test="${dto.role_level >= 99}">
                                                 <span class="position-absolute bottom-0 end-0 badge rounded-pill bg-dark border border-white" title="구단주">C</span>
@@ -147,10 +174,10 @@
                                             </span>
                                             <h6 class="fw-bold mb-0 text-truncate" style="max-width: 120px;">${dto.member_name}</h6>
                                             <small class="text-muted text-truncate d-block" style="max-width: 120px;">@${dto.member_id}</small>
-                                        	<div class="bg-light rounded-3 p-2">
-                                            	<small class="text-muted">가입일</small>
-                                            	<div class="fw-bold small">${empty dto.join_date ? '-' : dto.join_date}</div>
-                                       		</div>
+                                           <div class="bg-light rounded-3 p-2">
+                                               <small class="text-muted">가입일</small>
+                                               <div class="fw-bold small">${empty dto.join_date ? '-' : dto.join_date}</div>
+                                             </div>
                                         </div>
                                     </div>
                                 </div>
@@ -177,9 +204,18 @@
                                             <span class="badge badge-position pos-fw rounded-pill">FW</span>
                                             <span class="fw-bold text-muted fs-5">등번호 ${empty dto.back_number ? '-' : dto.back_number}번</span>
                                         </div>
+                                        
                                         <div class="profile-placeholder shadow-sm">
-                                            <i class="bi bi-person-fill fs-1 text-secondary"></i>
+                                            <c:choose>
+                                                <c:when test="${not empty dto.profile_image}">
+                                                    <img src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" class="profile-img-fit" onerror="this.src='${defaultProfile}'">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${defaultProfile}" class="profile-img-fit">
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
+
                                         <h5 class="fw-bold mb-1 text-truncate">${dto.member_name}</h5>
                                         <p class="text-muted small mb-3 text-truncate">@${dto.member_id}</p>
                                         <div class="bg-light rounded-3 p-2">
@@ -211,9 +247,18 @@
                                             <span class="badge badge-position pos-mf rounded-pill">MF</span>
                                             <span class="fw-bold text-muted fs-5">등번호 ${empty dto.back_number ? '-' : dto.back_number}번</span>
                                         </div>
+                                        
                                         <div class="profile-placeholder shadow-sm">
-                                            <i class="bi bi-person-fill fs-1 text-secondary"></i>
+                                            <c:choose>
+                                                <c:when test="${not empty dto.profile_image}">
+                                                    <img src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" class="profile-img-fit" onerror="this.src='${defaultProfile}'">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${defaultProfile}" class="profile-img-fit">
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
+
                                         <h5 class="fw-bold mb-1 text-truncate">${dto.member_name}</h5>
                                         <p class="text-muted small mb-3 text-truncate">@${dto.member_id}</p>
                                         <div class="bg-light rounded-3 p-2">
@@ -245,9 +290,18 @@
                                             <span class="badge badge-position pos-df rounded-pill">DF</span>
                                             <span class="fw-bold text-muted fs-5">등번호 ${empty dto.back_number ? '-' : dto.back_number}번</span>
                                         </div>
+                                        
                                         <div class="profile-placeholder shadow-sm">
-                                            <i class="bi bi-person-fill fs-1 text-secondary"></i>
+                                            <c:choose>
+                                                <c:when test="${not empty dto.profile_image}">
+                                                    <img src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" class="profile-img-fit" onerror="this.src='${defaultProfile}'">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${defaultProfile}" class="profile-img-fit">
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
+
                                         <h5 class="fw-bold mb-1 text-truncate">${dto.member_name}</h5>
                                         <p class="text-muted small mb-3 text-truncate">@${dto.member_id}</p>
                                         <div class="bg-light rounded-3 p-2">
@@ -279,9 +333,18 @@
                                             <span class="badge badge-position pos-gk rounded-pill">GK</span>
                                             <span class="fw-bold text-muted fs-5">등번호 ${empty dto.back_number ? '-' : dto.back_number}번</span>
                                         </div>
+                                        
                                         <div class="profile-placeholder shadow-sm">
-                                            <i class="bi bi-person-fill fs-1 text-secondary"></i>
+                                            <c:choose>
+                                                <c:when test="${not empty dto.profile_image}">
+                                                    <img src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" class="profile-img-fit" onerror="this.src='${defaultProfile}'">
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${defaultProfile}" class="profile-img-fit">
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
+
                                         <h5 class="fw-bold mb-1 text-truncate">${dto.member_name}</h5>
                                         <p class="text-muted small mb-3 text-truncate">@${dto.member_id}</p>
                                         <div class="bg-light rounded-3 p-2">
@@ -343,7 +406,12 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger me-auto" onclick="deleteMember()">
+                            <i class="bi bi-person-x-fill"></i> 내보내기
+                        </button>
+                        
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                         <button type="submit" class="btn btn-primary">수정 완료</button>
                     </div>
@@ -353,10 +421,10 @@
     </div>
 
     <footer>
-	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
-	</footer>
-	
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
+      <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+   </footer>
+   
+   <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -379,21 +447,15 @@
             });
         }
 
-        // [수정됨] role 인자 추가
+        // 모달 열기
         function openEditModal(code, name, pos, num, role) {
             document.getElementById('modalMemberCode').value = code;
             document.getElementById('modalMemberName').value = name;
-            
-            // 권한 세팅 (추가됨)
             document.getElementById('modalRoleLevel').value = role;
 
-            // 포지션 세팅
             const select = document.getElementById('modalPosition');
-            if(pos) {
-                select.value = pos.trim(); 
-            }
+            if(pos) { select.value = pos.trim(); }
             
-            // 등번호 세팅
             if(num == '0' || num == '') {
                 document.getElementById('modalBackNumber').value = "";
             } else {
@@ -402,6 +464,16 @@
             
             const modal = new bootstrap.Modal(document.getElementById('editMemberModal'));
             modal.show();
+        }
+
+        function deleteMember() {
+            const teamCode = document.querySelector("input[name=team_code]").value;
+            const memberCode = document.getElementById("modalMemberCode").value;
+            const memberName = document.getElementById("modalMemberName").value;
+            
+            if(confirm("[" + memberName + "] 님을 정말로 구단에서 내보내시겠습니까?\n이 작업은 취소할 수 없습니다.")) {
+                location.href = "${pageContext.request.contextPath}/myteam/deleteMember?teamCode=" + teamCode + "&memberCode=" + memberCode;
+            }
         }
     </script>
 

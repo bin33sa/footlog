@@ -32,12 +32,13 @@
 	        role_level, 
 	        position, 
 	        back_number, 
-	        profile_image,   reg_date AS join_date
+	        profile_image,
+	        reg_date AS join_date
 	    FROM member_team
-	    WHERE team_code = #{teamCode} 
-	      AND member_code = #{memberCode}
+	    WHERE team_code = #{team_code} 
+	      AND member_code = #{member_code}
 	</select>
-
+	
 	<update id="updateTeamMember" parameterType="com.fl.model.TeamMemberDTO">
 		UPDATE member_team
 		SET profile_image = #{profile_image}
@@ -56,8 +57,8 @@
 	</update>
 
 	<delete id="deleteMyTeamHistory" parameterType="map">
-		DELETE FROM team_member 
-		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	    DELETE FROM member_team 
+	    WHERE team_code = #{team_code} AND member_code = #{member_code}
 	</delete>
 	
 	<update id="updateTeamMemberCountDown" parameterType="Long">
@@ -78,7 +79,8 @@
 	                m.member_id,    
 	                tm.role_level,
 	                tm.position,
-	                tm.back_number,  TO_CHAR(tm.reg_date, 'YYYY-MM-DD') AS join_date
+	                tm.back_number,
+	                tm.profile_image,  TO_CHAR(tm.reg_date, 'YYYY-MM-DD') AS join_date
 	                
 	            FROM member_team tm
 	            JOIN member m ON tm.member_code = m.member_code
@@ -120,8 +122,8 @@
 	</update>
 
 	<delete id="deleteTeamMember" parameterType="map">
-		DELETE FROM team_member 
-		WHERE team_code = #{team_code} AND member_code = #{member_code}
+	    DELETE FROM member_team 
+	    WHERE team_code = #{team_code} AND member_code = #{member_code}
 	</delete>
 
 
@@ -283,5 +285,83 @@
 	    FROM member_team
 	    WHERE team_code = #{team_code} AND member_code = #{member_code}
 	</select>
+	
+	<insert id="insertGallery" parameterType="com.fl.model.GalleryDTO">
+		<selectKey keyProperty="gallery_code" resultType="Long" order="BEFORE">
+			SELECT gallery_seq.NEXTVAL FROM DUAL
+		</selectKey>
+	
+		INSERT INTO GALLERY(GALLERY_CODE, TEAM_CODE, MEMBER_CODE, TITLE, CONTENT, TITLE_IMAGE, VIEW_COUNT, CREATED_AT)
+		VALUES (#{gallery_code}, #{team_code}, #{member_code}, #{title}, #{content}, #{title_image, jdbcType=VARCHAR}, 0, SYSDATE)
+	</insert>
+
+	<select id="galleryDataCount" parameterType="map" resultType="Integer">
+		SELECT NVL(COUNT(*), 0) 
+		FROM GALLERY 
+		WHERE TEAM_CODE = #{team_code}
+	</select>
+
+	<select id="listGallery" parameterType="map" resultType="com.fl.model.GalleryDTO">
+		SELECT 
+			g.GALLERY_CODE, 
+			g.TEAM_CODE, 
+			g.MEMBER_CODE, 
+			g.TITLE, 
+			g.TITLE_IMAGE, 
+			g.VIEW_COUNT,
+			TO_CHAR(g.CREATED_AT, 'YYYY-MM-DD') AS created_at,
+			m.MEMBER_NAME,       
+			tm.PROFILE_IMAGE,    
+			(SELECT COUNT(*) FROM COMMENT_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS reply_count,
+			(SELECT COUNT(*) FROM LIKE_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS like_count
+
+		FROM GALLERY g
+		JOIN MEMBER m ON g.MEMBER_CODE = m.MEMBER_CODE
+		LEFT JOIN MEMBER_TEAM tm ON g.TEAM_CODE = tm.TEAM_CODE AND g.MEMBER_CODE = tm.MEMBER_CODE
+		
+		WHERE g.TEAM_CODE = #{team_code}
+		ORDER BY g.GALLERY_CODE DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+
+	<select id="readGallery" parameterType="Long" resultType="com.fl.model.GalleryDTO">
+		SELECT 
+			g.GALLERY_CODE, g.TEAM_CODE, g.MEMBER_CODE, 
+			g.TITLE, g.CONTENT, g.TITLE_IMAGE, g.VIEW_COUNT, 
+			TO_CHAR(g.CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+			m.MEMBER_NAME, m.MEMBER_ID,
+			tm.PROFILE_IMAGE,
+			(SELECT COUNT(*) FROM COMMENT_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS reply_count,
+			(SELECT COUNT(*) FROM LIKE_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS like_count
+			
+		FROM GALLERY g
+		JOIN MEMBER m ON g.MEMBER_CODE = m.MEMBER_CODE
+		LEFT JOIN MEMBER_TEAM tm ON g.TEAM_CODE = tm.TEAM_CODE AND g.MEMBER_CODE = tm.MEMBER_CODE
+		WHERE g.GALLERY_CODE = #{gallery_code}
+	</select>
+	
+	<select id="listGalleryFiles" parameterType="Long" resultType="com.fl.model.FileDTO">
+		SELECT FILE_ID, GALLERY_CODE, FILE_SERVER_NAME AS saveFilename
+		FROM FILE_GALLERY
+		WHERE GALLERY_CODE = #{gallery_code}
+	</select>
+	
+	<update id="updateGalleryHitCount" parameterType="Long">
+		UPDATE GALLERY SET VIEW_COUNT = VIEW_COUNT + 1 WHERE GALLERY_CODE = #{gallery_code}
+	</update>
+
+	<update id="updateGallery" parameterType="com.fl.model.GalleryDTO">
+		UPDATE GALLERY
+		SET TITLE = #{title},
+			CONTENT = #{content}
+			<if test="title_image != null and title_image != ''">
+				, TITLE_IMAGE = #{title_image}
+			</if>
+		WHERE GALLERY_CODE = #{gallery_code}
+	</update>
+
+	<delete id="deleteGallery" parameterType="Long">
+		DELETE FROM GALLERY WHERE GALLERY_CODE = #{gallery_code}
+	</delete>
 	
 </mapper>

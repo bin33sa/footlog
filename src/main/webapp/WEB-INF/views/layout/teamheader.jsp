@@ -66,13 +66,13 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link px-4" href="${pageContext.request.contextPath}/myteam/board/list">
+                        <a class="nav-link px-4" href="${pageContext.request.contextPath}/myteam/board">
                             팀 게시판
                         </a>
                     </li>
                     
                     <li class="nav-item">
-                        <a class="nav-link px-4" href="${pageContext.request.contextPath}/myteam/gallery/list">
+                        <a class="nav-link px-4" href="${pageContext.request.contextPath}/myteam/gallery?teamCode=${teamCode}">
                             갤러리
                         </a>
                     </li>
@@ -92,7 +92,13 @@
                             </c:if>
 
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="${pageContext.request.contextPath}/myteam/delete">구단 탈퇴</a></li>
+                            <li>
+							    <a class="dropdown-item text-danger" 
+							       href="${pageContext.request.contextPath}/myteam/selfLeave?teamCode=${sessionScope.currentTeamCode}"
+							       onclick="return confirm('정말로 이 구단을 탈퇴하시겠습니까?\n탈퇴 후에는 복구할 수 없습니다.');">
+							       구단 탈퇴
+							    </a>
+							</li>
                         </ul>
                     </li>
                 </ul>
