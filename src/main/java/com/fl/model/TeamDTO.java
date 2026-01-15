@@ -1,21 +1,20 @@
 package com.fl.model;
 
 public class TeamDTO {
-	private Long team_code;          
-    private String team_name;        
-    private String team_url;         
-    private String contact_number;   
-    private String region;           
-    private String description;      
-    private String created_at;       
-    private String emblem_image;     
-    private String intro_video_url;  
+	private Long team_code; // 구단 코드     
+    private String team_name; // 구단 명   
+    private String team_url; // 구단 URL
+    private String contact_number; // 구단 대표 연락처
+    private String region; // 활동 지역           
+    private String description; // 구단 소개글     
+    private String created_at; // 구단 생성일
+    private String emblem_image; // 엠블럼 이미지
+    private String intro_video_url; // 구단 소개 영상 URL
+    private String leader_name; // 구단장 이름 
 
     private int member_count;      
-    private int like_count;      
-    
-    private int my_role;      
-    private int user_liked;
+    private int like_count;        
+    private int user_liked; // 좋아요
     
 	public Long getTeam_code() {
 		return team_code;
@@ -83,17 +82,17 @@ public class TeamDTO {
 	public void setLike_count(int like_count) {
 		this.like_count = like_count;
 	}
-	public int getMy_role() {
-		return my_role;
-	}
-	public void setMy_role(int my_role) {
-		this.my_role = my_role;
-	}
 	public int getUser_liked() {
 		return user_liked;
 	}
 	public void setUser_liked(int user_liked) {
 		this.user_liked = user_liked;
+	}
+	public String getLeader_name() {
+		return leader_name;
+	}
+	public void setLeader_name(String leader_name) {
+		this.leader_name = leader_name;
 	}
     
     

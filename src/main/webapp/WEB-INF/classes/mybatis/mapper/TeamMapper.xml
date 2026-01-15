@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fl.mapper.TeamMapper">
+
+    <select id="readTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
+        SELECT 
+            t.team_code, 
+            t.team_name, 
+            t.region, 
+            t.description, 
+            t.contact_number, 
+            t.intro_video_url,
+            t.emblem_image, 
+            TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at, 
+            (SELECT COUNT(*) FROM member_team WHERE team_code = t.team_code) AS member_count,
+            (SELECT COUNT(*) FROM like_team WHERE team_code = t.team_code) AS like_count,
+            (SELECT m.member_name 
+             FROM member m 
+             JOIN member_team mt ON m.member_code = mt.member_code 
+             WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name,
+             
+            <choose>
+                <when test="member_code != null and member_code != 0">
+                    NVL((SELECT 1 FROM like_team lt 
+                         WHERE lt.team_code = t.team_code AND lt.member_code = #{member_code}), 0)
+                </when>
+                <otherwise>0</otherwise>
+            </choose> AS user_liked
+            
+        FROM team t
+        WHERE t.team_code = #{team_code}
+    </select>
+    
+    <select id="readMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
+	    SELECT t.team_code, t.team_name, t.emblem_image, t.region
+	    FROM team t
+	    JOIN member_team mt ON t.team_code = mt.team_code
+	    WHERE mt.member_code = #{member_code}
+	</select>	
+    
+    <insert id="insertTeamLike" parameterType="map">
+        INSERT INTO like_team (team_code, member_code)
+        VALUES (#{team_code}, #{member_code})
+    </insert>
+
+    <delete id="deleteTeamLike" parameterType="map">
+        DELETE FROM like_team 
+        WHERE team_code = #{team_code} AND member_code = #{member_code}
+    </delete>
+    
+    <select id="teamLikeCount" parameterType="Long" resultType="Integer">
+        SELECT COUNT(*) FROM like_team WHERE team_code = #{team_code}
+    </select>
+
+    <insert id="insertTeam" parameterType="com.fl.model.TeamDTO">
+        <selectKey keyProperty="team_code" resultType="long" order="BEFORE">
+            SELECT seq_team.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO team (team_code, team_name, region, description, emblem_image, contact_number, intro_video_url, team_url, created_at) 
+        VALUES (#{team_code}, #{team_name}, #{region}, #{description}, #{emblem_image, jdbcType=VARCHAR}, #{contact_number}, #{intro_video_url, jdbcType=VARCHAR}, 'pending', SYSDATE)
+    </insert>
+
+    <insert id="insertTeamMember" parameterType="map">
+        INSERT INTO member_team (team_code, member_code, role_level, position, reg_date) 
+        VALUES (#{team_code}, #{member_code}, #{role_level}, #{position}, SYSDATE)
+    </insert>
+    
+    <select id="listTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
+	    SELECT 
+	        t.team_code, 
+	        t.team_name, 
+	        t.region, 
+	        t.emblem_image, 
+	        TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at,
+	        (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) AS member_count,
+	        (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) AS like_count,
+	        
+	        (SELECT m.member_name 
+	         FROM member m 
+	         JOIN member_team mt ON m.member_code = mt.member_code 
+	         WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name
+	         
+	    FROM team t
+	    ORDER BY t.created_at DESC
+	    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+    
+    <select id="teamCount" parameterType="map" resultType="Integer">
+        SELECT COUNT(*) FROM team
+    </select>
+
+</mapper>

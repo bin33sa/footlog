@@ -80,7 +80,7 @@
                         
                         <div class="row">
                             <div class="col-md-4 text-center border-end mb-4 mb-md-0">
-                                <label class="form-label fw-bold d-block">팀 엠블럼</label>
+                                <label class="form-label fw-bold d-block">팀 엠블럼 <span class="text-danger">*</span></label>
                                 
                                 <div class="emblem-preview-box" onclick="document.getElementById('uploadFile').click();">
                                     <span id="emblemPlaceholder">
@@ -98,49 +98,41 @@
 
                             <div class="col-md-8 ps-md-5">
                                 <div class="mb-4">
-                                    <label for="subject" class="form-label fw-bold">구단명 <span class="text-danger">*</span></label>
-                                    <input type="text" name="subject" id="subject" class="form-control form-control-lg bg-light border-0" placeholder="멋진 구단 이름을 지어주세요 (예: FC 풋로그)" required>
+                                    <label for="team_name" class="form-label fw-bold">구단명 <span class="text-danger">*</span></label>
+                                    <%-- [수정] name="subject" -> name="team_name" --%>
+                                    <input type="text" name="team_name" id="team_name" class="form-control form-control-lg bg-light border-0" placeholder="멋진 구단 이름을 지어주세요 (예: FC 풋로그)" required>
                                 </div>
 
                                 <div class="row mb-4">
                                     <div class="col-md-6">
-                                        <label class="form-label fw-bold">활동 지역 <span class="text-danger">*</span></label>
-                                        <select name="region" class="form-select bg-light border-0" required>
-                                            <option value="">선택하세요</option>
+                                        <label class="form-label fw-bold">활동 지역</label>
+                                        <select name="region" class="form-select bg-light border-0">
+                                            <option value="">선택하세요 (미정 가능)</option>
                                             <option value="서울">서울</option>
                                             <option value="경기">경기</option>
                                             <option value="인천">인천</option>
                                             <option value="부산">부산</option>
-                                            </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-bold">주요 연령대</label>
-                                        <select name="ageGroup" class="form-select bg-light border-0">
-                                            <option value="무관">연령 무관</option>
-                                            <option value="20대">20대</option>
-                                            <option value="30대">30대</option>
-                                            <option value="40대">40대</option>
-                                            <option value="50대 이상">50대 이상</option>
+                                            <option value="대구">대구</option>
+                                            <option value="광주">광주</option>
+                                            <option value="대전">대전</option>
+                                            <option value="울산">울산</option>
+                                            <option value="강원">강원</option>
+                                            <option value="충청">충청</option>
+                                            <option value="전라">전라</option>
+                                            <option value="경상">경상</option>
+                                            <option value="제주">제주</option>
                                         </select>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">대표 연락처 <span class="text-danger">*</span></label>
+                                        <input type="text" name="contact_number" class="form-control bg-light border-0" placeholder="예: 010-1234-5678" required>
                                     </div>
                                 </div>
                                 
                                 <div class="mb-4">
-                                    <label class="form-label fw-bold">실력 수준</label>
-                                    <div class="d-flex gap-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="skillLevel" id="skill1" value="초급" checked>
-                                            <label class="form-check-label" for="skill1">즐겜러 (초급)</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="skillLevel" id="skill2" value="중급">
-                                            <label class="form-check-label" for="skill2">아마추어 (중급)</label>
-                                        </div>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="skillLevel" id="skill3" value="상급">
-                                            <label class="form-check-label" for="skill3">선출 보유 (상급)</label>
-                                        </div>
-                                    </div>
+                                    <label class="form-label fw-bold">홍보 영상 URL</label>
+                                    <input type="text" name="intro_video_url" class="form-control bg-light border-0" placeholder="YouTube 영상 링크 등 (선택 사항)">
                                 </div>
                             </div>
                         </div>
@@ -149,7 +141,8 @@
 
                         <div class="mb-5">
                             <label class="form-label fw-bold">구단 소개 및 가입 안내</label>
-                            <textarea name="content" class="form-control border-0 bg-light rounded-4 p-4" rows="8" placeholder="우리 팀의 특징, 주로 차는 시간대, 회비 정보 등을 자유롭게 적어주세요." style="resize: none;" required></textarea>
+                            <%-- [수정] name="content" -> name="description" --%>
+                            <textarea name="description" class="form-control border-0 bg-light rounded-4 p-4" rows="8" placeholder="우리 팀의 특징, 주로 차는 시간대, 회비 정보 등을 자유롭게 적어주세요." style="resize: none;" required></textarea>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
@@ -172,24 +165,43 @@
    
    <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
     
-
-    
     <script>
         function sendOk() {
             const f = document.teamForm;
-            if(!f.subject.value.trim()) {
-                alert("구단명을 입력해주세요.");
-                f.subject.focus();
+            
+            // 엠블럼 체크 (필요시 주석 해제하여 필수 처리)
+            if(!f.uploadFile.value) {
+                alert("팀 엠블럼 이미지를 등록해주세요.");
                 return false;
             }
+
+            // [수정] subject -> team_name
+            if(!f.team_name.value.trim()) {
+                alert("구단명을 입력해주세요.");
+                f.team_name.focus();
+                return false;
+            }
+            
+            // 활동 지역은 필수가 아니므로 체크 제거 (필요하면 부활)
+            /*
             if(f.region.value === "") {
                 alert("활동 지역을 선택해주세요.");
                 f.region.focus();
                 return false;
             }
-            if(!f.content.value.trim()) {
+            */
+            
+            // 연락처 필수 체크
+            if(!f.contact_number.value.trim()) {
+                alert("대표 연락처를 입력해주세요.");
+                f.contact_number.focus();
+                return false;
+            }
+
+            // [수정] content -> description
+            if(!f.description.value.trim()) {
                 alert("구단 소개 내용을 입력해주세요.");
-                f.content.focus();
+                f.description.focus();
                 return false;
             }
             return true;
