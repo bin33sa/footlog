@@ -46,6 +46,8 @@ public class LoginFilter implements Filter {
 		
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
 		
+	
+		
 		if(info == null && isExcludeUri(req) == false) {
 			if(isAjaxRequest(req)) {
 				resp.sendError(403);
