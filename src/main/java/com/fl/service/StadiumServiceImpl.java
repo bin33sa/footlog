@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.mapper.StadiumMapper;
-import com.fl.model.ArenaDTO;
+
 import com.fl.model.PageResult;
 import com.fl.model.StadiumDTO;
 import com.fl.mybatis.support.MapperContainer;
@@ -53,11 +53,7 @@ public class StadiumServiceImpl implements StadiumService {
 	}
 
 	
-	@Override
-	public List<ArenaDTO> listArena(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	@Override
 	public int arenaCount(Map<String, Object> map) {

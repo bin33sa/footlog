@@ -14,12 +14,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/dist/css/style.css">
 
@@ -158,7 +152,10 @@
 								<label class="form-label fw-bold d-block mb-2">시간 선택</label>
 
 								<!-- 타임슬롯카드 -->
-								<div class="row g-2" id="timeSlotArea"></div>
+								<div class="row g-2" id="timeSlotArea">
+									
+								</div>
+
 
 								<div class="mt-2 small text-muted">
 									<span class="me-2"><i
@@ -235,62 +232,35 @@
 	<footer>
 		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
 	</footer>
-
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 	<script type="text/javascript">
-	
-	
+
 $(function () {
   $('#reservationDate').on('change', function () {
-    const date = this.value;
-
-    console.log(date);
-    $.get('${pageContext.request.contextPath}/field/times', {
-      stadiumCode: '${dto.stadiumCode}',
-      date: date
-    }, function (res) {
-      renderTimeSlots(res);
-    }, 'json');
-    
+	    const date = this.value;
+	    const $list = $('#timeSlotArea');
+	    
+	    $.ajax({
+			url : '${pageContext.request.contextPath}/field/timeSlot',
+			type : 'get',
+			data : {
+				  stadiumCode: '${dto.stadiumCode}',
+			      date: date
+			},
+			dataType : 'html',
+			success : function(html) {
+				$list.html(html);
+			},
+			error : function() {
+				console.error('구장 목록 로드 실패');
+			}
+		});
   });
-
+    
   // 페이지 처음 들어왔을 때도 한번 불러오게
   $('#reservationDate').trigger('change');
   
 });
 
-function renderTimeSlots(res) {
-	
-  const $area = $('#timeSlotArea');
-  $area.empty();
-
-  res.available.forEach(time => {
-    $area.append(`
-      <div class="col-4 col-md-3">
-        <button type="button"
-                class="btn btn-outline-primary w-100 py-2 rounded-3 time-btn"
-                data-time="\${time}">
-          \${time}
-        </button>
-      </div>
-    `);
-  });
-
-  res.reserved.forEach(time => {
-    $area.append(`
-      <div class="col-4 col-md-3">
-        <button type="button"
-                class="btn btn-outline-secondary w-100 py-2 rounded-3 text-decoration-line-through"
-                disabled>
-          \${time}
-        </button>
-      </div>
-    `);
-  });
-}
 </script>
 
 

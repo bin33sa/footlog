@@ -1,19 +1,19 @@
 package com.fl.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.fl.model.PageResult;
 import com.fl.model.StadiumDTO;
+import com.fl.model.StadiumTimeSlotDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.RequestMapping;
-import com.fl.mvc.annotation.ResponseBody;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.StadiumService;
 import com.fl.service.StadiumServiceImpl;
+import com.fl.service.TimeSlotService;
+import com.fl.service.TimeSlotServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +23,8 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/field/*")
 public class FieldController {
 
-	private StadiumService service = new StadiumServiceImpl();
+	private StadiumService Stadiumservice = new StadiumServiceImpl();
+	private TimeSlotService TimeSlotservice = new TimeSlotServiceImpl();
 
 	@RequestMapping("list")
 	public ModelAndView list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -33,7 +34,7 @@ public class FieldController {
 		String keyword = req.getParameter("keyword");
 		String sort = req.getParameter("sort");
 
-		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword, sort);
+		PageResult<StadiumDTO> result = Stadiumservice.listStadium(pageNo, size, keyword, sort);
 
 		ModelAndView mav = new ModelAndView("field/list");
 		mav.addObject("list", result.getList());
@@ -52,7 +53,7 @@ public class FieldController {
 		
 		int stadiumCode = Integer.parseInt(req.getParameter("stadiumCode"));
 		
-		StadiumDTO dto = service.findById(stadiumCode);
+		StadiumDTO dto = Stadiumservice.findById(stadiumCode);
 		
 		
 		ModelAndView mav = new ModelAndView("field/view");
@@ -70,7 +71,7 @@ public class FieldController {
 		String keyword = req.getParameter("keyword");
 		String sort = req.getParameter("sort");
 		
-		PageResult<StadiumDTO> result = service.listStadium(pageNo, size, keyword, sort);
+		PageResult<StadiumDTO> result = Stadiumservice.listStadium(pageNo, size, keyword, sort);
 
 		ModelAndView mav = new ModelAndView("field/stadiumList");
 		
@@ -87,21 +88,19 @@ public class FieldController {
 	
 	
 	//날짜에 따른 타임슬롯
-	@GetMapping("times")
-	@ResponseBody
-	public Map<String, Object> times(HttpServletRequest req, HttpServletResponse resp) 
+	@GetMapping("timeSlot")
+	public ModelAndView timeSlot(HttpServletRequest req, HttpServletResponse resp) 
 				throws ServletException, IOException{
 			
 		int stadiumCode = Integer.parseInt(req.getParameter("stadiumCode"));
 	    String date = req.getParameter("date");
 		
-		  Map<String, Object> map = new HashMap<>();
-		    map.put("available", List.of("12:00", "14:00"));
-		    map.put("reserved", List.of("10:00", "16:00"));
+	    List<StadiumTimeSlotDTO> result = TimeSlotservice.TimeSlots(stadiumCode, date);
 
-		    System.out.println(stadiumCode);
-		    
-		    return map;
+	    ModelAndView mav = new ModelAndView("field/timeSlot");
+	    mav.addObject("list", result);
+
+	    return mav;
 	}
 
 }

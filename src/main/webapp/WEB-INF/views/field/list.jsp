@@ -18,19 +18,6 @@
 <link rel="stylesheet"
 	href="${pageContext.request.contextPath}/dist/css/style.css">
 
-<style type="text/css">
-.list-footer {
-	
-}
-
-.loadMoreBtn {
-	
-}
-
-.stadium {
-	
-}
-</style>
 
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
 </head>
