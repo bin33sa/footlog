@@ -126,4 +126,27 @@ public class BoardServiceImpl implements BoardService {
     public List<BoardReplyDTO> listReplyAnswer(Map<String, Object> map) {
         return getMapper().listReplyAnswer(map);
     }
+
+	
+
+
+	@Override
+	public void insertGallery(BoardDTO dto) throws Exception {
+		try {
+	        // 1. 게시글 정보 저장 (gallery 테이블)
+	        // mapper의 insertGallery에서 <selectKey>를 통해 dto에 gallery_code가 세팅됩니다.
+	        getMapper().insertGallery(dto);
+
+	        // 2. 파일 정보 저장 (file_gallery 테이블)
+	        if (dto.getImageFilename() != null && !dto.getImageFilename().isEmpty()) {
+	            getMapper().insertGalleryFile(dto);
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw e;
+	    }
+		
+	}
+
+	
 }

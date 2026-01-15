@@ -14,7 +14,7 @@
         .title-input { font-size: 1.5rem; font-weight: 700; background: transparent; }
         .title-input::placeholder { color: #ccc; }
         .btn-check:checked + .btn-category { background-color: #111; color: #D4F63F; border-color: #111; font-weight: 800; }
-        .btn-category { border: 1px solid #ddd; background-color: #fff; color: #888; font-weight: 600; border-radius: 50px; padding: 10px 20px; transition: 0.2s; cursor: pointer; }
+        .btn-category { border: 1px solid #ddd; background-color: #fff; color: #888; font-size: 0.9rem; font-weight: 600; border-radius: 50px; padding: 10px 15px; transition: 0.2s; cursor: pointer; display: flex; align-items: center; justify-content: center; height: 45px; }
     </style>
 </head>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
@@ -32,25 +32,36 @@
         </div>
 
         <div class="modern-card p-5 shadow-lg">
-            <form name="bbsForm" method="post" action="${pageContext.request.contextPath}/bbs/${mode}">
+            <form name="bbsForm" method="post" action="${pageContext.request.contextPath}/bbs/${mode}" enctype="multipart/form-data">
                 <div class="row g-3 mb-4">
                     <div class="col-12">
                         <label class="d-block text-muted fw-bold small mb-2 ms-1">게시글 분류</label>
-                        <div class="d-flex gap-2">
-                            <input type="radio" class="btn-check" name="category" id="cat1" value="1" ${category==1 or dto.category==1?'checked':''}>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <input type="radio" class="btn-check" name="category" id="cat1" value="1" ${category==1 or dto.category==1?'checked':''} onclick="toggleFile(1)">
                             <label class="btn btn-category flex-fill" for="cat1">💬 공지사항</label>
 
-                            <input type="radio" class="btn-check" name="category" id="cat2" value="2" ${category==2 or dto.category==2?'checked':''}>
+                            <input type="radio" class="btn-check" name="category" id="cat2" value="2" ${category==2 or dto.category==2?'checked':''} onclick="toggleFile(2)">
                             <label class="btn btn-category flex-fill" for="cat2">💡 자유게시판</label>
                             
-                            <input type="radio" class="btn-check" name="category" id="cat3" value="3" ${category==3 or dto.category==3?'checked':''}>
-                            <label class="btn btn-category flex-fill" for="cat3">📝 이벤트/뉴스</label>
+                            <input type="radio" class="btn-check" name="category" id="cat3" value="3" ${category==3 or dto.category==3?'checked':''} onclick="toggleFile(3)">
+                            <label class="btn btn-category flex-fill" for="cat3">📝 뉴스</label>
+
+                            <input type="radio" class="btn-check" name="category" id="cat4" value="4" ${category==4 or dto.category==4?'checked':''} onclick="toggleFile(4)">
+                            <label class="btn btn-category flex-fill" for="cat4">📸 갤러리</label>
                         </div>
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <input type="text" name="title" value="${dto.title}" class="form-control title-input border-0 border-bottom rounded-0 px-0 py-2" placeholder="제목을 입력하세요" required>
+                </div>
+
+                <div id="fileViewer" class="mb-4" style="display: ${category==4 or dto.category==4 ? 'block' : 'none'};">
+                    <label class="d-block text-muted fw-bold small mb-2 ms-1">이미지 첨부 (필수)</label>
+                    <input type="file" name="selectFile" class="form-control rounded-pill bg-light border-0 px-3" accept="image/*">
+                    <c:if test="${mode=='update' and not empty dto.imageFilename}">
+                        <div class="mt-2 ms-2 small text-muted">기존 파일: ${dto.imageFilename}</div>
+                    </c:if>
                 </div>
 
                 <div class="mb-4">
@@ -77,6 +88,7 @@
                 <c:if test="${mode=='update'}">
                     <input type="hidden" name="board_main_code" value="${dto.board_main_code}">
                     <input type="hidden" name="page" value="${page}">
+                    <input type="hidden" name="imageFilename" value="${dto.imageFilename}">
                 </c:if>
             </form>
         </div>
@@ -88,6 +100,17 @@
     <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
     <script>
+        // 카테고리 선택에 따라 파일 입력창 보이기/숨기기
+        function toggleFile(cat) {
+            const viewer = document.getElementById("fileViewer");
+            if(cat == 4) {
+                viewer.style.display = "block";
+            } else {
+                viewer.style.display = "none";
+                document.bbsForm.selectFile.value = ""; // 선택 취소 시 파일 비우기
+            }
+        }
+
         function sendOk() {
             const f = document.bbsForm;
             if(!f.title.value.trim()) {
@@ -95,11 +118,21 @@
                 f.title.focus();
                 return;
             }
+            
+            // 갤러리일 경우 파일 체크
+            if(f.category.value == "4" && "${mode}" == "write") {
+                if(!f.selectFile.value) {
+                    alert("갤러리 게시글은 이미지를 반드시 첨부해야 합니다.");
+                    return;
+                }
+            }
+            
             if(!f.content.value.trim()) {
                 alert("내용을 입력하세요.");
                 f.content.focus();
                 return;
             }
+            
             f.submit();
         }
     </script>

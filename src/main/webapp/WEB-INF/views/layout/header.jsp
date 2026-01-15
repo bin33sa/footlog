@@ -100,10 +100,10 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link px-4 dropdown-toggle" href="${pageContext.request.contextPath}/bbs/list" role="button" data-bs-toggle="dropdown" aria-expanded="false">게시판</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/notice/list">공지사항</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/bbs/list">자유 게시판</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/photo/list">갤러리</a></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/event/list">이벤트 / 뉴스</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/bbs/list?category=1">공지사항</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/bbs/list?category=2">자유 게시판</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/${cp}bbs/list?category=4">갤러리</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/bbs/list?category=3">이벤트 / 뉴스</a></li>
                         </ul>
                     </li>
                 </ul>
@@ -116,15 +116,25 @@
                         </c:when>
                         
                         <c:otherwise>
-						    <div class="d-flex align-items-center">
-						        <div class="d-flex align-items-center me-3">
-						            <img src="${pageContext.request.contextPath}/uploads/member/${sessionScope.member.profile_image}" 
-						                 class="rounded-circle border me-2" 
-						                 width="32" height="32" 
-						                 style="object-fit: cover;"
-						                 onerror="this.src='${pageContext.request.contextPath}/dist/images/avatar.png'"> <!-- 이미지 깨질땐 기본이미지 로 -->
-						                 <span class="fw-bold">${sessionScope.member.member_name}님</span>
-						        </div>
+						    <div class="d-flex align-items-center me-3">
+    <c:choose>
+        <c:when test="${not empty sessionScope.member.profile_image}">
+            <img src="${pageContext.request.contextPath}/uploads/member/${sessionScope.member.profile_image}" 
+                 class="rounded-circle border me-2" 
+                 width="32" height="32" 
+                 style="object-fit: cover;"
+                 onerror="this.src='${pageContext.request.contextPath}/dist/images/avatar.png'">
+        </c:when>
+        <c:otherwise>
+            <img src="${pageContext.request.contextPath}/dist/images/avatar.png" 
+                 class="rounded-circle border me-2" 
+                 width="32" height="32" 
+                 style="object-fit: cover;">
+        </c:otherwise>
+    </c:choose>
+
+    <span class="fw-bold">${sessionScope.member.member_name}님</span>
+</div>
 						        
 						        <a href="${pageContext.request.contextPath}/member/mypage" class="btn btn-outline-secondary rounded-pill btn-sm me-2">마이페이지</a>
 						        <a href="${pageContext.request.contextPath}/member/logout" class="btn btn-dark rounded-pill btn-sm">로그아웃</a>

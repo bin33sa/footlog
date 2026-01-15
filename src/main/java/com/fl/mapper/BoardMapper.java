@@ -28,5 +28,7 @@ public interface BoardMapper {
     public List<BoardReplyDTO> listReply(Map<String, Object> map);
     public void deleteReply(Map<String, Object> map) throws Exception;
     public List<BoardReplyDTO> listReplyAnswer(Map<String, Object> map);
+	public void insertGalleryFile(BoardDTO dto);
+	public void insertGallery(BoardDTO dto);
     
 }

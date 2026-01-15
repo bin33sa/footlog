@@ -11,7 +11,7 @@ public interface BoardService {
     public void insertBoard(BoardDTO dto) throws Exception;
     public void updateBoard(BoardDTO dto) throws Exception;
     public void deleteBoard(Map<String, Object> map) throws Exception;
-    
+    public void insertGallery(BoardDTO dto) throws Exception;
     // board_main_code를 사용하여 상세 정보 조회
     public BoardDTO findById(long board_main_code);
     // 메인 게시판 리스트 조회 (카테고리 필터링 포함 가능)
@@ -29,4 +29,5 @@ public interface BoardService {
     
     // 답글(대댓글) 목록 조회
     public List<BoardReplyDTO> listReplyAnswer(Map<String, Object> map);
+	
 }

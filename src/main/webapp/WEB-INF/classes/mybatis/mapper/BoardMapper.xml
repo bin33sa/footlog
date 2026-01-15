@@ -3,36 +3,54 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.BoardMapper">
    
+<sql id="search-condition">
+    <choose>
+        <when test="schType == 'all'">
+            (INSTR(title, #{kwd}) &gt; 0 OR INSTR(content, #{kwd}) &gt; 0)
+        </when>
+        <when test="schType == 'title'">
+            INSTR(title, #{kwd}) &gt; 0
+        </when>
+        <when test="schType == 'content'">
+            INSTR(content, #{kwd}) &gt; 0
+        </when>
+        <when test="schType == 'name'">
+            INSTR(member_name, #{kwd}) &gt; 0
+        </when>
+    </choose>
+</sql>
 
     <select id="listBoard" parameterType="map" resultType="com.fl.model.BoardDTO">
-    SELECT b.board_main_code, b.title, m.member_name, 
-           b.created_at, b.view_count, b.category,
-           (SELECT COUNT(*) FROM comment_main r WHERE r.board_main_code = b.board_main_code) as replyCount
-    FROM board_main b
-    JOIN member m ON b.member_code = m.member_code
-    <where>
-        <if test="category != null and category != 0">
-            AND b.category = #{category}
-        </if>
-        <if test="kwd != null and kwd != ''">
+    SELECT * FROM (
+        SELECT rownum rnum, tb.* FROM (
             <choose>
-                <when test="schType == 'all'">
-                    AND (INSTR(b.title, #{kwd}) &gt; 0 OR INSTR(b.content, #{kwd}) &gt; 0 OR INSTR(m.member_name, #{kwd}) &gt; 0)
+                <when test="category == 4">
+                    SELECT 
+                        g.gallery_code AS board_main_code, g.title, g.member_code, 4 AS category,
+                        g.view_count, g.created_at, m.member_name,
+                        (SELECT COUNT(*) FROM comment_main r WHERE r.board_main_code = g.gallery_code) AS replyCount,
+                        g.title_image AS imageFilename
+                    FROM gallery g
+                    JOIN member m ON g.member_code = m.member_code
+                    ORDER BY gallery_code DESC
                 </when>
-                <when test="schType == 'title'">
-                    AND INSTR(b.title, #{kwd}) &gt; 0
-                </when>
-                <when test="schType == 'content'">
-                    AND INSTR(b.content, #{kwd}) &gt; 0
-                </when>
-                <when test="schType == 'name'">
-                    AND INSTR(m.member_name, #{kwd}) &gt; 0
-                </when>
+                
+                <otherwise>
+                    SELECT 
+                        b.board_main_code, b.title, b.member_code, b.category,
+                        b.view_count, b.created_at, m.member_name,
+                        (SELECT COUNT(*) FROM comment_main r WHERE r.board_main_code = b.board_main_code) AS replyCount,
+                        NULL AS imageFilename
+                    FROM board_main b
+                    JOIN member m ON b.member_code = m.member_code
+                    WHERE category = #{category}
+                    <if test="kwd != null and kwd != ''">
+                        </if>
+                    ORDER BY board_main_code DESC
+                </otherwise>
             </choose>
-        </if>
-    </where>
-    ORDER BY b.board_main_code DESC
-    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+        ) tb WHERE rownum &lt;= #{offset} + #{size}
+    ) WHERE rnum &gt; #{offset}
 </select>
     
     <insert id="insertBoard" parameterType="com.fl.model.BoardDTO">
@@ -53,39 +71,111 @@
     </select>
    
    <update id="updateBoard" parameterType="com.fl.model.BoardDTO">
-        UPDATE board_main 
-        SET title = #{title}, 
-            content = #{content}, 
-            category = #{category},
-            video_url = #{video_url, jdbcType=VARCHAR}
-        WHERE board_main_code = #{board_main_code} AND member_code = #{member_code}
-    </update>
+    <choose>
+        <when test="category == 4">
+            UPDATE gallery SET 
+                title = #{title}, 
+                content = #{content}
+                <if test="imageFilename != null and imageFilename != ''">
+                    , title_image = #{imageFilename}
+                </if>
+            WHERE gallery_code = #{board_main_code} AND member_code = #{member_code}
+        </when>
+        <otherwise>
+            UPDATE board_main SET 
+                title = #{title}, 
+                content = #{content}
+            WHERE board_main_code = #{board_main_code} AND member_code = #{member_code}
+        </otherwise>
+    </choose>
+</update>
     
-    <select id="findById" parameterType="long" resultType="com.fl.model.BoardDTO">
-        SELECT b.board_main_code, b.member_code, b.title, b.content, 
-               b.created_at, b.category, b.view_count, b.video_url, m.member_name
-        FROM board_main b
-        JOIN MEMBER m ON b.member_code = m.member_code
-        WHERE b.board_main_code = #{board_main_code}
-    </select>
+    <select id="findById" parameterType="map" resultType="com.fl.model.BoardDTO">
+    <choose>
+        <when test="category == 4">
+            SELECT 
+                g.gallery_code AS board_main_code, g.member_code, g.title, g.content, 
+                g.created_at, 4 AS category, g.view_count, m.member_name,
+                f.file_server_name AS imageFilename
+            FROM gallery g
+            JOIN member m ON g.member_code = m.member_code
+            LEFT OUTER JOIN (
+                SELECT gallery_code, MIN(file_server_name) AS file_server_name
+                FROM file_gallery
+                GROUP BY gallery_code
+            ) f ON g.gallery_code = f.gallery_code
+            WHERE g.gallery_code = #{board_main_code}
+        </when>
+
+        <otherwise>
+            SELECT 
+                b.board_main_code, b.member_code, b.title, b.content, 
+                b.created_at, b.category, b.view_count, b.video_url, m.member_name
+            FROM board_main b
+            JOIN member m ON b.member_code = m.member_code
+            WHERE b.board_main_code = #{board_main_code}
+        </otherwise>
+    </choose>
+</select>
     
     <delete id="deleteBoard" parameterType="map">
-        DELETE FROM board_main 
-        WHERE board_main_code = #{board_main_code} AND member_code = #{member_code}
-    </delete>
+    <choose>
+        <when test="category == 4">
+            DELETE FROM gallery 
+            WHERE gallery_code = #{board_main_code} AND member_code = #{member_code}
+        </when>
+        <otherwise>
+            DELETE FROM board_main 
+            WHERE board_main_code = #{board_main_code} AND member_code = #{member_code}
+        </otherwise>
+    </choose>
+</delete>
     
     <select id="dataCount" parameterType="map" resultType="int">
-        SELECT COUNT(*) 
-        FROM board_main b
-        <where>
-            <if test="category != null and category != ''">
-                AND b.category = #{category}
-            </if>
-            <if test="kwd != null and kwd != ''">
-                AND b.title LIKE '%' || #{kwd} || '%'
-            </if>
-        </where>   
-    </select>
+    <choose>
+        <when test="category == 4">
+            SELECT COUNT(*) 
+            FROM gallery
+            <where>
+                <if test="kwd != null and kwd != ''">
+                    AND <include refid="search-condition"/>
+                </if>
+            </where>
+        </when>
+        
+        <otherwise>
+            SELECT COUNT(*) 
+            FROM board_main
+            <where>
+                <if test="category != 0">
+                    AND category = #{category}
+                </if>
+                <if test="kwd != null and kwd != ''">
+                    AND <include refid="search-condition"/>
+                </if>
+            </where>
+        </otherwise>
+    </choose>
+</select>
+
+<insert id="insertGallery" parameterType="com.fl.model.BoardDTO">
+    <selectKey keyProperty="board_main_code" resultType="long" order="BEFORE">
+        SELECT gallery_seq.NEXTVAL FROM dual
+    </selectKey>
+    INSERT INTO gallery (
+        gallery_code, title, content, member_code, 
+        created_at, view_count, title_image  ) VALUES (
+        #{board_main_code}, #{title}, #{content}, #{member_code}, 
+        SYSDATE, 0, #{imageFilename}  )
+</insert>
+
+<insert id="insertGalleryFile" parameterType="com.fl.model.BoardDTO">
+    INSERT INTO file_gallery (
+        file_id, gallery_code, file_server_name
+    ) VALUES (
+        file_gallery_seq.NEXTVAL, #{board_main_code}, #{imageFilename}
+    )
+</insert>
 
    <insert id="insertReply" parameterType="com.fl.model.BoardReplyDTO">
         INSERT INTO comment_main (
@@ -127,10 +217,19 @@
 </select>
 
     
-    <update id="updateHitCount" parameterType="long">
-    UPDATE board_main
-    SET view_count = view_count + 1 
-    WHERE board_main_code = #{board_main_code}
-   </update>
+    <update id="updateHitCount" parameterType="map">
+    <choose>
+        <when test="category == 4">
+            UPDATE gallery 
+            SET view_count = view_count + 1 
+            WHERE gallery_code = #{board_main_code}
+        </when>
+        <otherwise>
+            UPDATE board_main 
+            SET view_count = view_count + 1 
+            WHERE board_main_code = #{board_main_code}
+        </otherwise>
+    </choose>
+</update>
     
 </mapper>

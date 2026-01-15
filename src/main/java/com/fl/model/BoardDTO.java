@@ -21,6 +21,7 @@ public class BoardDTO {
     private int file_count;          
     private String gap;
     
+    private String imageFilename;
     
 	public Long getBoard_main_code() {
 		return board_main_code;
@@ -111,6 +112,12 @@ public class BoardDTO {
 	}
 	public void setReplyCount(int replyCount) {
 		this.replyCount = replyCount;
+	}
+	public String getImageFilename() {
+		return imageFilename;
+	}
+	public void setImageFilename(String imageFilename) {
+		this.imageFilename = imageFilename;
 	}
     
     
