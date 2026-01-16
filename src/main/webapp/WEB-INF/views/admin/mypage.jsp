@@ -106,7 +106,6 @@
                     <a href="${pageContext.request.contextPath}/admin/mypage?menu=team" class="list-group-item list-group-item-action py-3 border-light">구단 관리</a>
                     <a href="${pageContext.request.contextPath}/admin/mypage?menu=stadium" class="list-group-item list-group-item-action py-3 border-light">구장 관리</a>
                     <a href="${pageContext.request.contextPath}/admin/mypage?menu=member" class="list-group-item list-group-item-action py-3 border-light">회원 관리</a>
-                    <a href="${pageContext.request.contextPath}/admin/mypage?menu=faq" class="list-group-item list-group-item-action py-3 border-light">FAQ 수정</a>
                     <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action py-3 border-0 text-danger fw-bold">로그아웃</a>
                 </div>
             </div>
@@ -124,9 +123,6 @@
             	</c:when>
             	<c:when test="${param.menu == 'member'}">
   			          <jsp:include page="/WEB-INF/views/admin/mypage/member.jsp" />
-            	</c:when>
-            	<c:when test="${param.menu == 'faq'}">
-  			          <jsp:include page="/WEB-INF/views/admin/mypage/faq.jsp" />
             	</c:when>
             	
             	

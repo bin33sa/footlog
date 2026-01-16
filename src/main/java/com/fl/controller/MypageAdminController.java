@@ -54,11 +54,14 @@ public class MypageAdminController {
 			}
 
 			List<TeamDTO> team = AdminService.CountTeamAll();
+			List<TeamDTO> teamList = AdminService.ListTeamAll();
+			
 			List<StadiumDTO> stadium = AdminService.CountStadiumAll();
 			List<MemberDTO> member = AdminService.CountMemberAll();
 			mav.addObject("team", team);
 			mav.addObject("stadium", stadium);
 			mav.addObject("member", member);
+			mav.addObject("teamList", teamList);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

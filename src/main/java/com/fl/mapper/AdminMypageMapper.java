@@ -9,9 +9,11 @@ import com.fl.model.TeamDTO;
 public interface AdminMypageMapper {
 
 	public List<TeamDTO> CountTeamAll();
+	public List<TeamDTO> ListTeamAll();
+	
 	public List<StadiumDTO> CountStadiumAll();
 	public List<MemberDTO> CountMemberAll();
-	  
+	 
 	
 	
 }

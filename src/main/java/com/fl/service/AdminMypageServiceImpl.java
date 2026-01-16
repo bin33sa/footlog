@@ -41,6 +41,15 @@ public class AdminMypageServiceImpl implements AdminMypageService {
 	}
 	
 	
+	// 관리 페이지
+	public List<TeamDTO> ListTeamAll() {
+		List<TeamDTO> list = mapper.ListTeamAll();
+		
+		return list;
+	}
+	
+	
+	
 	//문의 게시판 조회
 	 @Override
 	    public List<BoardQnaDTO> listQna(Map<String, Object> map) {

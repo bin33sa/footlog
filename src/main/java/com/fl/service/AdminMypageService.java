@@ -15,6 +15,7 @@ public interface AdminMypageService {
 	public List<StadiumDTO> CountStadiumAll();
 	public List<MemberDTO> CountMemberAll();
 	
+	public List<TeamDTO> ListTeamAll();
 	
 	// 문의게시판 관련
     public List<BoardQnaDTO> listQna(Map<String, Object> map);

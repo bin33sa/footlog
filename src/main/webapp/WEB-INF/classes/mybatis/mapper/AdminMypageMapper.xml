@@ -4,7 +4,7 @@
 <mapper namespace="com.fl.mapper.AdminMypageMapper">
 
 	
-		<!-- 구단 전체 수 조회 -->
+		<!-- 구단 전체 조회 -->
 		<select id="CountTeamAll"
 			resultType="com.fl.model.TeamDTO">
 			SELECT
@@ -12,7 +12,25 @@
 			FROM team
 		</select>
 		
-		<!-- 구장 전체 수 조회 -->
+		<!-- 구단 관리 구단주명 포함 조회 -->
+		<select id="ListTeamAll"
+				resultType="com.fl.model.TeamDTO">	
+				SELECT
+				    t.team_name      AS team_name,
+				    t.contact_number AS contact_number,
+				    t.region,
+				    t.member_count   AS member_count,
+				    m.member_name    AS leader_name
+				FROM team t
+				JOIN member_team mt
+				  ON t.team_code = mt.team_code
+				JOIN member m
+				  ON mt.member_code = m.member_code
+				WHERE mt.role_level >= 10 
+		  </select>
+		
+		
+		<!-- 구장 전체 조회 -->
 		<select id="CountStadiumAll"
 			resultType="com.fl.model.StadiumDTO">
 
@@ -21,7 +39,7 @@
 			FROM stadium
 		</select>
 		
-		<!-- 멤버 전체 수 조회 -->
+		<!-- 멤버 전체 조회 -->
 		<select id="CountMemberAll"
 			resultType="com.fl.model.MemberDTO">
 
