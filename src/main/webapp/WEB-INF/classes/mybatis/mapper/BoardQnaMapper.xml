@@ -90,9 +90,8 @@
 	<update id="updateAnswer"
 		parameterType="com.fl.model.BoardQnaDTO">
 		UPDATE board_qna SET
-		answer = #{answer},
-		status = 2
-		WHERE board_qna_code = #{board_qna_code}
+		answer = #{answer, jdbcType=VARCHAR},
+		status = #{status} WHERE board_qna_code = #{board_qna_code}
 	</update>
 
 

@@ -181,7 +181,7 @@ public class BoardQnaController {
 
         return new ModelAndView("redirect:/qna/list?page=" + page);
     }
-    
+
     @PostMapping("answer")
     public ModelAndView answerSubmit(HttpServletRequest req, HttpServletResponse resp) {
         HttpSession session = req.getSession();
@@ -207,6 +207,41 @@ public class BoardQnaController {
         }
 
         // 답변 작성 후 보던 상세 페이지로 다시 리다이렉트
+        return new ModelAndView("redirect:/qna/article?board_qna_code=" + board_qna_code + "&page=" + page);
+    }
+
+    // ★ 이 부분의 인자를 (HttpServletRequest req, HttpServletResponse resp)로 수정했습니다.
+    @GetMapping("deleteAnswer")
+    public ModelAndView deleteAnswer(HttpServletRequest req, HttpServletResponse resp) {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        String page = req.getParameter("page");
+        long board_qna_code = 0;
+
+        try {
+            board_qna_code = Long.parseLong(req.getParameter("board_qna_code"));
+
+            if (info != null && info.getRole_level() >= 50) {
+                BoardQnaDTO dto = new BoardQnaDTO();
+                dto.setBoard_qna_code(board_qna_code);
+                
+                // 1. 답변은 NULL 혹은 빈 문자열로
+                dto.setAnswer(""); 
+                
+                // 2. 상태를 반드시 1(대기)로 명시
+                dto.setStatus(1);  
+
+                // 3. 서비스 호출
+                service.updateAnswer(dto);
+                
+                // [추가 체크] 만약 위 방법으로 안 된다면, 
+                // 아예 답변 삭제 전용 서비스 메서드를 하나 만드시는 것도 방법입니다.
+                // service.resetAnswer(board_qna_code);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return new ModelAndView("redirect:/qna/article?board_qna_code=" + board_qna_code + "&page=" + page);
     }
     
