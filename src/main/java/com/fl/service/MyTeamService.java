@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.model.BoardReplyDTO;
+import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.TeamBoardDTO;
@@ -105,8 +106,6 @@ public interface MyTeamService {
 	
 	public com.fl.model.GalleryDTO readGallery(long gallery_code);
 	
-	public void updateGallery(com.fl.model.GalleryDTO dto) throws Exception;
-	
 	public void deleteGallery(long gallery_code) throws Exception;
 	
 	public void insertReply(BoardReplyDTO dto) throws Exception;
@@ -116,4 +115,17 @@ public interface MyTeamService {
 	public int replyCount(Map<String, Object> map);
 	
 	public void deleteReply(Map<String, Object> map) throws Exception;
+	
+	public int checkGalleryLike(Map<String, Object> map);
+	
+	public void insertGalleryLike(Map<String, Object> map) throws Exception;
+	
+	public void deleteGalleryLike(Map<String, Object> map) throws Exception;
+	
+	public int countGalleryLike(long gallery_code);
+
+    public void updateReply(Map<String, Object> map) throws Exception;
+    
+    public void updateGallery(GalleryDTO dto) throws Exception;
+
 }

@@ -407,4 +407,35 @@
 		WHERE comment_code = #{comment_id}
 	</delete>
 	
+	<insert id="insertGalleryLike" parameterType="map">
+		INSERT INTO team_gallery_like(gallery_code, member_code)
+		VALUES (#{gallery_code}, #{member_code})
+	</insert>
+
+	<delete id="deleteGalleryLike" parameterType="map">
+		DELETE FROM team_gallery_like
+		WHERE gallery_code = #{gallery_code} AND member_code = #{member_code}
+	</delete>
+
+	<select id="checkGalleryLike" parameterType="map" resultType="Integer">
+		SELECT COUNT(*) 
+		FROM team_gallery_like
+		WHERE gallery_code = #{gallery_code} AND member_code = #{member_code}
+	</select>
+	
+	<select id="countGalleryLike" parameterType="Long" resultType="Integer">
+		SELECT COUNT(*) 
+		FROM team_gallery_like
+		WHERE gallery_code = #{gallery_code}
+	</select>
+	
+	<update id="updateReply" parameterType="map">
+	    UPDATE team_gallery_comment 
+	    SET content = #{content}
+	    WHERE comment_code = #{comment_id} AND member_code = #{member_code}
+	</update>
+	
+	<delete id="deleteGalleryFiles" parameterType="Long">
+        DELETE FROM team_gallery_file WHERE gallery_code = #{gallery_code}
+    </delete>
 </mapper>

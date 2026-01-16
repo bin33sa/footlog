@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fl.model.BoardReplyDTO;
 import com.fl.model.FileDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
@@ -17,6 +18,7 @@ import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
+import com.fl.mvc.annotation.ResponseBody;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MyTeamService;
 import com.fl.service.MyTeamServiceImpl;
@@ -573,4 +575,357 @@ public class MyTeamController {
 
         return new ModelAndView("redirect:/myteam/gallery?teamCode=" + teamCode);
     }
+    
+    @GetMapping("gallery_article")
+    public ModelAndView galleryArticle(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        ModelAndView mav = new ModelAndView("myteam/gallery_article");
+        
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        String teamCodeStr = req.getParameter("teamCode");
+        String galleryCodeStr = req.getParameter("gallery_code");
+        String page = req.getParameter("page");
+        
+        if (teamCodeStr == null || galleryCodeStr == null) {
+            return new ModelAndView("redirect:/myteam/main");
+        }
+        
+        long teamCode = Long.parseLong(teamCodeStr);
+        long galleryCode = Long.parseLong(galleryCodeStr);
+        
+        GalleryDTO dto = service.readGallery(galleryCode);
+        
+        if(dto == null) {
+            return new ModelAndView("redirect:/myteam/gallery?teamCode=" + teamCode);
+        }
+        
+        if(dto.getContent() != null) {
+            dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+        }
+        
+        if (info != null) {
+            int myRoleLevel = service.readMemberRoleLevel(info.getMember_code(), teamCode);
+            mav.addObject("myRoleLevel", myRoleLevel);          
+            mav.addObject("sessionMemberCode", info.getMember_code()); 
+        }
+
+        mav.addObject("dto", dto);
+        mav.addObject("teamCode", teamCode);
+        mav.addObject("page", page);
+
+        return mav;
+    }
+
+    @GetMapping("galleryDelete")
+    public ModelAndView galleryDelete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+       
+        String teamCodeStr = req.getParameter("teamCode");
+        String galleryCodeStr = req.getParameter("gallery_code");
+        
+        if (teamCodeStr != null && galleryCodeStr != null) {
+            long galleryCode = Long.parseLong(galleryCodeStr);
+            long teamCode = Long.parseLong(teamCodeStr);
+            
+            service.deleteGallery(galleryCode);
+            
+            return new ModelAndView("redirect:/myteam/gallery?teamCode=" + teamCode);
+        }
+        
+        return new ModelAndView("redirect:/myteam/main");
+    }
+    
+    @ResponseBody
+    @PostMapping("updateGalleryLike")
+    public Map<String, Object> updateGalleryLike(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        String state = "false";
+        int likeCount = 0;
+        
+        if (info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+        
+        try {
+            long gallery_code = Long.parseLong(req.getParameter("gallery_code"));
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("gallery_code", gallery_code);
+            map.put("member_code", info.getMember_code());
+            
+            int check = service.checkGalleryLike(map);
+            
+            if(check > 0) {
+                service.deleteGalleryLike(map);
+                state = "false";
+            } else {
+                service.insertGalleryLike(map);
+                state = "true";
+            }
+            
+            likeCount = service.countGalleryLike(gallery_code);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            state = "error";
+        }
+        
+        model.put("state", state);
+        model.put("likeCount", likeCount);
+        
+        return model;
+    }
+
+    @ResponseBody
+    @GetMapping("listReply")
+    public Map<String, Object> listReply(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        try {
+            String galleryCodeStr = req.getParameter("gallery_code");
+            String teamCodeStr = req.getParameter("teamCode"); 
+            String pageNoStr = req.getParameter("pageNo");
+            
+            if(galleryCodeStr == null || teamCodeStr == null) {
+                model.put("state", "false");
+                return model;
+            }
+            
+            long gallery_code = Long.parseLong(galleryCodeStr);
+            long teamCode = Long.parseLong(teamCodeStr);      
+            
+            int current_page = 1;
+            if(pageNoStr != null) {
+                try {
+                    current_page = Integer.parseInt(pageNoStr);
+                } catch(Exception e) { }
+            }
+            
+            int rows = 5; 
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("gallery_code", gallery_code);
+            map.put("team_code", teamCode);
+            
+            int dataCount = service.replyCount(map);
+            int total_page = util.pageCount(rows, dataCount);
+            
+            if(current_page > total_page) current_page = total_page;
+            
+            int offset = (current_page - 1) * rows;
+            if(offset < 0) offset = 0;
+            
+            map.put("offset", offset);
+            map.put("size", rows);
+            
+            List<BoardReplyDTO> list = service.listReply(map);
+            
+            if(list != null) {
+                for(BoardReplyDTO dto : list) {
+                    if(dto.getContent() != null) {
+                        dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+                    }
+                }
+            }
+            
+            String paging = util.pagingMethod(current_page, total_page, "loadContent");
+            
+            model.put("listReply", list);
+            model.put("replyCount", dataCount);
+            model.put("pageNo", current_page);
+            model.put("total_page", total_page);
+            model.put("paging", paging);
+            model.put("state", "true");
+            
+            if(info != null) {
+                model.put("sessionMemberCode", info.getMember_code());
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "error");
+        }
+        
+        return model;
+    }
+    
+    @ResponseBody
+    @PostMapping("insertReply")
+    public Map<String, Object> insertReply(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+        
+        try {
+            BoardReplyDTO dto = new BoardReplyDTO();
+            
+            long gallery_code = Long.parseLong(req.getParameter("gallery_code"));
+            String content = req.getParameter("content");
+            
+            dto.setGallery_code(gallery_code);
+            dto.setContent(content);
+            dto.setMember_code(info.getMember_code());
+            
+            service.insertReply(dto);
+            
+            model.put("state", "true");
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("deleteReply")
+    public Map<String, Object> deleteReply(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        try {
+            long comment_id = Long.parseLong(req.getParameter("comment_id"));
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("comment_id", comment_id);
+            
+            service.deleteReply(map);
+            model.put("state", "true");
+        } catch (Exception e) {
+            model.put("state", "false");
+        }
+        return model;
+    }
+    
+    @GetMapping("gallery_update")
+    public ModelAndView galleryUpdate(HttpServletRequest req, HttpServletResponse resp) {
+        ModelAndView mav = new ModelAndView("myteam/gallery_write");
+        
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        if (info == null) return new ModelAndView("redirect:/member/login");
+
+        try {
+            long gallery_code = Long.parseLong(req.getParameter("gallery_code"));
+            String teamCode = req.getParameter("teamCode");
+            String page = req.getParameter("page");
+            
+            GalleryDTO dto = service.readGallery(gallery_code);
+            
+            if (dto == null || dto.getMember_code() != info.getMember_code()) {
+                return new ModelAndView("redirect:/myteam/gallery?teamCode=" + teamCode);
+            }
+            
+            mav.addObject("dto", dto);           
+            mav.addObject("mode", "update");     
+            mav.addObject("teamCode", teamCode);
+            mav.addObject("page", page);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ModelAndView("redirect:/myteam/gallery");
+        }
+
+        return mav;
+    }
+
+    @PostMapping("gallery_update")
+    public ModelAndView galleryUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        String teamCode = req.getParameter("teamCode");
+        String page = req.getParameter("page");
+        
+        try {
+            GalleryDTO dto = new GalleryDTO();
+            
+            long gallery_code = Long.parseLong(req.getParameter("gallery_code"));
+            dto.setGallery_code(gallery_code);
+            dto.setTeam_code(Long.parseLong(teamCode));
+            dto.setMember_code(info.getMember_code());
+            dto.setTitle(req.getParameter("title"));
+            dto.setContent(req.getParameter("content"));
+            
+            String oldImage = req.getParameter("oldImage");
+            dto.setTitle_image(oldImage);
+
+            String root = session.getServletContext().getRealPath("/");
+            String pathname = root + "uploads" + File.separator + "gallery";
+            
+            Part part = req.getPart("selectFile");
+            MyMultipartFile uploadedFile = fileManager.doFileUpload(part, pathname);
+
+            if (uploadedFile != null) {
+                if(oldImage != null && !oldImage.isEmpty()) {
+                    fileManager.doFiledelete(pathname, oldImage);
+                }
+                
+                String saveFilename = uploadedFile.getSaveFilename();
+                dto.setTitle_image(saveFilename);
+                
+                FileDTO fileDto = new FileDTO();
+                fileDto.setFile_name(uploadedFile.getOriginalFilename());
+                fileDto.setFile_server_name(saveFilename);
+                fileDto.setFile_size(uploadedFile.getSize());
+                List<FileDTO> listFile = new ArrayList<>();
+                listFile.add(fileDto);
+                dto.setListFile(listFile);
+            }
+
+            service.updateGallery(dto); 
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return new ModelAndView("redirect:/myteam/gallery_article?gallery_code=" + req.getParameter("gallery_code") + "&teamCode=" + teamCode + "&page=" + page);
+    }
+
+    @ResponseBody
+    @PostMapping("updateReply") 
+    public Map<String, Object> updateReply(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+        
+        try {
+            long comment_id = Long.parseLong(req.getParameter("comment_id"));
+            String content = req.getParameter("content");
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("comment_id", comment_id);
+            map.put("content", content);
+            map.put("member_code", info.getMember_code());
+            
+            service.updateReply(map); 
+            
+            model.put("state", "true");
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        return model;
+    }
+    
+    
+    
 }

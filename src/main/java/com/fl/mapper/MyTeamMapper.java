@@ -113,4 +113,16 @@ public interface MyTeamMapper {
     public int replyCount(Map<String, Object> map);
     
     public void deleteReply(Map<String, Object> map);
+    
+    public void insertGalleryLike(Map<String, Object> map);
+    
+    public void deleteGalleryLike(Map<String, Object> map);
+    
+    public int checkGalleryLike(Map<String, Object> map);
+    
+    public int countGalleryLike(long gallery_code);
+    
+    public void updateReply(Map<String, Object> map) throws Exception;
+    
+    public void deleteGalleryFiles(long gallery_code) throws Exception;
 }

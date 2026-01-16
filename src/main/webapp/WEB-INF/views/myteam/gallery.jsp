@@ -5,96 +5,56 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>Footlog - Team Gallery</title>
+    <title>Footlog - 팀 갤러리</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
-    
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
     
     <style>
-        /* 갤러리 카드 디자인 */
-        .gallery-card {
-            border: none;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            background: #fff;
-            height: 100%;
-            cursor: pointer;
-        }
-        .gallery-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        /* 이미지 비율 유지 (4:3) */
-        .gallery-img-box {
-            position: relative;
-            width: 100%;
-            padding-top: 75%; 
-            overflow: hidden;
-            background-color: #f1f3f5;
-        }
-        
-        .gallery-img-box img {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-        
-        .gallery-card:hover .gallery-img-box img { transform: scale(1.05); }
-
-        /* 오버레이 효과 */
-        .gallery-overlay {
-            position: absolute;
-            bottom: 0; left: 0; right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-            padding: 20px 15px 10px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .gallery-card:hover .gallery-overlay { opacity: 1; }
-
         .sidebar-title { font-size: 0.85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* 페이징 스타일 */
-        .paginate {
-            text-align: center;
-            margin-top: 40px;
-            display: flex;
-            justify-content: center;
-            gap: 5px;
+        .gallery-item {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
         }
-        .paginate a, .paginate span {
-            display: inline-block;
-            padding: 6px 12px;
-            font-size: 0.9rem;
-            color: #333;
-            text-decoration: none;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-            background-color: #fff;
-            transition: all 0.2s;
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
         }
-        .paginate a:hover {
-            background-color: #e9ecef;
-            color: #0d6efd;
-            border-color: #dee2e6;
+        
+        .gallery-thumb {
+            height: 200px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            position: relative;
         }
-        .paginate span {
-            background-color: #0d6efd;
-            color: #fff;
-            border-color: #0d6efd;
-            font-weight: bold;
-            pointer-events: none;
+        .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 꽉 차게 */
         }
+        
+        .gallery-body { padding: 15px; }
+        .gallery-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; color: #333; }
+        .gallery-meta { font-size: 0.85rem; color: #888; }
+        
+        .btn-write {
+            background-color: #333; color: #fff; border-radius: 50px; padding: 10px 25px; font-weight: bold;
+        }
+        .btn-write:hover { background-color: #000; color: #fff; }
     </style>
+    
+    <script type="text/javascript">
+        function searchList() {
+            const f = document.searchForm;
+            f.submit();
+        }
+    </script>
 </head>
 
 <body>
@@ -130,72 +90,63 @@
 
             <div class="col-lg-10 col-12">
                 
-                <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                     <div>
                         <h2 class="fw-bold display-6 mb-1 text-dark">TEAM GALLERY</h2>
-                        <p class="text-muted mb-0">우리 팀의 추억을 사진으로 공유하세요. <span class="text-primary fw-bold">(${dataCount}개)</span></p>
+                        <p class="text-muted mb-0">우리 팀의 추억을 공유하는 공간입니다.</p>
                     </div>
-                    
-                    <button type="button" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" 
-                            onclick="location.href='${pageContext.request.contextPath}/myteam/gallery_write?teamCode=${teamCode}';">
-                        <i class="bi bi-camera-fill me-1"></i> 사진 올리기
-                    </button>
+                    <div>
+                        <button type="button" class="btn btn-write" onclick="location.href='${pageContext.request.contextPath}/myteam/gallery_write?teamCode=${teamCode}';">
+                            <i class="bi bi-pencil-square me-1"></i> 글쓰기
+                        </button>
+                    </div>
                 </div>
 
-                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
-                    
+                <div class="row g-4">
                     <c:forEach var="dto" items="${list}">
-                        <div class="col">
-                            <div class="gallery-card" onclick="location.href='${pageContext.request.contextPath}/myteam/galleryArticle?gallery_code=${dto.gallery_code}&page=${page}&teamCode=${teamCode}';">
-                                
-                                <div class="gallery-img-box">
+                        <div class="col-md-6 col-lg-4 col-xl-3">
+                            <div class="gallery-item cursor-pointer" onclick="location.href='${pageContext.request.contextPath}/myteam/gallery_article?teamCode=${teamCode}&gallery_code=${dto.gallery_code}&page=${page}';">
+                                <div class="gallery-thumb">
                                     <c:choose>
                                         <c:when test="${not empty dto.title_image}">
-                                            <img src="${pageContext.request.contextPath}/uploads/gallery/${dto.title_image}" alt="${dto.title}">
+                                            <img src="${pageContext.request.contextPath}/uploads/gallery/${dto.title_image}" alt="썸네일">
                                         </c:when>
                                         <c:otherwise>
-                                            <img src="${pageContext.request.contextPath}/resources/images/no_image.png" style="object-fit: contain; padding: 20px;">
+                                            <div class="d-flex justify-content-center align-items-center h-100 text-muted">
+                                                <i class="bi bi-image fs-1"></i>
+                                            </div>
                                         </c:otherwise>
                                     </c:choose>
-                                    
-                                    <div class="gallery-overlay text-white d-flex justify-content-between small">
-                                        <span><i class="bi bi-eye"></i> ${dto.view_count}</span>
-                                        <span><i class="bi bi-chat-dots"></i> ${dto.reply_count}</span>
-                                    </div>
                                 </div>
-
-                                <div class="p-3">
-                                    <h6 class="fw-bold text-dark text-truncate mb-1">${dto.title}</h6>
-                                    
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                
+                                <div class="gallery-body">
+                                    <div class="gallery-title text-truncate">${dto.title}</div>
+                                    <div class="gallery-meta d-flex justify-content-between align-items-center mt-2">
                                         <div class="d-flex align-items-center">
-                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2 overflow-hidden" style="width: 24px; height: 24px;">
-                                                <img src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" 
-                                                     style="width:100%; height:100%; object-fit:cover;"
-                                                     onerror="this.src='${pageContext.request.contextPath}/dist/images/avatar.png'">
-                                            </div>
-                                            <span class="text-muted small text-truncate" style="max-width: 80px;">${dto.member_name}</span>
+                                            <span class="fw-bold me-2 text-dark small">${dto.member_name}</span>
                                         </div>
-                                        <span class="text-muted small" style="font-size: 0.75rem;">${dto.created_at}</span>
+                                        <span class="small">${dto.created_at}</span>
+                                    </div>
+                                    <div class="gallery-meta mt-2 border-top pt-2 d-flex justify-content-between">
+                                        <span><i class="bi bi-eye"></i> ${dto.view_count}</span>
+                                        <span>
+                                            <i class="bi bi-heart me-1 text-danger"></i> ${dto.like_count}
+                                            <i class="bi bi-chat-dots ms-2 text-primary"></i> ${dto.reply_count}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </c:forEach>
-
+                    
+                    <c:if test="${empty list}">
+                        <div class="col-12 text-center py-5">
+                            <p class="text-muted fs-5">등록된 게시물이 없습니다.</p>
+                        </div>
+                    </c:if>
                 </div>
 
-                <c:if test="${dataCount == 0}">
-                    <div class="text-center py-5">
-                        <div class="mb-3 text-secondary">
-                            <i class="bi bi-images" style="font-size: 3rem;"></i>
-                        </div>
-                        <h5 class="text-muted">등록된 사진이 없습니다.</h5>
-                        <p class="small text-secondary">첫 번째 추억을 기록해보세요!</p>
-                    </div>
-                </c:if>
-
-                <div class="page-navigation-wrap">
+                <div class="page-navigation text-center mt-5">
                     ${dataCount == 0 ? "" : paging}
                 </div>
 
@@ -206,8 +157,6 @@
     <footer>
        <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
     </footer>
-    
     <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
 </body>
 </html>
