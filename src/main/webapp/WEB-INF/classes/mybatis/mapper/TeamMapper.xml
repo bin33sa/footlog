@@ -32,11 +32,21 @@
         
         ORDER BY
         <choose>
-            <when test="sort == '1'"> member_count DESC, t.created_at DESC
+            <when test="sort == '1'"> 
+                (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) DESC, 
+                t.created_at DESC, 
+                t.team_code DESC
             </when>
-            <when test="sort == '2'"> like_count DESC, t.created_at DESC
+            
+            <when test="sort == '2'"> 
+                (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) DESC, 
+                t.created_at DESC, 
+                t.team_code DESC
             </when>
-            <otherwise> t.created_at DESC
+            
+            <otherwise> 
+                t.created_at DESC, 
+                t.team_code DESC
             </otherwise>
         </choose>
         

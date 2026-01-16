@@ -62,6 +62,7 @@ public class TeamController {
         return mav;
     }
     
+    
     // 더보기(AJAX)
     @RequestMapping("listMore")
     public ModelAndView listMore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -198,8 +199,7 @@ public class TeamController {
         return model;
     }
     
-    // [삭제됨] processJoin (승인/거절)
-    // [삭제됨] management (관리페이지)
+  
 
     // 구단 삭제 처리
     @GetMapping("delete")
