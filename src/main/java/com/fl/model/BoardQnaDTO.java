@@ -1,6 +1,6 @@
 package com.fl.model;
 
-public class QnaDTO {
+public class BoardQnaDTO {
 	private Long board_qna_code;
     private Long member_code;
     private String title;

@@ -1,178 +1,135 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <title>Footlog - 1:1 Inquiry</title>
+    <title>1:1 문의 - Footlog</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
+    
+    <style>
+        /* 문의 게시판 전용 스타일 (제공된 디자인 가이드 적용) */
+        .board-table thead th { background-color: #111; color: #fff; border: none; padding: 15px; font-weight: 700; }
+        .board-table tbody tr { transition: 0.2s; cursor: pointer; }
+        .board-table tbody tr:hover { background-color: rgba(212, 246, 63, 0.1); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        
+        .neon-search-box { background-color: #111; border: 2px solid #333; transition: 0.3s; height: 40px; max-width: 350px; font-size: 0.9rem; }
+        .neon-search-box:hover, .neon-search-box:focus-within { border-color: #D4F63F; box-shadow: 0 0 10px rgba(212, 246, 63, 0.2); }
+        .neon-search-box select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); background-size: 10px; }
+    
+        /* 페이징 디자인 */
+        .page-navigation { display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .page-navigation a, .page-navigation b { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 12px; text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: all 0.2s ease; }
+        .page-navigation b { background-color: #111; color: #D4F63F !important; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .page-navigation a { color: #666; background-color: #f8f9fa; border: 1px solid #eee; }
+        .page-navigation a:hover { background-color: #111; color: #D4F63F; border-color: #111; transform: translateY(-2px); }
+
+        /* 상태 배지 */
+        .badge-qna { border-radius: 50px; padding: 5px 12px; font-weight: 600; font-size: 0.8rem; }
+    </style>
 </head>
-	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
-	
+<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <body>
+    <header>
+        <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
+    </header>
 
-     <header>
-	   <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
-	</header>
-
-    <div class="container-fluid px-lg-5 mt-4">
+    <div class="container-fluid px-lg-5 mt-5 mb-5">
         <div class="row">
-            
             <div class="col-lg-2 d-none d-lg-block">
                 <div class="sidebar-menu sticky-top" style="top: 100px;">
-                    <div class="mb-4">
-                        <p class="sidebar-title">사이트 소개</p>
-                        <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/introduction" class="list-group-item list-group-item-action">사이트 기능 소개</a>
-                            <a href="${pageContext.request.contextPath}/qna/list" class="list-group-item list-group-item-action active-menu">문의 게시판</a>
-                            <a href="${pageContext.request.contextPath}/faq/list" class="list-group-item list-group-item-action">자주 묻는 질문 (Q/A)</a>
-                        </div>
+                    <p class="sidebar-title">Information</p>
+                    <div class="list-group">
+                        <a href="${pageContext.request.contextPath}/introduction" class="list-group-item list-group-item-action">사이트 소개</a>
+                        <a href="${pageContext.request.contextPath}/qna/list" class="list-group-item list-group-item-action active bg-dark text-white border-0 fw-bold">1:1 문의 게시판</a>
+                        <a href="${pageContext.request.contextPath}/faq/list" class="list-group-item list-group-item-action">자주 묻는 질문</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-8 col-12">
-                
-                <div class="d-flex flex-wrap justify-content-between align-items-end mb-4">
+            <div class="col-lg-9 col-12 ms-lg-4">
+                <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-3">
                     <div>
-                        <h2 class="fw-bold mb-2">문의 게시판</h2>
-                        <p class="text-muted mb-0">궁금한 점이나 불편한 사항을 남겨주세요. 관리자가 답변해 드립니다.</p>
+                        <h2 class="fw-bold display-6 mb-1">문의 게시판</h2>
+                        <p class="text-muted mb-0">궁금한 점을 남겨주시면 관리자가 신속하게 답변해 드립니다.</p>
                     </div>
-                    <button class="btn btn-primary rounded-pill px-4 mt-3 mt-md-0 shadow-sm fw-bold">
-                        <i class="bi bi-pencil-fill me-1"></i> 문의하기
-                    </button>
+                    <a href="${pageContext.request.contextPath}/qna/write" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" style="color: #D4F63F;">
+                        🖊️ 문의하기
+                    </a>
                 </div>
 
-                <div class="modern-card p-0 overflow-hidden">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0 qna-table">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th scope="col" class="text-center py-3" style="width: 80px;">상태</th>
-                                    <th scope="col" class="py-3">제목</th>
-                                    <th scope="col" class="text-center py-3" style="width: 120px;">작성자</th>
-                                    <th scope="col" class="text-center py-3" style="width: 120px;">작성일</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="text-center align-middle">
-                                        <span class="badge bg-dark text-primary rounded-pill px-3 py-2">답변완료</span>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="#" class="text-decoration-none text-dark fw-bold d-block text-truncate">
-                                            <i class="bi bi-lock-fill text-muted me-1"></i>
-                                            구장 예약 취소 환불 규정이 궁금합니다.
-                                        </a>
-                                    </td>
-                                    <td class="text-center align-middle text-muted">슛돌이</td>
-                                    <td class="text-center align-middle text-muted small">2025.08.15</td>
-                                </tr>
-
-                                <tr>
-                                    <td class="text-center align-middle">
-                                        <span class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill px-3 py-2">답변대기</span>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="#" class="text-decoration-none text-dark d-block text-truncate">
-                                            <i class="bi bi-lock-fill text-muted me-1"></i>
-                                            매치 매칭이 계속 실패하는데 오류인가요?
-                                        </a>
-                                    </td>
-                                    <td class="text-center align-middle text-muted">메시</td>
-                                    <td class="text-center align-middle text-muted small">2025.08.14</td>
-                                </tr>
-
-                                <tr>
-                                    <td class="text-center align-middle">
-                                        <span class="badge bg-dark text-primary rounded-pill px-3 py-2">답변완료</span>
-                                    </td>
-                                    <td class="align-middle">
-                                        <a href="#" class="text-decoration-none text-dark d-block text-truncate">
-                                            <span class="badge bg-danger me-1">공지</span>
-                                            [필독] 문의 게시판 이용 수칙 안내
-                                        </a>
-                                    </td>
-                                    <td class="text-center align-middle text-muted">관리자</td>
-                                    <td class="text-center align-middle text-muted small">2025.08.01</td>
-                                </tr>
-                                
-                                <tr>
-                                    <td class="text-center align-middle"><span class="badge bg-secondary bg-opacity-25 text-secondary rounded-pill px-3 py-2">답변대기</span></td>
-                                    <td class="align-middle"><a href="#" class="text-decoration-none text-dark"><i class="bi bi-lock-fill text-muted me-1"></i> 포인트 충전이 안돼요</a></td>
-                                    <td class="text-center align-middle text-muted">호날두</td>
-                                    <td class="text-center align-middle text-muted small">2025.08.13</td>
-                                </tr>
-                                <tr>
-                                    <td class="text-center align-middle"><span class="badge bg-dark text-primary rounded-pill px-3 py-2">답변완료</span></td>
-                                    <td class="align-middle"><a href="#" class="text-decoration-none text-dark"><i class="bi bi-lock-fill text-muted me-1"></i> 팀 생성 승인은 언제 되나요?</a></td>
-                                    <td class="text-center align-middle text-muted">손흥민</td>
-                                    <td class="text-center align-middle text-muted small">2025.08.12</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                <div class="row g-2 align-items-center mb-4">
+                    <div class="col-md-6"></div>
+                    <div class="col-md-6">
+                        <form action="${pageContext.request.contextPath}/qna/list" method="get" class="d-flex justify-content-md-end">
+                            <div class="neon-search-box d-flex align-items-center rounded-pill px-2 w-100">
+                                <select name="schType" class="form-select border-0 text-white bg-transparent py-0" style="width: auto; font-size: 0.9em;">
+                                    <option value="all" ${schType=='all'?'selected':''} class="text-dark">전체</option>
+                                    <option value="title" ${schType=='title'?'selected':''} class="text-dark">제목</option>
+                                    <option value="content" ${schType=='content'?'selected':''} class="text-dark">내용</option>
+                                </select>
+                                <input type="text" name="kwd" value="${kwd}" class="form-control border-0 bg-transparent text-white py-0" placeholder="Search..." style="box-shadow: none; font-size: 0.9em;">
+                                <button type="submit" class="btn btn-link text-decoration-none p-2" style="color: #D4F63F;">🔍</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-center mb-4">
-                    <div class="input-group w-50">
-                        <select class="form-select flex-grow-0" style="width: 100px;">
-                            <option selected>제목</option>
-                            <option value="1">내용</option>
-                            <option value="2">작성자</option>
-                        </select>
-                        <input type="text" class="form-control" placeholder="검색어를 입력하세요">
-                        <button class="btn btn-dark" type="button">검색</button>
-                    </div>
+                <div class="modern-card p-0 overflow-hidden shadow-sm border-0" style="border-radius: 15px;">
+                    <table class="table table-hover board-table mb-0 text-center align-middle">
+                        <thead>
+                            <tr>
+                                <th width="100">상태</th>
+                                <th width="100">분류</th>
+                                <th class="text-start">제목</th>
+                                <th width="120">작성자</th>
+                                <th width="120">날짜</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:forEach var="dto" items="${list}">
+                                <tr onclick="location.href='${pageContext.request.contextPath}/qna/article?board_qna_code=${dto.board_qna_code}&page=${page}'">
+                                    <td>
+                                        <c:choose>
+                                            <c:when test="${dto.status == 2}">
+                                                <span class="badge bg-dark text-primary badge-qna border border-dark">답변완료</span>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="badge bg-light text-muted badge-qna border">답변대기</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">
+                                            ${dto.category==1?'계정':(dto.category==2?'구장':'기타')}
+                                        </span>
+                                    </td>
+                                    <td class="text-start fw-bold">
+                                        <i class="bi bi-lock-fill text-muted me-1"></i> ${dto.title}
+                                    </td>
+                                    <td>${dto.member_name}</td>
+                                    <td class="text-muted small">${dto.created_at}</td>
+                                </tr>
+                            </c:forEach>
+                        </tbody>
+                    </table>
+                    <c:if test="${empty list}">
+                        <div class="py-5 text-center text-muted">등록된 문의가 없습니다.</div>
+                    </c:if>
                 </div>
 
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link border-0 rounded-circle mx-1 text-dark" href="#" tabindex="-1">&lt;</a>
-                        </li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 bg-dark text-primary fw-bold" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">4</a></li>
-                        <li class="page-item"><a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">5</a></li>
-                        <li class="page-item">
-                            <a class="page-link border-0 rounded-circle mx-1 text-dark" href="#">&gt;</a>
-                        </li>
-                    </ul>
-                </nav>
-
-            </div>
-
-            <div class="col-lg-2 d-none d-lg-block">
-                <div class="sidebar-menu sticky-top" style="top: 100px;">
-                    <div class="mb-4">
-                        <p class="sidebar-title">Community</p>
-                        <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">게시판</a>
-                            <a href="#" class="list-group-item list-group-item-action">공지사항</a>
-                            <a href="#" class="list-group-item list-group-item-action">자유 게시판</a>
-                            <a href="#" class="list-group-item list-group-item-action">팀 사진첩</a>
-                            <a href="#" class="list-group-item list-group-item-action">이벤트 / 뉴스</a>
-                        </div>
-                    </div>
+                <div class="page-navigation mt-5 text-center">
+                    ${paging}
                 </div>
-            </div>
+            </div> 
+        </div> 
+    </div> 
 
-        </div> </div> 
-        <footer>
-	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
-	</footer>
-	
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+    <footer>
+        <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+    </footer>
+    <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 </body>
 </html>
