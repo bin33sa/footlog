@@ -326,10 +326,10 @@ public class MyTeamServiceImpl implements MyTeamService {
 	@Override
 	public TeamBoardDTO readTeamBoard(long board_team_code) {
 		try {
-			mapper.updateHitCount(board_team_code);
 			return mapper.readTeamBoard(board_team_code);
 		} catch (Exception e) {
 			e.printStackTrace();
+			
 			throw e;
 		}
 	}
@@ -353,7 +353,39 @@ public class MyTeamServiceImpl implements MyTeamService {
 			throw e;
 		}
 	}
+	
+	@Override
+    public void updateHitCount(long board_team_code) throws Exception {
+        try {
+            mapper.updateHitCount(board_team_code);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
+    @Override
+    public TeamBoardDTO preReadTeamBoard(Map<String, Object> map) {
+        TeamBoardDTO dto = null;
+        try {
+            dto = mapper.preReadTeamBoard(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dto;
+    }
+
+    @Override
+    public TeamBoardDTO nextReadTeamBoard(Map<String, Object> map) {
+        TeamBoardDTO dto = null;
+        try {
+            dto = mapper.nextReadTeamBoard(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dto;
+    }
+	
 	@Override
 	public void insertGallery(GalleryDTO dto) throws Exception {
 		try {

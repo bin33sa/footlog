@@ -2,7 +2,11 @@ package com.fl.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +16,7 @@ import com.fl.model.FileDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
 import com.fl.model.SessionInfo;
+import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
 import com.fl.model.TeamMemberDTO;
 import com.fl.mvc.annotation.Controller;
@@ -926,6 +931,190 @@ public class MyTeamController {
         return model;
     }
     
-    
+    @GetMapping("board")
+    public ModelAndView listTeamBoard(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        ModelAndView mav = new ModelAndView("myteam/board");
+        HttpSession session = req.getSession();
+        
+        long teamCode = setTeamInfoAndRole(req, session, mav);
+        if (teamCode == -1) return new ModelAndView("redirect:/myteam/main");
+
+        String page = req.getParameter("page");
+        int current_page = 1;
+        if (page != null) {
+            try {
+                current_page = Integer.parseInt(page);
+            } catch (Exception e) { }
+        }
+
+        String condition = req.getParameter("condition");
+        String keyword = req.getParameter("keyword");
+        if (condition == null) condition = "all";
+        if (keyword == null) keyword = "";
+
+        if (req.getMethod().equalsIgnoreCase("GET")) {
+            keyword = URLDecoder.decode(keyword, "UTF-8");
+        }
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("team_code", teamCode);
+        map.put("condition", condition);
+        map.put("keyword", keyword);
+
+        int dataCount = service.dataCountTeamBoard(map);
+        
+        int rows = 10;
+        int total_page = util.pageCount(rows, dataCount);
+        if (current_page > total_page) current_page = total_page;
+
+        int start = (current_page - 1) * rows + 1;
+        int end = current_page * rows;
+        map.put("start", start);
+        map.put("end", end);
+
+        List<TeamBoardDTO> list = service.listTeamBoard(map);
+
+        long diffHour; 
+        Date now = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        
+        for (TeamBoardDTO dto : list) {
+            try {
+                Date regDate = sdf.parse(dto.getCreated_at());
+                
+             
+                diffHour = (now.getTime() - regDate.getTime()) / (60 * 60 * 1000); 
+                
+                dto.setGap(String.valueOf(diffHour)); 
+                
+            } catch (Exception e) {
+                dto.setGap("999");
+            }
+        }    
+        String cp = req.getContextPath();
+        String query = "teamCode=" + teamCode;
+        String listUrl = cp + "/myteam/board?" + query;
+        String articleUrl = cp + "/myteam/board_article?page=" + current_page + "&" + query;
+        
+        if (keyword.length() != 0) {
+            query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
+            listUrl = cp + "/myteam/board?" + query;
+            articleUrl = cp + "/myteam/board_article?page=" + current_page + "&" + query;
+        }
+
+        String paging = util.pagingUrl(current_page, total_page, listUrl);
+
+        mav.addObject("list", list);
+        mav.addObject("dataCount", dataCount);
+        mav.addObject("page", current_page);
+        mav.addObject("total_page", total_page);
+        mav.addObject("paging", paging);
+        mav.addObject("articleUrl", articleUrl);
+        mav.addObject("condition", condition);
+        mav.addObject("keyword", keyword);
+        mav.addObject("teamCode", teamCode);
+
+        return mav;
+    }
+
+    @GetMapping("board_write")
+    public ModelAndView boardWriteForm(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        ModelAndView mav = new ModelAndView("myteam/board_write");
+        HttpSession session = req.getSession();
+        
+        long teamCode = setTeamInfoAndRole(req, session, mav);
+        if (teamCode == -1) return new ModelAndView("redirect:/myteam/main");
+        
+        mav.addObject("mode", "write");
+        return mav;
+    }
+
+    @PostMapping("board_write")
+    public ModelAndView boardWriteSubmit(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if (info == null) return new ModelAndView("redirect:/member/login");
+        
+        try {
+            TeamBoardDTO dto = new TeamBoardDTO();
+            dto.setTeam_code(Long.parseLong(req.getParameter("teamCode")));
+            dto.setTitle(req.getParameter("title"));
+            dto.setContent(req.getParameter("content"));
+            dto.setMember_code(info.getMember_code());
+            
+            service.insertTeamBoard(dto); 
+            
+            return new ModelAndView("redirect:/myteam/board?teamCode=" + dto.getTeam_code());
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ModelAndView("redirect:/myteam/main");
+        }
+    }
+
+    @GetMapping("board_article")
+    public ModelAndView boardArticle(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        ModelAndView mav = new ModelAndView("myteam/board_article");
+        HttpSession session = req.getSession();
+        
+        long teamCode = setTeamInfoAndRole(req, session, mav);
+        if (teamCode == -1) return new ModelAndView("redirect:/myteam/main");
+        
+        String page = req.getParameter("page");
+        String query = "page=" + page + "&teamCode=" + teamCode;
+
+        try {
+            long board_team_code = Long.parseLong(req.getParameter("board_team_code"));
+            String condition = req.getParameter("condition");
+            String keyword = req.getParameter("keyword");
+
+            if (condition == null) condition = "all";
+            if (keyword == null) keyword = "";
+            
+            if (keyword.length() != 0) {
+                if(req.getMethod().equalsIgnoreCase("GET")) {
+                     keyword = URLDecoder.decode(keyword, "UTF-8");
+                }
+                query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
+            }
+
+            service.updateHitCount(board_team_code);
+
+            TeamBoardDTO dto = service.readTeamBoard(board_team_code);
+            if (dto == null) return new ModelAndView("redirect:/myteam/board?" + query);
+            
+            if(dto.getContent() != null) {
+                dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("team_code", teamCode);
+            map.put("board_team_code", board_team_code);
+            map.put("condition", condition);
+            map.put("keyword", keyword);
+
+            TeamBoardDTO preReadDto = service.preReadTeamBoard(map);
+            TeamBoardDTO nextReadDto = service.nextReadTeamBoard(map);
+            
+            mav.addObject("preReadDto", preReadDto);
+            mav.addObject("nextReadDto", nextReadDto);
+
+            mav.addObject("dto", dto);
+            mav.addObject("page", page);
+            mav.addObject("query", query);
+            
+            SessionInfo info = (SessionInfo)session.getAttribute("member");
+            if(info != null) {
+                mav.addObject("sessionMemberCode", info.getMember_code());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ModelAndView("redirect:/myteam/board?" + query);
+        }
+
+        return mav;
+    }
     
 }

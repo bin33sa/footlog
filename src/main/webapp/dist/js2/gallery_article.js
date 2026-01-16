@@ -1,3 +1,4 @@
+
 $(function(){
     loadContent(1);
     
@@ -10,8 +11,10 @@ $(function(){
     });
 });
 
+
 function loadContent(page) {
     const url = contextPath + "/myteam/listReply";
+    
     const params = { 
         gallery_code: galleryCode, 
         teamCode: teamCode,     
@@ -25,12 +28,12 @@ function loadContent(page) {
     ajaxRequest(url, "get", params, "json", fn);
 }
 
+
 function addNewContent(data) {
     const listReply = data.listReply;
     const replyCount = data.replyCount;
     const pageNo = data.pageNo;
     const total_page = data.total_page;
-    const paging = data.paging;
     
     $("#listReply .reply-count").text("댓글 " + replyCount);
     
@@ -44,16 +47,36 @@ function addNewContent(data) {
     
     if(replyCount === 0) {
         $("#listReply .list-content tbody").html("<tr><td class='text-center py-4 text-muted'>등록된 댓글이 없습니다.</td></tr>");
-        $("#listReply .page-navigation").html("");
+        $("#listReply .page-navigation").html(""); 
         return;
     }
     
     $("#listReply .list-content tbody").html(htmlText);
     
-    if(total_page > 1) {
-        $("#listReply .page-navigation").html(paging);
-    } else {
-        $("#listReply .page-navigation").html("");
+    createPagingButtons(pageNo, total_page);
+}
+
+function createPagingButtons(current_page, total_page) {
+    const $pagingArea = $("#listReply .page-navigation");
+    $pagingArea.empty();
+
+    if(total_page <= 1) return;
+
+    for(let i = 1; i <= total_page; i++) {
+        let $btn;
+
+        if(i === current_page) {
+            $btn = $("<span>").text(i).addClass("active mx-1"); 
+        } else {
+            $btn = $("<a>").attr("href", "#")
+                           .text(i)
+                           .addClass("mx-1")
+                           .on("click", function(e){
+                               e.preventDefault(); 
+                               loadContent(i);    
+                           });
+        }
+        $pagingArea.append($btn);
     }
 }
 
@@ -61,6 +84,7 @@ function renderReplies(listReply) {
     if(!listReply) return "";
     
     return listReply.map(vo => {
+        // 본인 글인지 확인
         const isWriter = (String(sessionMemberCode) === String(vo.member_code));
         
         let btnHTML = "";
@@ -138,15 +162,15 @@ $(function(){
         const $menuDiv = $tr.find(".reply-menu");
         
         let content = $contentDiv.html().replace(/<br\s*\/?>/gi, "\n");
-
-        $contentDiv.hide();
-        $menuDiv.hide();
+        
+        $contentDiv.hide(); 
+        $menuDiv.hide();    
         
         const editHtml = `
             <div class="edit-form mt-2">
                 <textarea class="form-control mb-2" rows="3">${content}</textarea>
                 <div class="text-end">
-                    <button type="button" class="btn btn-sm btn-secondary btnCancelUpdate">취소</button>
+                    <button type="button" class="btn btn-sm btn-secondary btnCancelUpdate me-1">취소</button>
                     <button type="button" class="btn btn-sm btn-dark btnSaveUpdate" 
                             data-commentId="${$(this).attr("data-commentId")}">저장</button>
                 </div>
@@ -158,9 +182,9 @@ $(function(){
 
     $("body").on("click", ".btnCancelUpdate", function(){
         const $tr = $(this).closest("tr");
-        $tr.find(".edit-form").remove();      // 폼 삭제
-        $tr.find(".original-content").show(); // 내용 보이기
-        $tr.find(".reply-menu").show();       // 버튼 보이기
+        $tr.find(".edit-form").remove();
+        $tr.find(".original-content").show();
+        $tr.find(".reply-menu").show();
     });
 
     $("body").on("click", ".btnSaveUpdate", function(){
@@ -224,8 +248,10 @@ function sendLikeAction($btn) {
             $btn.find("i").removeClass("bi-heart-fill").addClass("bi-heart");
         } else if(data.state === "login_required") {
             alert("로그인이 필요합니다.");
+            return;
         } else {
             alert("오류가 발생했습니다.");
+            return;
         }
         $("#likeCount").text(data.likeCount);
     };

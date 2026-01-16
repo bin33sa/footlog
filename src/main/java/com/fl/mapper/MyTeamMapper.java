@@ -74,7 +74,7 @@ public interface MyTeamMapper {
 
 	public void insertVoteHistory(Map<String, Object> map);
 
-	public void insertTeamBoard(TeamBoardDTO dto);
+	public void insertTeamBoard(TeamBoardDTO dto) throws Exception;
 	
 	public List<TeamBoardDTO> listTeamBoard(Map<String, Object> map);
 	
@@ -82,11 +82,15 @@ public interface MyTeamMapper {
 	
 	public TeamBoardDTO readTeamBoard(long board_team_code);
 	
-	public void updateHitCount(long board_team_code);
+	public void updateHitCount(long board_team_code) throws Exception;
 	
-	public void updateTeamBoard(TeamBoardDTO dto);
+	public void updateTeamBoard(TeamBoardDTO dto) throws Exception;
 	
-	public void deleteTeamBoard(long board_team_code);
+	public void deleteTeamBoard(long board_team_code) throws Exception;
+
+	public TeamBoardDTO preReadTeamBoard(Map<String, Object> map) throws Exception;
+	
+	public TeamBoardDTO nextReadTeamBoard(Map<String, Object> map) throws Exception;
 	
 	public void insertGallery(GalleryDTO dto);
 	

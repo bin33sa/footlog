@@ -97,6 +97,11 @@ public interface MyTeamService {
 	
 	public void deleteTeamBoard(long board_team_code) throws Exception;
 	
+	public void updateHitCount(long board_team_code) throws Exception;
+    
+    public TeamBoardDTO preReadTeamBoard(Map<String, Object> map) throws Exception;
+    
+    public TeamBoardDTO nextReadTeamBoard(Map<String, Object> map) throws Exception;	
 	
 	public void insertGallery(com.fl.model.GalleryDTO dto) throws Exception;
 	
