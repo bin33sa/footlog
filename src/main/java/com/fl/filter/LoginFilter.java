@@ -117,6 +117,7 @@ public class LoginFilter implements Filter {
 				"/event/list", "/event/view",
 				
 				"/team/list",   
+				"/team/listMore", 				
 				"/team/view",  
 				
 				"/match/list",   
