@@ -2,38 +2,89 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.TeamMapper">
 
-    <select id="readTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
+    <sql id="searchData">
+        <if test="keyword != null and keyword != ''">
+            AND (
+                INSTR(t.team_name, #{keyword}) &gt; 0 
+                OR 
+                INSTR(t.region, #{keyword}) &gt; 0
+            )
+        </if>
+    </sql>
+
+    <select id="listTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
         SELECT 
             t.team_code, 
             t.team_name, 
             t.region, 
-            t.description, 
-            t.contact_number, 
-            t.intro_video_url,
             t.emblem_image, 
-            TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at, 
-            (SELECT COUNT(*) FROM member_team WHERE team_code = t.team_code) AS member_count,
-            (SELECT COUNT(*) FROM like_team WHERE team_code = t.team_code) AS like_count,
+            TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at,
+            (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) AS member_count,
+            (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) AS like_count,
             (SELECT m.member_name 
              FROM member m 
              JOIN member_team mt ON m.member_code = mt.member_code 
-             WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name,
-             
-            <choose>
-                <when test="member_code != null and member_code != 0">
-                    NVL((SELECT 1 FROM like_team lt 
-                         WHERE lt.team_code = t.team_code AND lt.member_code = #{member_code}), 0)
-                </when>
-                <otherwise>0</otherwise>
-            </choose> AS user_liked
-            
+             WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name      
         FROM team t
-        WHERE t.team_code = #{team_code}
+        WHERE t.status = 1  
+        
+        <include refid="searchData"/>
+        
+        ORDER BY
+        <choose>
+            <when test="sort == '1'"> member_count DESC, t.created_at DESC
+            </when>
+            <when test="sort == '2'"> like_count DESC, t.created_at DESC
+            </when>
+            <otherwise> t.created_at DESC
+            </otherwise>
+        </choose>
+        
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
     
-    <select id="readMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
-	    SELECT t.team_code, t.team_name, t.emblem_image, t.region
+    <select id="teamCount" parameterType="map" resultType="Integer">
+        SELECT COUNT(*) FROM team t
+        WHERE t.status = 1
+        <include refid="searchData"/>
+    </select>
+    
+    <select id="readTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
+	    SELECT 
+	        t.team_code, 
+	        t.team_name, 
+	        t.region, 
+	        t.description, 
+	        t.contact_number, 
+	        t.intro_video_url,
+	        t.emblem_image, 
+	        t.status,  TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at, 
+	        (SELECT COUNT(*) FROM member_team WHERE team_code = t.team_code) AS member_count,
+	        (SELECT COUNT(*) FROM like_team WHERE team_code = t.team_code) AS like_count,
+	        (SELECT m.member_name 
+	         FROM member m 
+	         JOIN member_team mt ON m.member_code = mt.member_code 
+	         WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name,
+	         
+	        <choose>
+	            <when test="member_code != null and member_code != 0">
+	                NVL((SELECT 1 FROM like_team lt 
+	                     WHERE lt.team_code = t.team_code AND lt.member_code = #{member_code}), 0)
+	            </when>
+	            <otherwise>0</otherwise>
+	        </choose> AS user_liked
+	        
 	    FROM team t
+	    WHERE t.team_code = #{team_code}
+	</select>
+    
+    <select id="readMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
+	    SELECT 
+        t.team_code, 
+        t.team_name, 
+        t.emblem_image, 
+        t.region,
+        mt.role_level  FROM team t
 	    JOIN member_team mt ON t.team_code = mt.team_code
 	    WHERE mt.member_code = #{member_code}
 	</select>	
@@ -63,30 +114,44 @@
     <insert id="insertTeamMember" parameterType="map">
         INSERT INTO member_team (team_code, member_code, role_level, position, reg_date) 
         VALUES (#{team_code}, #{member_code}, #{role_level}, #{position}, SYSDATE)
-    </insert>
+    </insert>	
     
-    <select id="listTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
+    <update id="deleteTeam" parameterType="Long">
+	    UPDATE team 
+	    SET 
+	        status = 0, 
+	        deleted_at = SYSDATE  WHERE team_code = #{team_code}
+	</update>
+
+    <select id="checkJoinStatus" parameterType="map" resultType="Integer">
 	    SELECT 
-	        t.team_code, 
-	        t.team_name, 
-	        t.region, 
-	        t.emblem_image, 
-	        TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at,
-	        (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) AS member_count,
-	        (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) AS like_count,
-	        
-	        (SELECT m.member_name 
-	         FROM member m 
-	         JOIN member_team mt ON m.member_code = mt.member_code 
-	         WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name
+	        CASE
+	            WHEN EXISTS ( 
+	                SELECT 1 FROM member_team 
+	                WHERE member_code = #{member_code} AND team_code = #{team_code}
+	            ) THEN 15 
+	            
+	            WHEN EXISTS (
+	                SELECT 1 FROM join_request 
+	                WHERE member_code = #{member_code} AND team_code = #{team_code} AND status = 1
+	            ) THEN 1
 	         
-	    FROM team t
-	    ORDER BY t.created_at DESC
-	    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	            ELSE 0 
+	        END 
+	    FROM dual
 	</select>
-    
-    <select id="teamCount" parameterType="map" resultType="Integer">
-        SELECT COUNT(*) FROM team
-    </select>
+	
+	<select id="isLeader" parameterType="map" resultType="Integer">
+		SELECT COUNT(*) 
+	    FROM member_team 
+	    WHERE team_code = #{team_code} 
+	      AND member_code = #{member_code} 
+	      AND role_level = 10
+	</select>
+	
+	<insert id="insertJoinRequest" parameterType="map">
+        INSERT INTO join_request (team_code, member_code, status, created_at)
+        VALUES (#{team_code}, #{member_code}, 1, SYSDATE)
+    </insert>
 
 </mapper>

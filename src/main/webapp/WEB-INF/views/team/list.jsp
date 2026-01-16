@@ -165,19 +165,22 @@
     <div class="container-fluid px-lg-5 mt-4">
         <div class="row">
             
-            <%-- 사이드바 --%>
+            <%-- 사이드바 영역 --%>
             <div class="col-lg-2 d-none d-lg-block">
                 <div class="sidebar-menu sticky-top" style="top: 100px;">
                     <div class="mb-4">
                         <p class="sidebar-title">구단</p>
                         <div class="list-group">
+                            <%-- 1. 기본 메뉴 --%>
                             <a href="${pageContext.request.contextPath}/myteam/main" class="list-group-item list-group-item-action">내 구단 이동</a>
-                            <a href="${pageContext.request.contextPath}/team/list" class="list-group-item list-group-item-action active-menu">전체 구단 리스트</a>                  
+                            <a href="${pageContext.request.contextPath}/team/list" class="list-group-item list-group-item-action active-menu">전체 구단 리스트</a>
+                            
+                            <%-- 가입 신청 관리 제거됨 --%>
                         </div>
                     </div>
                 </div>
             </div>
-
+            
             <%-- 메인 컨텐츠 --%>
             <div class="col-lg-8 col-12">
                 
@@ -210,15 +213,15 @@
                                 <c:forEach var="team" items="${myTeams}">
                                     
                                     <%-- 카드 아이템 --%>
-                                    <a href="${pageContext.request.contextPath}/myteam/main?team_code=${team.team_code}" class="my-team-card-item">
-                                        <div class="my-team-emblem">
-                                            <img src="${pageContext.request.contextPath}${not empty team.emblem_image ? '/uploads/team/'.concat(team.emblem_image) : '/dist/images/emblem.png'}" 
-                                                 onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
-                                        </div>
-                                        <div class="my-team-name">${team.team_name}</div>
-                                        <div class="my-team-region"><i class="bi bi-geo-alt me-1"></i>${team.region}</div>
-                                        <span class="btn-enter">입장하기</span>
-                                    </a>
+                                    <a href="${pageContext.request.contextPath}/myteam/main?teamCode=${team.team_code}" class="my-team-card-item">
+									    <div class="my-team-emblem">
+									        <img src="${pageContext.request.contextPath}${not empty team.emblem_image ? '/uploads/team/'.concat(team.emblem_image) : '/dist/images/emblem.png'}" 
+									             onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
+									    </div>
+									    <div class="my-team-name">${team.team_name}</div>
+									    <div class="my-team-region"><i class="bi bi-geo-alt me-1"></i>${team.region}</div>
+									    <span class="btn-enter">입장하기</span>
+									</a>
 
                                 </c:forEach>
                                 
@@ -261,7 +264,7 @@
                         <select id="sortSelect" class="form-select rounded-pill border-0 shadow-sm" style="width: 120px;">
                             <option selected value="">최신순</option>
                             <option value="1">인원 많은순</option>
-                            <option value="2">매너 점수순</option>
+                            <option value="2">좋아요 순</option>
                         </select>
                         <button class="btn btn-dark rounded-pill px-4 text-nowrap" onclick="location.href='${pageContext.request.contextPath}/team/write'">
                             <i class="bi bi-plus-lg me-1" ></i> 구단 생성
@@ -272,9 +275,9 @@
                 <%-- ========================================== --%>
                 <%-- [3] 전체 구단 리스트 (AJAX 로드) --%>
                 <%-- ========================================== --%>
-                <div class="row g-4" id="teamList" data-page-no="${pageNo}" data-total-page="${totalPage}"> 
-                     <jsp:include page="/WEB-INF/views/team/teamList.jsp"/>
-                </div>
+                <div class="row g-4" id="teamList"> 
+				     <jsp:include page="/WEB-INF/views/team/teamList.jsp"/>
+				</div>
 
                 <div class="text-center mt-5 mb-5">
                     <button id="loadMoreBtn" class="btn btn-light rounded-pill px-5 py-2 shadow-sm text-muted fw-bold hover-scale">
@@ -298,154 +301,125 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="text/javascript">
-    
-        function getSort(){
-            return $('#sortSelect').val();
-        }
-        
-        // 정렬 변경 시 초기화 후 로드
-        $('#sortSelect').on('change',function(){
-            const $list = $('#teamList');
-            $list.empty();
-            $list.data('pageNo', 1);
-            
-            loadContent(1);
-        });
-        
-        function getKeyword(){
-            return $('#searchInput').val().trim();
-        }
-        
-        // 검색 엔터키 입력 시 초기화 후 로드
-        $('#searchInput').on('keydown',function(e){
-            if(e.key === 'Enter'){
-                e.preventDefault();
-                
-                const $list = $('#teamList');
-                $list.empty();
-                $list.data('pageNo', 1);
-                
-                loadContent(1);
-            }
-        });
-    
-        // AJAX 로드 함수
-        function loadContent(pageNo) {
-            const $list = $('#teamList');
-            const keyword = getKeyword();
-            const sort = getSort();
-            
-            $.ajax({
-                url : `${pageContext.request.contextPath}/team/listMore`,
-                type : 'get',
-                data : {
-                    pageNo : pageNo,
-                    keyword : keyword,
-                    sort : sort
-                },
-                dataType : 'html',
-                success : function(html) {
-                    $list.append(html); 
-                },
-                error : function() {
-                    console.error('구단 목록 로드 실패');
-                }
-            });
-        }
-
-        $(function() {
-           
-            $('#loadMoreBtn').click(function() {
-
-                const $list = $('#teamList'); 
-
-                let pageNo = $list.data('pageNo') || 1;
-                let totalPage = $list.data('totalPage'); 
-
-                if (!totalPage || totalPage === 0) {
-                    $('#loadMoreBtn').hide();
-                    return;
-                }
-
-                pageNo = Number(pageNo);
-                totalPage = Number(totalPage);
-
-                if (pageNo < totalPage) {
-                    pageNo++;
-                    $list.data('pageNo', pageNo);
-                    loadContent(pageNo);
-                } else {
-                    $('#loadMoreBtn').hide(); 
-                }
-            });
-            
-            const initialTotalPage = $('#teamList').data('totalPage');
-            if(!initialTotalPage || initialTotalPage <= 1) {
-                $('#loadMoreBtn').hide();
-            }
-        });
-
-        // 좋아요 기능
-        $(window).on("pageshow", function(event) {
-            const updateData = sessionStorage.getItem("likeUpdate");
-            if (updateData) {
-                const data = JSON.parse(updateData);
-                const $targetBtn = $(".btn-team-like[onclick*='" + data.team_code + "']");
-        
-                if ($targetBtn.length > 0) {
-                    const $count = $targetBtn.find(".count");
-                    $targetBtn.attr("data-liked", data.user_liked ? "1" : "0");
-                    $count.text(data.count);
-                }
-                sessionStorage.removeItem("likeUpdate");
-            }
-        });
-        
-        function toggleLike(element, teamCode, event) {
-            if(event) {
-                event.stopPropagation();
-                event.preventDefault();
-            }
-        
-            const $btn = $(element);
-            const $count = $btn.find('.count');
-            let userLiked = ($btn.attr('data-liked') == "1");
-            
-            let params = {
-                team_code: teamCode,
-                user_Liked: userLiked.toString()
-            };
-            
-            $.ajax({
-                type: "POST",
-                url: "${pageContext.request.contextPath}/team/insertTeamLike",
-                data: params,
-                dataType: "json",
-                success: function(data) {
-                    if (data.state === "login_required") {
-                        if(confirm("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?")) {
-                            location.href = "${pageContext.request.contextPath}/member/login"; 
-                        }
-                        return;
-                    }
-                    
-                    if (data.state === "true") {
-                        $count.text(data.teamLikeCount);
-                        if (userLiked) {
-                            $btn.attr('data-liked', "0");
-                        } else {
-                            $btn.attr('data-liked', "1");
-                        }
-                    } else {
-                        alert("처리에 실패했습니다.");
-                    }
-                },
-                error: function(e) {
-                    console.log(e);
-                    alert("서버 통신 오류");
-                }
-            });
-        }
-    </script>
+	    // 전역 변수로 현재 페이지와 총 페이지 관리
+	    let currentPage = 1;
+	    let currentTotalPage = ${totalPage}; // 초기 로딩 시 값
+	
+	    function getSort(){ return $('#sortSelect').val(); }
+	    function getKeyword(){ return $('#searchInput').val().trim(); }
+	    
+	    // 정렬/검색 시 초기화 함수
+	    function resetAndLoad() {
+	        $('#teamList').empty(); // 비우기
+	        currentPage = 1;        // 1페이지로 리셋
+	        $('#loadMoreBtn').hide(); // 로딩 중엔 버튼 숨김
+	        
+	        loadContent(1);
+	    }
+	    
+	    // 이벤트 리스너
+	    $('#sortSelect').on('change', resetAndLoad);
+	    $('#searchInput').on('keydown', function(e){
+	        if(e.key === 'Enter'){
+	            e.preventDefault();
+	            resetAndLoad();
+	        }
+	    });
+	
+	    // AJAX 로드 함수
+	    function loadContent(pageNo) {
+	        const keyword = getKeyword();
+	        const sort = getSort();
+	        
+	        $.ajax({
+	            url : "${pageContext.request.contextPath}/team/listMore",
+	            type : 'get',
+	            data : {
+	                pageNo : pageNo,
+	                keyword : keyword,
+	                sort : sort
+	            },
+	            dataType : 'html',
+	            success : function(html) {
+	                // 1. 데이터 추가
+	                $('#teamList').append(html); 
+	                
+	                // 2. ★ 중요: AJAX로 받아온 HTML 안에 숨겨진 totalPage 값을 찾아서 업데이트
+	                const $newTotal = $('#teamList').find('#ajaxTotalPage').last();
+	                if($newTotal.length > 0) {
+	                    currentTotalPage = parseInt($newTotal.val());
+	                    // 읽은 후 태그는 지워줌 (깔끔하게)
+	                    $newTotal.remove(); 
+	                }
+	                
+	                // 3. 더보기 버튼 보이기/숨기기 판단
+	                if(pageNo >= currentTotalPage || currentTotalPage === 0) {
+	                    $('#loadMoreBtn').hide(); // 더 이상 갈 곳이 없으면 숨김
+	                } else {
+	                    $('#loadMoreBtn').show(); // 아직 남았으면 보임
+	                }
+	                
+	                // 페이지 번호 업데이트
+	                currentPage = pageNo;
+	            },
+	            error : function() {
+	                alert('목록을 불러오는데 실패했습니다.');
+	            }
+	        });
+	    }
+	
+	    $(function() {
+	        // 초기 로딩 시 버튼 처리
+	        if(currentTotalPage <= 1) {
+	            $('#loadMoreBtn').hide();
+	        }
+	
+	        // 더보기 버튼 클릭
+	        $('#loadMoreBtn').click(function() {
+	            if (currentPage < currentTotalPage) {
+	                loadContent(currentPage + 1);
+	            }
+	        });
+	    });
+	
+	    // 좋아요 토글 함수 (기존 유지)
+	    function toggleLike(element, teamCode, event) {
+	        if(event) { event.stopPropagation(); event.preventDefault(); }
+	        
+	        const $btn = $(element);
+	        const $icon = $btn.find('i');
+	        const $count = $btn.find('.count');
+	        let userLiked = ($btn.attr('data-liked') == "1");
+	        
+	        $.ajax({
+	            type: "POST",
+	            url: "${pageContext.request.contextPath}/team/insertTeamLike",
+	            data: { team_code: teamCode, user_Liked: userLiked.toString() },
+	            dataType: "json",
+	            beforeSend: function(xhr) { xhr.setRequestHeader("AJAX", "true"); },
+	            success: function(data) {
+	                if (data.state === "login_required") {
+	                    if(confirm("로그인이 필요합니다. 이동하시겠습니까?")) location.href = "${pageContext.request.contextPath}/member/login";
+	                    return;
+	                }
+	                if (data.state === "true") {
+	                    $count.text(data.teamLikeCount);
+	                    if (userLiked) {
+	                        $btn.attr('data-liked', "0");
+	                        $icon.removeClass('text-warning').addClass('text-secondary');
+	                    } else {
+	                        $btn.attr('data-liked', "1");
+	                        $icon.removeClass('text-secondary').addClass('text-warning');
+	                    }
+	                }
+	            },
+	            error: function(e) {
+	                if(e.status === 403) {
+	                     if(confirm("로그인이 필요합니다. 이동하시겠습니까?")) location.href = "${pageContext.request.contextPath}/member/login";
+	                }
+	            }
+	        });
+	    }
+	</script>
 </body>
 </html>

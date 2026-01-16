@@ -55,10 +55,9 @@ public class TeamController {
         mav.addObject("keyword", keyword);
         mav.addObject("sort", sort);
         
-     
         if(member_code != 0) {
             List<TeamDTO> myTeams = service.readMyTeam(member_code);
-            mav.addObject("myTeams", myTeams); // 변수명 myTeam -> myTeams (복수형)
+            mav.addObject("myTeams", myTeams); 
         }
         return mav;
     }
@@ -77,7 +76,7 @@ public class TeamController {
         
         PageResult<TeamDTO> result = service.listTeam(pageNo, size, keyword, sort, member_code);
         
-        ModelAndView mav = new ModelAndView("team/teamList"); // JSP 조각 반환
+        ModelAndView mav = new ModelAndView("team/teamList");
         mav.addObject("list", result.getList());
         mav.addObject("pageNo", result.getPageNo());
         mav.addObject("totalPage", result.getTotalPage());
@@ -91,18 +90,26 @@ public class TeamController {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
         long member_code = (info != null) ? info.getMember_code() : 0;
-
         long team_code = Long.parseLong(req.getParameter("team_code"));
         
-        // 상세 정보 가져오기 (좋아요 여부 포함)
         TeamDTO dto = service.readTeam(team_code, member_code);
         
-        if(dto == null) {
+        if(dto == null || dto.getStatus() == 0) {
             return new ModelAndView("redirect:/team/list");
         }
 
         ModelAndView mav = new ModelAndView("team/view");
         mav.addObject("dto", dto);
+
+        boolean isLeader = service.isLeader(team_code, member_code);
+        mav.addObject("isLeader", isLeader);
+
+        // 가입 상태 확인 (필수 유지)
+        if(member_code != 0) {
+            int joinStatus = service.checkJoinStatus(team_code, member_code);
+            mav.addObject("joinStatus", joinStatus);
+        }
+        
         return mav;
     }
     
@@ -152,7 +159,63 @@ public class TeamController {
         return new ModelAndView("redirect:/team/list");
     }
     
-    // [핵심] 좋아요 등록/취소 AJAX 처리
+    // 가입 신청 기능 (필수 유지)
+    @ResponseBody
+    @PostMapping("joinRequest")
+    public Map<String, Object> joinRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+        
+        try {
+            long team_code = Long.parseLong(req.getParameter("team_code"));
+            long member_code = info.getMember_code();
+
+            // 1. 이미 가입했거나 신청했는지 미리 확인
+            int currentStatus = service.checkJoinStatus(team_code, member_code);
+            
+            if(currentStatus != 0) { 
+                model.put("state", "duplicate");
+                return model;
+            }
+
+            // 2. 가입 신청 insert 실행
+            Map<String, Object> map = new HashMap<>();
+            map.put("team_code", team_code);
+            map.put("member_code", member_code);
+            service.insertJoinRequest(map);
+            
+            model.put("state", "true");
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "error");
+        }
+        return model;
+    }
+    
+    // [삭제됨] processJoin (승인/거절)
+    // [삭제됨] management (관리페이지)
+
+    // 구단 삭제 처리
+    @GetMapping("delete")
+    public ModelAndView delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        long team_code = Long.parseLong(req.getParameter("team_code"));
+        
+        if(info != null && service.isLeader(team_code, info.getMember_code())) {
+            service.deleteTeam(team_code);
+        }
+        
+        return new ModelAndView("redirect:/team/list");
+    }
+    
+    // 좋아요 처리
     @ResponseBody
     @PostMapping("insertTeamLike")
     public Map<String, Object> insertTeamLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -161,7 +224,6 @@ public class TeamController {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
         
-        // 1. 로그인 체크
         if (info == null) {
             model.put("state", "login_required");
             return model;
@@ -169,17 +231,14 @@ public class TeamController {
         
         try {
             long team_code = Long.parseLong(req.getParameter("team_code"));
-            String user_Liked = req.getParameter("user_Liked"); // "true" or "false"
+            String user_Liked = req.getParameter("user_Liked");
             
             Map<String, Object> map = new HashMap<>();
             map.put("team_code", team_code);
             map.put("member_code", info.getMember_code());
-            map.put("user_Liked", user_Liked); // 서비스에서 처리하도록 전달
+            map.put("user_Liked", user_Liked);
             
-            // 2. 서비스 호출 (삭제 or 추가 결정은 서비스에서)
             service.insertTeamLike(map);
-            
-            // 3. 갱신된 좋아요 개수 가져오기
             int teamLikeCount = service.teamLikeCount(team_code);
             
             model.put("state", "true");

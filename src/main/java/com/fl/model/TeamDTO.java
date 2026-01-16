@@ -10,7 +10,16 @@ public class TeamDTO {
     private String created_at; // 구단 생성일
     private String emblem_image; // 엠블럼 이미지
     private String intro_video_url; // 구단 소개 영상 URL
-    private String leader_name; // 구단장 이름 
+    
+    private int status;          // 상태 (0:삭제, 1:정상)
+    private String deleted_at;	 // 삭제(비활성화)된 날짜
+    private int role_level; // 구단 역할 레벨 (구단장:10/매니저:5/일반:1)
+    private String position; // 구단 포지션
+    private int back_number; // 등번호
+    private String reg_date; // 등록날짜(구단등록)
+    private String profile_image; // 구단내 프로필 이미지
+    
+    private String leader_name; // 구단장 이름(표시하고싶어서 추가함..)
 
     private int member_count;      
     private int like_count;        
@@ -87,6 +96,48 @@ public class TeamDTO {
 	}
 	public void setUser_liked(int user_liked) {
 		this.user_liked = user_liked;
+	}
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	public String getDeleted_at() {
+		return deleted_at;
+	}
+	public void setDeleted_at(String deleted_at) {
+		this.deleted_at = deleted_at;
+	}
+	public int getRole_level() {
+		return role_level;
+	}
+	public void setRole_level(int role_level) {
+		this.role_level = role_level;
+	}
+	public String getPosition() {
+		return position;
+	}
+	public void setPosition(String position) {
+		this.position = position;
+	}
+	public int getBack_number() {
+		return back_number;
+	}
+	public void setBack_number(int back_number) {
+		this.back_number = back_number;
+	}
+	public String getReg_date() {
+		return reg_date;
+	}
+	public void setReg_date(String reg_date) {
+		this.reg_date = reg_date;
+	}
+	public String getProfile_image() {
+		return profile_image;
+	}
+	public void setProfile_image(String profile_image) {
+		this.profile_image = profile_image;
 	}
 	public String getLeader_name() {
 		return leader_name;

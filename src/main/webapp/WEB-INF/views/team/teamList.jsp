@@ -2,6 +2,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
+<input type="hidden" id="ajaxTotalPage" value="${totalPage}">
+
+<c:forEach var="team" items="${list}">
+   <div class="col-md-6 col-lg-3">
+       </div>
+</c:forEach>
+
 <c:forEach var="dto" items="${list}">
     <div class="col-md-6 mb-4">
         <%-- overflow-hidden을 추가해야 상단 배경색이 라운드 처리에 딱 맞게 잘립니다 --%>
