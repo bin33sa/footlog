@@ -181,4 +181,33 @@ public class BoardQnaController {
 
         return new ModelAndView("redirect:/qna/list?page=" + page);
     }
+    
+    @PostMapping("answer")
+    public ModelAndView answerSubmit(HttpServletRequest req, HttpServletResponse resp) {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        String page = req.getParameter("page");
+        long board_qna_code = 0;
+
+        try {
+            board_qna_code = Long.parseLong(req.getParameter("board_qna_code"));
+            String answer = req.getParameter("answer");
+
+            // 관리자 권한 확인 (role_level 50 이상)
+            if (info != null && info.getRole_level() >= 50) {
+                BoardQnaDTO dto = new BoardQnaDTO();
+                dto.setBoard_qna_code(board_qna_code);
+                dto.setAnswer(answer);
+                dto.setStatus(2); // 답변 완료 상태로 변경
+
+                service.updateAnswer(dto);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // 답변 작성 후 보던 상세 페이지로 다시 리다이렉트
+        return new ModelAndView("redirect:/qna/article?board_qna_code=" + board_qna_code + "&page=" + page);
+    }
+    
 }
