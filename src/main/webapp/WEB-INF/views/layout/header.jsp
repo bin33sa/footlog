@@ -134,9 +134,14 @@
     </c:choose>
 
     <span class="fw-bold">${sessionScope.member.member_name}님</span>
-</div>
-						        
+		</div>
+						        <c:if test="${not empty sessionScope.member and sessionScope.member.role_level < 50}">
 						        <a href="${pageContext.request.contextPath}/member/mypage" class="btn btn-outline-secondary rounded-pill btn-sm me-2">마이페이지</a>
+						        </c:if>
+						        <c:if test="${not empty sessionScope.member and sessionScope.member.role_level > 50}">
+						        <a href="${pageContext.request.contextPath}/admin/mypage" class="btn btn-outline-secondary rounded-pill btn-sm me-2">관리페이지</a>
+						        </c:if>
+						        
 						        <a href="${pageContext.request.contextPath}/member/logout" class="btn btn-dark rounded-pill btn-sm">로그아웃</a>
 						    </div>
 						</c:otherwise>
