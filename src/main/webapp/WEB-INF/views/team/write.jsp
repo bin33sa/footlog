@@ -51,31 +51,17 @@
       <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
    </header>
 
-    <div class="container-fluid px-lg-5 mt-4">
-        <div class="row">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
             
-            <div class="col-lg-2 d-none d-lg-block">
-                <div class="sidebar-menu sticky-top" style="top: 100px;">
-                    <div class="mb-4">
-                        <p class="sidebar-title">구단</p>
-                        <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/myteam/main" class="list-group-item list-group-item-action">내 구단 이동</a>
-                            <a href="${pageContext.request.contextPath}/team/list" class="list-group-item list-group-item-action">전체 구단 리스트</a>
-                            
-                            <a href="${pageContext.request.contextPath}/team/write" class="list-group-item list-group-item-action active-menu">구단 창단하기</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-10 col-12">
+            <div class="col-lg-8 col-12">
                 
-                <div class="mb-4 border-bottom pb-3">
-                    <h2 class="fw-bold display-6 mb-1">TEAM FOUNDING</h2>
+                <div class="mb-5 text-center">
+                    <h2 class="fw-bold display-6 mb-2">TEAM FOUNDING</h2>
                     <p class="text-muted mb-0">새로운 구단을 창단하고 팀원들을 모집해보세요.</p>
                 </div>
 
-                <div class="modern-card p-5 shadow-lg bg-white">
+                <div class="modern-card p-5 shadow-lg bg-white rounded-4 border-0">
                     <form name="teamForm" action="${pageContext.request.contextPath}/team/write" method="post" enctype="multipart/form-data" onsubmit="return sendOk();">
                         
                         <div class="row">
@@ -99,7 +85,6 @@
                             <div class="col-md-8 ps-md-5">
                                 <div class="mb-4">
                                     <label for="team_name" class="form-label fw-bold">구단명 <span class="text-danger">*</span></label>
-                                    <%-- [수정] name="subject" -> name="team_name" --%>
                                     <input type="text" name="team_name" id="team_name" class="form-control form-control-lg bg-light border-0" placeholder="멋진 구단 이름을 지어주세요 (예: FC 풋로그)" required>
                                 </div>
 
@@ -141,7 +126,6 @@
 
                         <div class="mb-5">
                             <label class="form-label fw-bold">구단 소개 및 가입 안내</label>
-                            <%-- [수정] name="content" -> name="description" --%>
                             <textarea name="description" class="form-control border-0 bg-light rounded-4 p-4" rows="8" placeholder="우리 팀의 특징, 주로 차는 시간대, 회비 정보 등을 자유롭게 적어주세요." style="resize: none;" required></textarea>
                         </div>
 
@@ -169,36 +153,27 @@
         function sendOk() {
             const f = document.teamForm;
             
-            // 엠블럼 체크 (필요시 주석 해제하여 필수 처리)
+            // 1. 엠블럼 이미지 확인
             if(!f.uploadFile.value) {
                 alert("팀 엠블럼 이미지를 등록해주세요.");
                 return false;
             }
 
-            // [수정] subject -> team_name
+            // 2. 구단명 입력 확인
             if(!f.team_name.value.trim()) {
                 alert("구단명을 입력해주세요.");
                 f.team_name.focus();
                 return false;
             }
             
-            // 활동 지역은 필수가 아니므로 체크 제거 (필요하면 부활)
-            /*
-            if(f.region.value === "") {
-                alert("활동 지역을 선택해주세요.");
-                f.region.focus();
-                return false;
-            }
-            */
-            
-            // 연락처 필수 체크
+            // 3. 연락처 입력 확인
             if(!f.contact_number.value.trim()) {
                 alert("대표 연락처를 입력해주세요.");
                 f.contact_number.focus();
                 return false;
             }
 
-            // [수정] content -> description
+            // 4. 구단 소개 내용 확인
             if(!f.description.value.trim()) {
                 alert("구단 소개 내용을 입력해주세요.");
                 f.description.focus();
@@ -207,7 +182,7 @@
             return true;
         }
 
-        // 엠블럼 미리보기 스크립트
+        // 이미지 파일 선택 시 미리보기 처리
         function previewImage(input) {
             const previewImg = document.getElementById('previewImg');
             const placeholder = document.getElementById('emblemPlaceholder');
@@ -221,6 +196,7 @@
                 };
                 reader.readAsDataURL(input.files[0]);
             } else {
+                // 파일 선택 취소 시 초기화
                 previewImg.src = "";
                 previewImg.style.display = 'none';
                 placeholder.style.display = 'block';

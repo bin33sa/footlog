@@ -62,6 +62,56 @@ public class TeamController {
         return mav;
     }
     
+    // 헤더전용) 내 구단 가기 모달 
+    @GetMapping("myList")
+    public void myList(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        // 1. 데이터 가져오기
+        List<TeamDTO> list = null;
+        if(info != null) {
+            list = service.readMyTeam(info.getMember_code());
+        }
+        
+        // 2. JSON 직접 만들기 (StringBuilder 사용)
+        StringBuilder sb = new StringBuilder();
+        sb.append("["); // 리스트 시작
+        
+        if (list != null && list.size() > 0) {
+            for (int i = 0; i < list.size(); i++) {
+                TeamDTO dto = list.get(i);
+                
+                sb.append("{");
+                // 숫자값
+                sb.append("\"team_code\": " + dto.getTeam_code() + ",");
+                
+                // 문자열값 (특수문자 " 처리)
+                String name = (dto.getTeam_name() == null) ? "" : dto.getTeam_name().replace("\"", "\\\"");
+                sb.append("\"team_name\": \"" + name + "\",");
+                
+                String region = (dto.getRegion() == null) ? "" : dto.getRegion().replace("\"", "\\\"");
+                sb.append("\"region\": \"" + region + "\",");
+                
+                String emblem = (dto.getEmblem_image() == null) ? "" : dto.getEmblem_image().replace("\"", "\\\"");
+                sb.append("\"emblem_image\": \"" + emblem + "\"");
+                
+                sb.append("}");
+                
+                // 마지막 데이터가 아니면 콤마(,) 추가
+                if (i < list.size() - 1) {
+                    sb.append(",");
+                }
+            }
+        }
+        
+        sb.append("]"); // 리스트 끝
+        
+        // 3. 응답 전송
+        resp.setContentType("application/json; charset=UTF-8");
+        resp.getWriter().write(sb.toString());
+    }
+    
     
     // 더보기(AJAX)
     @RequestMapping("listMore")

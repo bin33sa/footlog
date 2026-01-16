@@ -12,14 +12,14 @@
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
+    
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <style>
         :root { --neon-color: #D4F63F; --dark-black: #111; }
         
-        /* 스크롤 및 카드 스타일 */
+        /* 가로 스크롤 및 카드 스타일 */
         .my-team-scroll-container { display: flex; gap: 16px; overflow-x: auto; padding: 10px 5px 25px 5px; scroll-behavior: smooth; }
         .my-team-scroll-container::-webkit-scrollbar { height: 6px; }
         .my-team-scroll-container::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 3px; }
@@ -58,7 +58,9 @@
                     <div class="mb-4">
                         <p class="sidebar-title">구단</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/myteam/main" class="list-group-item list-group-item-action">내 구단 이동</a>
+                            <a href="#" class="list-group-item list-group-item-action" onclick="checkSidebarMyTeam(event)">
+                                내 구단 이동
+                            </a>
                             <a href="${pageContext.request.contextPath}/team/list" class="list-group-item list-group-item-action active-menu">전체 구단 리스트</a>
                         </div>
                     </div>
@@ -113,7 +115,6 @@
                 <%-- [2] 검색 및 정렬 바 --%>
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
                     <div class="search-bar-wrapper w-100 position-relative">
-                        <%-- 돋보기 아이콘에 클릭 ID 추가됨 --%>
                         <i class="bi bi-search position-absolute ms-3 text-muted" 
                            id="btnSearchIcon" 
                            style="cursor: pointer; top: 50%; transform: translateY(-50%); z-index: 10;"></i>
@@ -121,7 +122,6 @@
                     </div>
                     
                     <div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
-                        <%-- 정렬 Select --%>
                         <select id="sortSelect" class="form-select rounded-pill border-0 shadow-sm" style="width: 140px; cursor: pointer;">
                             <option selected value="">최신순</option>
                             <option value="1">인원 많은순</option>
@@ -155,7 +155,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <script type="text/javascript">
-    // [1] 뒤로가기로 왔을 때 페이지 강제 새로고침 (좋아요 숫자 최신화)
+    // 뒤로가기 시 페이지 새로고침
     window.addEventListener('pageshow', function(event) {
         if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
             location.reload();
@@ -169,21 +169,21 @@
     function getSort(){ return $('#sortSelect').val(); }
     function getKeyword(){ return $('#searchInput').val().trim(); }
     
-    // [2] 리스트 초기화 및 로드 함수 (정렬, 검색 시 호출)
+    // 목록 초기화 및 로드
     function resetAndLoad() {
-        $('#teamList').empty();   // 기존 리스트 삭제
-        currentPage = 1;          // 1페이지로 초기화
+        $('#teamList').empty();
+        currentPage = 1;
         $('#loadMoreBtn').hide(); 
-        loadContent(1);           // 데이터 요청
+        loadContent(1);
     }
     
     $(function() {
-        // 정렬 값 변경 시 -> resetAndLoad 실행 (여기가 정렬 트리거입니다!)
+        // 정렬 변경
         $('#sortSelect').on('change', function() {
             resetAndLoad();
         });
         
-        // 검색 엔터키
+        // 검색 엔터
         $('#searchInput').on('keydown', function(e){
             if(e.key === 'Enter'){
                 e.preventDefault();
@@ -191,7 +191,7 @@
             }
         });
 
-        // 돋보기 아이콘 클릭
+        // 검색 아이콘 클릭
         $('#btnSearchIcon').on('click', function() {
             resetAndLoad();
         });
@@ -208,10 +208,10 @@
         }
     });
 
-    // [3] AJAX 데이터 요청 (정렬 값 sort를 서버로 전송)
+    // 데이터 로드 (AJAX)
     function loadContent(pageNo) {
         const keyword = getKeyword();
-        const sort = getSort(); // 선택된 정렬값 (1, 2) 가져오기
+        const sort = getSort();
         
         $.ajax({
             url : "${pageContext.request.contextPath}/team/listMore", 
@@ -219,7 +219,7 @@
             data : {
                 pageNo : pageNo,
                 keyword : keyword,
-                sort : sort // ★ 컨트롤러로 정렬 기준(1 또는 2) 전송
+                sort : sort
             },
             dataType : 'html',
             success : function(html) {
@@ -245,12 +245,12 @@
                 currentPage = pageNo;
             },
             error : function() {
-                alert('데이터를 불러오지 못했습니다.');
+                alert('데이터 로드에 실패했습니다.');
             }
         });
     }
 
-    // 좋아요
+    // 좋아요 토글
     function toggleLike(element, teamCode, event) {
         if(event) { event.stopPropagation(); event.preventDefault(); }
         
@@ -269,10 +269,10 @@
                     return;
                 }
                 if (data.state === "true") {
-                    // 숫자만 업데이트
+                    // 숫자 업데이트
                     $count.text(data.teamLikeCount);
                     
-                    
+                    // 상태 업데이트 (아이콘 색상은 변경하지 않음)
                     if (userLiked) {
                         $btn.attr('data-liked', "0");
                     } else {
@@ -283,6 +283,89 @@
             error: function(e) { console.log(e); }
         });
     }
+    
+    // 사이드바 '내 구단 이동' 클릭 시 로그인 체크
+    function checkSidebarMyTeam(e) {
+        e.preventDefault(); // 링크 이동 막기
+        
+        const isLogin = '${not empty sessionScope.member}';
+        
+        if (isLogin === 'false') {
+            // 1. 비로그인 시: 알림창 띄우고 로그인 페이지로 이동
+            alert("로그인이 필요한 서비스입니다.");
+            location.href = "${pageContext.request.contextPath}/member/login";
+        } else {
+            // 2. 로그인 시: 모달 띄우기 (수동 실행)
+            const modalEl = document.getElementById('myTeamModal');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    }
     </script>
+    
+	<!-- 왼쪽 사이드바 모달 누를 시 들어가는 모달 창  -->
+    <div class="modal fade" id="myTeamModal" tabindex="-1" aria-labelledby="myTeamModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                
+                <%-- 모달 헤더 --%>
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h1 class="modal-title fs-5 fw-bold" id="myTeamModalLabel">내 구단 선택</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <%-- 모달 본문 --%>
+                <div class="modal-body p-4">
+                    <c:choose>
+                        <%-- 1. 가입한 구단이 있을 때 --%>
+                        <c:when test="${not empty myTeams}">
+                            <div class="list-group list-group-flush">
+                                <c:forEach var="team" items="${myTeams}">
+                                    <%-- 구단 리스트 아이템 --%>
+                                    <a href="${pageContext.request.contextPath}/myteam/main?teamCode=${team.team_code}" 
+                                       class="list-group-item list-group-item-action d-flex align-items-center py-3 px-2 border-0 rounded-3 mb-1"
+                                       style="transition: background 0.2s;">
+                                        
+                                        <%-- 엠블럼 (작은 원형) --%>
+                                        <div class="rounded-circle border me-3 overflow-hidden bg-light d-flex justify-content-center align-items-center" 
+                                             style="width: 48px; height: 48px; min-width: 48px;">
+                                            <img src="${pageContext.request.contextPath}${not empty team.emblem_image ? '/uploads/team/'.concat(team.emblem_image) : '/dist/images/emblem.png'}" 
+                                                 class="w-100 h-100 object-fit-cover"
+                                                 onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
+                                        </div>
+                                        
+                                        <%-- 텍스트 정보 --%>
+                                        <div>
+                                            <div class="fw-bold text-dark" style="font-size: 1rem;">${team.team_name}</div>
+                                            <div class="small text-secondary mt-1">
+                                                <i class="bi bi-geo-alt me-1"></i>${team.region}
+                                            </div>
+                                        </div>
+                                        
+                                        <%-- 화살표 아이콘 --%>
+                                        <i class="bi bi-chevron-right ms-auto text-muted opacity-50"></i>
+                                    </a>
+                                </c:forEach>
+                            </div>
+                        </c:when>
+                        
+                        <%-- 2. 가입한 구단이 없을 때 --%>
+                        <c:otherwise>
+                        
+                            <div class="text-center pt-5 pb-0">
+                                <i class="bi bi-exclamation-circle text-secondary fs-1 mb-3 d-block opacity-25"></i>
+                                <p class="text-secondary mb-4">아직 가입된 구단이 없습니다.</p>
+                                
+                                <a href="${pageContext.request.contextPath}/team/write" class="btn btn-dark rounded-pill w-100 py-2 fw-bold mt-5">
+                                    새 구단 만들기
+                                </a>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+                
+            </div>
+        </div>
+    </div>
 </body>
 </html>

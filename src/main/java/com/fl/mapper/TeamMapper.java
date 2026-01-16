@@ -8,6 +8,12 @@ public interface TeamMapper {
     
     // 리스트 조회
     public List<TeamDTO> listTeam(Map<String, Object> map);
+    
+    // 정렬) 인원순, 좋아요순 
+    public List<TeamDTO> findByMember(Map<String, Object> map); // 추가
+    public List<TeamDTO> findByLike(Map<String, Object> map);   // 추가
+    
+    // 개수 조회
     public int teamCount(Map<String, Object> map);
     
     // 상세 조회
@@ -32,6 +38,7 @@ public interface TeamMapper {
     
     // 구단장인지 확인 
     public int isLeader(Map<String, Object> map);
+  
     
     // 좋아요
     public void insertTeamLike(Map<String, Object> map); 

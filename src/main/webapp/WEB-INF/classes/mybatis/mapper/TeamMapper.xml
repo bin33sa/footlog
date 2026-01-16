@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.TeamMapper">
 
+	<!-- 팀 이름, 지역명 키워드 검색 -->
     <sql id="searchData">
         <if test="keyword != null and keyword != ''">
             AND (
@@ -11,8 +12,9 @@
             )
         </if>
     </sql>
-
-    <select id="listTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
+  
+  	<!-- 팀 기본정보, 멤버수, 좋아요수, 구단장 이름 조회 -->
+    <sql id="commonSelect">
         SELECT 
             t.team_code, 
             t.team_name, 
@@ -26,39 +28,47 @@
              JOIN member_team mt ON m.member_code = mt.member_code 
              WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name      
         FROM team t
-        WHERE t.status = 1  
-        
+        WHERE t.status = 1
+    </sql>
+
+	<!-- 구단 리스트 조회(기본:최신순 정렬) -->
+    <select id="listTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
+        <include refid="commonSelect"/>
         <include refid="searchData"/>
-        
-        ORDER BY
-        <choose>
-            <when test="sort == '1'"> 
-                (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) DESC, 
-                t.created_at DESC, 
-                t.team_code DESC
-            </when>
-            
-            <when test="sort == '2'"> 
-                (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) DESC, 
-                t.created_at DESC, 
-                t.team_code DESC
-            </when>
-            
-            <otherwise> 
-                t.created_at DESC, 
-                t.team_code DESC
-            </otherwise>
-        </choose>
-        
+        ORDER BY t.created_at DESC, t.team_code DESC
         OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
     
+    <!-- 구단 리스트 조회(멤버 수 많은 순 정렬) -->
+    <select id="findByMember" parameterType="map" resultType="com.fl.model.TeamDTO">
+        <include refid="commonSelect"/>
+        <include refid="searchData"/>
+        ORDER BY 
+            (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) DESC, 
+            t.created_at DESC, 
+            t.team_code DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+    
+    <!-- 구단 리스트 조회(좋아요 수 많은 순 정렬) -->
+    <select id="findByLike" parameterType="map" resultType="com.fl.model.TeamDTO">
+        <include refid="commonSelect"/>
+        <include refid="searchData"/>
+        ORDER BY 
+            (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) DESC, 
+            t.created_at DESC, 
+            t.team_code DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+    
+    <!-- 검색 조건에 맞는 전체 구단 개수 확인 (페이징 계산용) -->
     <select id="teamCount" parameterType="map" resultType="Integer">
         SELECT COUNT(*) FROM team t
         WHERE t.status = 1
         <include refid="searchData"/>
     </select>
     
+    <!-- 구단 상세 정보 조회(회원이 좋아요 눌럿는지 여부확인) -->
     <select id="readTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
 	    SELECT 
 	        t.team_code, 
@@ -88,31 +98,38 @@
 	    WHERE t.team_code = #{team_code}
 	</select>
     
+    <!-- 내가 가입한 구단 목록 조회 -->
     <select id="readMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
 	    SELECT 
         t.team_code, 
         t.team_name, 
         t.emblem_image, 
         t.region,
-        mt.role_level  FROM team t
+        mt.role_level  
+        FROM team t
 	    JOIN member_team mt ON t.team_code = mt.team_code
 	    WHERE mt.member_code = #{member_code}
+	    AND t.status = 1
 	</select>	
     
+    <!-- 구단 좋아요 등록 -->
     <insert id="insertTeamLike" parameterType="map">
         INSERT INTO like_team (team_code, member_code)
         VALUES (#{team_code}, #{member_code})
     </insert>
 
+	<!-- 구단 좋아요 취소 -->
     <delete id="deleteTeamLike" parameterType="map">
         DELETE FROM like_team 
         WHERE team_code = #{team_code} AND member_code = #{member_code}
     </delete>
     
+    <!-- 특정 구단의 총 좋아요 수 확인 -->
     <select id="teamLikeCount" parameterType="Long" resultType="Integer">
         SELECT COUNT(*) FROM like_team WHERE team_code = #{team_code}
     </select>
-
+	
+	<!-- 새 구단 생성하기(시퀀스이용) -->
     <insert id="insertTeam" parameterType="com.fl.model.TeamDTO">
         <selectKey keyProperty="team_code" resultType="long" order="BEFORE">
             SELECT seq_team.NEXTVAL FROM dual
@@ -121,18 +138,21 @@
         VALUES (#{team_code}, #{team_name}, #{region}, #{description}, #{emblem_image, jdbcType=VARCHAR}, #{contact_number}, #{intro_video_url, jdbcType=VARCHAR}, 'pending', SYSDATE)
     </insert>
 
+	<!-- 멤버 추가하기 -->
     <insert id="insertTeamMember" parameterType="map">
         INSERT INTO member_team (team_code, member_code, role_level, position, reg_date) 
         VALUES (#{team_code}, #{member_code}, #{role_level}, #{position}, SYSDATE)
     </insert>	
     
+    <!-- 구단 삭제(비활성화로 업데이트 처리) -->
     <update id="deleteTeam" parameterType="Long">
 	    UPDATE team 
 	    SET 
-	        status = 0, 
+	        status = 0, <!-- status(상태):0 이면 숨김처리 -->
 	        deleted_at = SYSDATE  WHERE team_code = #{team_code}
 	</update>
-
+	
+	<!-- 내 가입 상태 확인(15:이미 가입된 멤버, 1:가입 승인 대기중, 0:가입 안함 -->
     <select id="checkJoinStatus" parameterType="map" resultType="Integer">
 	    SELECT 
 	        CASE
@@ -151,6 +171,7 @@
 	    FROM dual
 	</select>
 	
+	<!-- 내가 이 구단의 구단장인지 확인(수정, 삭제 권한) -->
 	<select id="isLeader" parameterType="map" resultType="Integer">
 		SELECT COUNT(*) 
 	    FROM member_team 
@@ -159,6 +180,7 @@
 	      AND role_level = 10
 	</select>
 	
+	<!-- 구단 가입 신청 보내기 -->
 	<insert id="insertJoinRequest" parameterType="map">
         INSERT INTO join_request (team_code, member_code, status, created_at)
         VALUES (#{team_code}, #{member_code}, 1, SYSDATE)

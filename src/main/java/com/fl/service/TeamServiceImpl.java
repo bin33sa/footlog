@@ -35,16 +35,28 @@ public class TeamServiceImpl implements TeamService {
     // 구단 리스트 조회
     @Override
     public PageResult<TeamDTO> listTeam(int pageNo, int size, String keyword, String sort, long member_code) {
-        int offset = (pageNo - 1) * size;
+    	int offset = (pageNo - 1) * size;
         
         Map<String, Object> map = new HashMap<>();
         map.put("offset", offset);
         map.put("size", size);
         map.put("keyword", keyword);
-        map.put("sort", sort);
         map.put("member_code", member_code);
         
-        List<TeamDTO> list = mapper.listTeam(map);
+        List<TeamDTO> list;
+
+       
+        if ("1".equals(sort)) {
+            // 인원순
+            list = mapper.findByMember(map);
+        } else if ("2".equals(sort)) {
+            // 좋아요순
+            list = mapper.findByLike(map);
+        } else {
+            // 기본(최신순)
+            list = mapper.listTeam(map);
+        }
+        
         int dataCount = mapper.teamCount(map);
         int totalPage = (int) Math.ceil((double) dataCount / size);
         
@@ -136,16 +148,12 @@ public class TeamServiceImpl implements TeamService {
         }
     }    
       
-    // [삭제됨] acceptJoinRequest
-    // [삭제됨] rejectJoinRequest
-
-    // 가입 상태 확인 (유지 - 오타 수정함 team_code)
     @Override
     public int checkJoinStatus(long team_code, long member_code) {
         int status = 0;
         try {
             Map<String, Object> map = new HashMap<>();
-            map.put("team_code", team_code); // team_ode 오타 수정됨
+            map.put("team_code", team_code);
             map.put("member_code", member_code);
             status = mapper.checkJoinStatus(map);
         } catch (Exception e) {
@@ -153,8 +161,6 @@ public class TeamServiceImpl implements TeamService {
         }
         return status;
     }
-
-    // [삭제됨] listJoinRequest
 
     @Override
     public boolean isLeader(long team_code, long member_code) {

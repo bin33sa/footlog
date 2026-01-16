@@ -46,11 +46,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex gap-3 text-dark fw-bold">
                         <span><i class="bi bi-people-fill text-secondary"></i> ${dto.member_count}</span>
-                        
-                        <%-- ★ 여기 수정됨: 무조건 노란색 별로 고정 --%>
-                        <span class="btn-team-like" style="cursor: pointer;" 
-                              data-liked="${dto.user_liked}"
-                              onclick="toggleLike(this, '${dto.team_code}', event)">
+                        <span class="btn-team-like" style="cursor: pointer;" onclick="toggleLike(this, '${dto.team_code}', event)">
                             <i class="bi bi-star-fill text-warning"></i> 
                             <span class="count">${dto.like_count}</span>
                         </span>

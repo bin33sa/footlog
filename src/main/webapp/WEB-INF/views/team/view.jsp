@@ -187,7 +187,7 @@
                                         <c:when test="${isLeader}">
                                             <%-- 구단장일 때 --%>
                                             <button class="btn btn-outline-danger rounded-pill px-4 fw-bold" 
-                                                    onclick="if(confirm('정말 구단을 삭제(비활성화) 하시겠습니까?')) location.href='${pageContext.request.contextPath}/team/delete?team_code=${dto.team_code}'">
+                                                    onclick="if(confirm('정말 구단을 삭제 하시겠습니까?')) location.href='${pageContext.request.contextPath}/team/delete?team_code=${dto.team_code}'">
                                                 구단 삭제
                                             </button>
                                             <button class="btn btn-dark rounded-pill px-5 fw-bold" 
