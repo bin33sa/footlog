@@ -29,7 +29,7 @@
                         <div class="list-group">
                             <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action ">내 매치 일정</a>
                             <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action ">전체 매치 리스트</a>
-                            <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action  active-menu">매치 개설하기</a>
+                            <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action  active-menu">${mode=='write'?'매치 개설하기' : '매치 수정하기' }</a>
                             <a href="${pageContext.request.contextPath}/mercenary/list" class="list-group-item list-group-item-action ">용병 구하기</a>
                         </div>
                     </div>
@@ -39,30 +39,52 @@
             <div class="col-lg-8 col-12">
                 
                 <div class="d-flex align-items-center mb-4">
-                    <h2 class="fw-bold mb-0">매치 개설하기</h2>
+                    <h2 class="fw-bold mb-0">${mode=='write'?'매치 개설하기' : '매치 수정하기' }</h2>
                     <span class="ms-3 text-muted small">팀원 모집을 위한 매치 정보를 입력해주세요.</span>
                 </div>
 
-                <form name="matchForm" action="${pageContext.request.contextPath}/match/register" method="post">
+                <form name="matchForm" method="post">
+                    <input type="hidden" name="mode" value="${mode}">
+                    <input type="hidden" name="page" value="${page}">
+                    
+                    <c:if test="${mode=='update'}">
+                    	<input type="hidden" name="match_code" value="${dto.match_code}">
+                    	<input type="hidden" name="status" value="${dto.status}">
+                    	
+                    </c:if>
                     
                     <div class="modern-card p-5">
-                        
+					     <div class="mb-3">
+					    <label class="form-label fw-bold">주최 팀 선택</label>
+					    <select name="home_code" class="form-select rounded-pill shadow-sm">
+					        <c:choose>
+					            <c:when test="${empty myTeamList}">
+					                <option value="" disabled selected>소속된 팀이 없습니다.</option>
+					            </c:when>
+					            <c:otherwise>
+					                <c:forEach var="team" items="${myTeamList}">
+					                    <option value="${team.team_code}" ${dto.home_code==team.team_code? "selected":""}>${team.team_name}</option>
+					                </c:forEach>
+					            </c:otherwise>
+					        </c:choose>
+					    </select>
+					</div>
                         <div class="mb-4">
                             <label for="title" class="form-label fw-bold">매치 제목</label>
-                            <input type="text" class="form-control form-control-lg bg-light border-0" id="title" name="title" placeholder="예) 9월 20일 상암 3파전 모집합니다!">
+                            <input type="text" class="form-control form-control-lg bg-light border-0" id="title" name="title" placeholder="예) 9월 20일 상암 3파전 모집합니다!" value="${dto.title }">
                         </div>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label for="matchDate" class="form-label fw-bold">경기 일시</label>
-                                <input type="datetime-local" class="form-control bg-light border-0" id="matchDate" name="matchDate" value="${dto.match_date}">
+                                <input type="datetime-local" class="form-control bg-light border-0" id="match_date" name="match_date" value="${dto.match_date}">
                             </div>
                             <div class="col-md-6">
                                 <label for="stadium" class="form-label fw-bold">구장 선택</label>
-                                <select class="form-select bg-light border-0" id="stadium" name="stadiumCode">
-                                    <option value="" selected>구장을 선택해주세요</option>
+                                <select class="form-select bg-light border-0" id="stadium" name="stadium_code">
+                                    <option value="" >구장을 선택해주세요</option>
                                     <c:forEach var="item" items="${stadiumList}">
-                                    	<option value="${item.stadiumCode}">${item.stadiumName}</option>
+                                    	<option value="${item.stadiumCode}" ${dto.stadium_code == item.stadiumCode ? "selected" : ""}>${item.stadiumName}</option>
                             		</c:forEach>
                                 </select>
                             </div>
@@ -72,25 +94,25 @@
                             <div class="col-md-4">
                                 <label for="matchType" class="form-label fw-bold">경기 방식</label>
                                 <select class="form-select bg-light border-0" id="matchType" name="matchType" >
-                                    <option value="5vs5" ${dto.matchType== '5'?'selected':''}>5 vs 5</option>
-                                    <option value="6vs6" ${dto.matchType== '6' || empty dto.matchType ?'selected':''}>6 vs 6</option>
-                                    <option value="11vs11" ${dto.matchType== '11'?'selected':''}>11 vs 11</option>
+                                    <option value="5vs5" ${dto.matchType== '5vs5'?'selected':''}>5 vs 5</option>
+                                    <option value="6vs6" ${dto.matchType== '6vs6' || empty dto.matchType ?'selected':''}>6 vs 6</option>
+                                    <option value="11vs11" ${dto.matchType== '11vs11'?'selected':''}>11 vs 11</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="gender" class="form-label fw-bold">성별</label>
                                 <select class="form-select bg-light border-0" id="gender" name="gender" >
-                                    <option value="남성" ${dto.gender=='M'|| empty dto.gender?'selected':''}>남성</option>
-                                    <option value="여성" ${dto.gender=='F'?'selected':''}>여성</option>
-                                    <option value="남녀무관(혼성)" ${dto.gender=='X'?'selected':''}>남녀무관(혼성)</option>
+                                    <option value="남성" ${dto.gender=='남성'|| empty dto.gender?'selected':''}>남성</option>
+                                    <option value="여성" ${dto.gender=='여성'?'selected':''}>여성</option>
+                                    <option value="남녀무관(혼성)" ${dto.gender=='남녀무관(혼성)'?'selected':''}>남녀무관(혼성)</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
                                 <label for="level" class="form-label fw-bold">실력</label>
                                 <select class="form-select bg-light border-0" id="matchLevel" name="matchLevel" >
-                                    <option value="하 (초보)" ${dto.matchLevel=='LOW'? 'selected':''}>하 (초보)</option>
-                                    <option value="중 (아마추어)" ${dto.matchLevel=='MID'|| empty dto.matchLevel? 'selected':''}>중 (아마추어)</option>
-                                    <option value="상 (선출포함)" ${dto.matchLevel=='HIGH'? 'selected':''}>상 (선출포함)</option>
+                                    <option value="하 (초보)" ${dto.matchLevel=='하 (초보)'? 'selected':''}>하 (초보)</option>
+                                    <option value="중 (아마추어)" ${dto.matchLevel=='중 (아마추어)'|| empty dto.matchLevel? 'selected':''}>중 (아마추어)</option>
+                                    <option value="상 (선출포함)" ${dto.matchLevel=='상 (선출포함)'? 'selected':''}>상 (선출포함)</option>
                                 </select>
                             </div>
                         </div>
@@ -142,17 +164,17 @@
 			return;
 		}
 		
-		str = f.matchDate.value.trim();
+		str = f.match_date.value.trim();
 		if(! str){
 			alert('경기일자를 입력하세요.');
-			f.matchDate.focus();
+			f.match_date.focus();
 			return;
 		}
 		
-		str = f.stadiumCode.value.trim();
+		str = f.stadium_code.value.trim();
 		if(! str){
 			alert('구장을 선택하세요.');
-			f.stadiumCode.focus();
+			f.stadium_code.focus();
 			return;
 		}
 		

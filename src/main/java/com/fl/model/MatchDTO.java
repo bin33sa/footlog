@@ -28,11 +28,9 @@ public class MatchDTO {
     private Long fee;
     private Long member_code;
     
-    private int stadiumCode;
+    private int stadium_code;
     private String stadiumName; 
     private String matchLevel;
-
-    
     
     public String getMatchType() {
 		return matchType;
@@ -218,12 +216,12 @@ public class MatchDTO {
 		this.matchLevel = matchLevel;
 	}
 
-	public int getStadiumCode() {
-		return stadiumCode;
+	public int getStadium_code() {
+		return stadium_code;
 	}
 
-	public void setStadiumCode(int stadiumCode) {
-		this.stadiumCode = stadiumCode;
+	public void setStadium_code(int stadium_code) {
+		this.stadium_code = stadium_code;
 	}
     
     

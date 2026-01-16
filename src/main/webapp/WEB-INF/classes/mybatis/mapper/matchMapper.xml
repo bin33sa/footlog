@@ -30,8 +30,14 @@
 	
 	<!-- 글 수정 -->
 	<update id="updateMatch">
-		UPDATE match_post SET title=#{title}, content=#{content}, match_date=#{match_date}, status=#{status}, 
-		 		matchType=#{matchType}, gender=#{gender},fee=#{fee}, matchLevel=#{matchLevel}, stadium_code=#{stadium_code}
+		UPDATE match_post SET title=#{title}, content=#{content}, match_date=TO_DATE(#{match_date}, 'YYYY-MM-DD"T"HH24:MI'), status=#{status}, 
+		 		matchType=#{matchType}, gender=#{gender},fee=#{fee}, matchLevel=#{matchLevel}, stadium_code=#{stadium_code}, home_code=#{home_code}
+		WHERE match_code=#{match_code}
+	</update>
+	
+	<!-- 매치 성사되었을 때 상태 변경 -->
+	<update id="updateMatchStatus">
+		UPDATE match_post SET status=#{status}, away_code=#{away_code}, 
 		WHERE match_code=#{match_code}
 	</update>
 	
@@ -40,7 +46,7 @@
 		DELETE FROM match_post 
 		<where>
 			<choose>
-				<when test="ROLE_LEVEL>=5">
+				<when test="ROLE_LEVEL>=1">
 					match_code=#{match_code}
 				</when>
 				<otherwise>
@@ -65,24 +71,28 @@
 
 	<!-- 매치 리스트 -->
 	<select id="listMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
-		SELECT m.match_code,ht.team_name AS home_team_name,at.team_name AS away_team_name,
-		      TO_CHAR(match_date,'YYYY-MM-DD HH24:MI') AS match_date,status,title,content,view_count,
-		      matchType,gender,fee,m.member_code, s.stadium_name AS stadiumName,s.region AS region, matchLevel, m.stadium_code AS stadiumCode
-		FROM match_post m
-		JOIN team ht ON ht.team_code = m.home_code
-		JOIN stadium s ON s.stadium_code = m.stadium_code
-		LEFT JOIN team at ON at.team_code = m.away_code
-		<where>
-			<include refid="where-list"/>
-		</where>
-		ORDER BY m.match_date
-		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-	</select>
+    SELECT 
+        m.match_code,
+        ht.team_name AS home_team_name,
+        at.team_name AS away_team_name,
+        TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
+        m.status, m.title, m.content, m.view_count,  m.matchType,  m.gender,  m.fee, m.member_code,
+        s.stadium_name AS stadiumName, s.region AS region, m.matchLevel,   m.stadium_code AS stadium_code
+    FROM match_post m
+    JOIN team ht ON ht.team_code = m.home_code
+    JOIN stadium s ON s.stadium_code = m.stadium_code
+    LEFT JOIN team at ON at.team_code = m.away_code
+    <where>
+        <include refid="where-list"/>
+    </where>
+    ORDER BY m.match_date
+    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+</select>
 	
-	<!-- 팀코드 가져오기 -->
+	<!-- 코드로 정보갖고오기 -->
 	<select id="findById" parameterType="Long" resultType="com.fl.model.MatchDTO">
 		SELECT m.match_code,ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, m.status,m.title, 
-		m.content, m.fee,s.stadium_name AS stadiumName, s.region AS region, matchType, gender, matchLevel
+		m.content, m.fee,s.stadium_name AS stadiumName, s.region AS region, matchType, gender, matchLevel, m.stadium_code, home_code
 		FROM match_post m
 		JOIN team ht ON ht.team_code = m.home_code
 		JOIN stadium s ON s.stadium_code = m.stadium_code
@@ -99,9 +109,13 @@
 		WHERE m.member_code = #{member_code}
 	</select>
 	
-	<select id="getUserTeamCode" parameterType="Long" resultType="Long">
-    SELECT team_code 
-    FROM member_team  WHERE member_code = #{member_code}
+	<select id="listUserTeams" parameterType="Long" resultType="com.fl.model.TeamDTO">
+	    SELECT t.team_code, t.team_name
+	    FROM team t
+	    JOIN member_team mt ON t.team_code = mt.team_code 
+	    WHERE mt.member_code = #{member_code}
     </select>
+    
+    
 	
 </mapper>

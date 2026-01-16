@@ -6,13 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fl.model.MatchApplyDTO;
 import com.fl.model.MatchDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.StadiumDTO;
+import com.fl.model.TeamDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
+import com.fl.mvc.annotation.ResponseBody;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MatchService;
 import com.fl.service.MatchServiceImpl;
@@ -52,7 +55,7 @@ public class MatchController {
 			String schType = req.getParameter("schType");
 			String kwd = req.getParameter("kwd");
 			String region = req.getParameter("region");
-			String matchDate = req.getParameter("matchDate");
+			String match_date = req.getParameter("match_date");
 			
 			if(schType == null) {
 				schType = "";
@@ -68,7 +71,7 @@ public class MatchController {
 			map.put("schType", schType);
 			map.put("kwd", kwd);
 			map.put("region", region);
-			map.put("matchDate", matchDate);
+			map.put("match_date", match_date);
 			
 			dataCount = service.dataCount(map);
 			
@@ -109,7 +112,7 @@ public class MatchController {
 	
 	
 	@GetMapping("article")
-	public ModelAndView matchBoard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	public ModelAndView article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		String page = req.getParameter("page");
 		String query = "page="+page;
@@ -138,12 +141,15 @@ public class MatchController {
 			if(dto==null) {
 				return new ModelAndView("redirect:/match/list?"+query);
 			}
+			
 			dto.setContent(util.htmlSymbols(dto.getContent()));
 			
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("schType",schType);
 			map.put("kwd",kwd);
 			map.put("match_code",match_code);
+			
+			List<MatchApplyDTO> applicantList = service.listApplicant(map);
 			
 			MatchDTO prevDto = service.findByPrev(map);
 			MatchDTO nextDto = service.findByNext(map);
@@ -162,6 +168,7 @@ public class MatchController {
 			mav.addObject("query", query);
 			mav.addObject("prevDto", prevDto);
 			mav.addObject("nextDto", nextDto);
+			mav.addObject("applicant", applicantList);
 			
 			return mav;
 			
@@ -186,9 +193,12 @@ public class MatchController {
 			out.close();
 			return null;
 		}
+		long memberCode = info.getMember_code();
+		List<TeamDTO> myTeamList = service.listUserTeams(memberCode);
 		
 		List<StadiumDTO> list = stadiumservice.listStadiumAll();
 		mav.addObject("stadiumList", list);
+		mav.addObject("myTeamList", myTeamList);
 		mav.addObject("mode", "write");
 		
 		return mav;
@@ -201,9 +211,12 @@ public class MatchController {
 		
 		try {
 			MatchDTO dto = new MatchDTO();
-			long myTeamCode = service.getUserTeamCode(info.getMember_code());
 			
-			if (info == null || (info.getRole_level() != 1 && info.getRole_level() != 60)) {
+			long home_code = Long.parseLong(req.getParameter("home_code"));
+			
+			dto.setHome_code(home_code);
+			
+			if (info == null || (info.getRole_level() ==0)) {
 		        return new ModelAndView("redirect:/match/list");
 		    }
 			
@@ -211,10 +224,9 @@ public class MatchController {
 			dto.setMember_code(info.getMember_code());
 			
 			dto.setTitle(req.getParameter("title"));
-			dto.setStadiumCode(Integer.parseInt(req.getParameter("stadiumCode")));
+			dto.setStadium_code(Integer.parseInt(req.getParameter("stadium_code")));
 			dto.setContent(req.getParameter("content"));
-			dto.setHome_code(myTeamCode);
-			dto.setMatch_date(req.getParameter("matchDate"));
+			dto.setMatch_date(req.getParameter("match_date"));
 			dto.setMatchType(req.getParameter("matchType"));
 			dto.setGender(req.getParameter("gender"));
 			dto.setFee(Long.parseLong(req.getParameter("fee")));
@@ -230,10 +242,137 @@ public class MatchController {
 	}
 	
 	
-	@RequestMapping("myMatch")
-	public ModelAndView myMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ModelAndView mav = new ModelAndView("match/myMatch");
+	@GetMapping("delete")
+	public ModelAndView delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+			
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
 		
-		return mav;
+		String page = req.getParameter("page");
+		String query = "page=" + page;
+		
+		try {
+			long match_code = Long.parseLong(req.getParameter("match_code"));
+			
+			String schType = req.getParameter("schType");
+			String kwd = req.getParameter("kwd");
+			if(schType==null) {
+				schType="";
+				kwd="";
+			}
+			kwd = util.decodeUrl(kwd);
+			
+			if(!kwd.isBlank()) {
+				query += "&schType="+schType+"&kwd="+util.decodeUrl(kwd);
+			}
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("match_code", match_code);
+			map.put("member_code", info.getMember_code());
+			map.put("userLevel", info.getRole_level());
+			
+			service.deleteMatch(map);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:/match/list?"+query);
 	}
+	
+	@GetMapping("update")
+	public ModelAndView update(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		String page = req.getParameter("page");
+		
+		try {
+			long match_code = Long.parseLong(req.getParameter("match_code"));
+			MatchDTO dto = service.findById(match_code);
+			
+			long member_code = info.getMember_code();
+			List<TeamDTO> myTeamList = service.listUserTeams(member_code);
+			List<StadiumDTO> list = stadiumservice.listStadiumAll();
+			
+			ModelAndView mav = new ModelAndView("match/write");
+			
+			mav.addObject("page", page);
+			mav.addObject("dto", dto);
+			mav.addObject("mode", "update");
+			mav.addObject("stadiumList", list);
+			mav.addObject("myTeamList", myTeamList);
+			
+			return mav;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:/match/list?page="+page);
+	}
+	
+	@PostMapping("update")
+	public ModelAndView updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		String page = req.getParameter("page");
+		
+		try {
+			MatchDTO dto = new MatchDTO();
+			
+			dto.setMatch_code(Long.parseLong(req.getParameter("match_code")));
+			dto.setTitle(req.getParameter("title"));
+			dto.setContent(req.getParameter("content"));
+			dto.setMatch_date(req.getParameter("match_date"));
+			dto.setHome_code(Long.parseLong(req.getParameter("home_code")));
+			dto.setFee(Long.parseLong(req.getParameter("fee")));
+			dto.setGender(req.getParameter("gender"));
+			dto.setMatchLevel(req.getParameter("matchLevel"));
+			dto.setMatchType(req.getParameter("matchType"));
+			dto.setStatus(req.getParameter("status"));
+			dto.setStadium_code(Integer.parseInt(req.getParameter("stadium_code")));
+			dto.setMember_code(info.getMember_code());
+			
+			service.updateMatch(dto);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return new ModelAndView("redirect:/match/list?page="+page);
+	}
+	
+	@ResponseBody
+	@PostMapping("updateStatus")
+	public Map<String, Object> updateStatus(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		try {
+			if(info==null) {
+				map.put("state","login_required");
+			}
+			long away_code = Long.parseLong(req.getParameter("away_code"));
+			long match_code = Long.parseLong(req.getParameter("match_code"));
+			
+			map.put("match_code", match_code);
+			map.put("away_code", away_code);
+			map.put("status","마감");
+		
+			boolean isSuccess = service.updateMatchStatus(map);
+			
+			if(isSuccess) {
+				map.put("state", "true");
+			}else {
+				map.put("state", "false");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			map.put("state","error");
+		}
+		
+		return map;
+	}
+	
 }

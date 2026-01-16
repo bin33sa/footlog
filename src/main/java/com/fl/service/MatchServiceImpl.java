@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.mapper.MatchMapper;
+import com.fl.model.MatchApplyDTO;
 import com.fl.model.MatchDTO;
+import com.fl.model.TeamDTO;
 import com.fl.mybatis.support.MapperContainer;
 
 public class MatchServiceImpl implements MatchService{
@@ -29,11 +31,26 @@ public class MatchServiceImpl implements MatchService{
 			e.printStackTrace();
 		}
 	}
+	
+	@Override
+	public boolean updateMatchStatus(Map<String, Object> map) {
+		try {
+			int result = mapper.updateMatchStatus(map);
+			
+			return result > 0;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+			return false;
+		}
+	
+	}
 
 	@Override
-	public void deleteMatch(List<Long> list) throws Exception {
+	public void deleteMatch(Map<String, Object> map) throws Exception {
 		try {
-			mapper.deleteMatch(list);
+			mapper.deleteMatch(map);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -62,9 +79,15 @@ public class MatchServiceImpl implements MatchService{
 	}
 	
 	@Override
-	public List<MatchDTO> listMyMatch(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<MatchApplyDTO> listApplicant(Map<String, Object> map) {
+		List<MatchApplyDTO> list = null;
+		try {
+			list = mapper.listApplicant(map);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
 	}
 
 	@Override
@@ -121,17 +144,18 @@ public class MatchServiceImpl implements MatchService{
 	}
 
 	@Override
-	public Long getUserTeamCode(long member_code) {
-		try {
-			Long teamCode = mapper.getUserTeamCode(member_code);
-			if(teamCode==null) {
-				return 0L;
-			}
-		    return teamCode;
-		
-		} catch (Exception e) {
-			e.printStackTrace();
-			return 0L;
-		}
+	public List<TeamDTO> listUserTeams(long member_code) {
+	    List<TeamDTO> list = null;
+	    try {
+	        list = mapper.listUserTeams(member_code);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return list;
 	}
+
+	
+	
+	
+	
 }
