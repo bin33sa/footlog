@@ -3,6 +3,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
+
+
 <div class="modern-card p-4">
 
     <!-- 리스트 테이블 (테두리 강조) -->
@@ -10,66 +12,49 @@
         <table class="table align-middle table-hover mb-0">
             <thead class="table-light border-bottom">
                 <tr>
-                    <th style="width: 8%">번호</th>
-                    <th>구단명</th>
-                    <th style="width: 20%">지역</th>
-                    <th style="width: 15%">등급</th>
-                    <th style="width: 20%">관리</th>
+                    <th style="width: 12%">상태</th>
+                    <th style="width: 12%">분류</th>
+                    <th>제목</th>
+                    <th style="width: 15%">작성자</th>
+                    <th style="width: 12%">날짜</th>
                 </tr>
             </thead>
 
             <tbody>
-                <!-- 더미 데이터 -->
-                <tr>
-                    <td>1</td>
-                    <td class="fw-bold">Footlog FC</td>
-                    <td>서울</td>
-                    <td>
-                        <span class="badge bg-success">활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
-
-                <tr class="table-light">
-                    <td>2</td>
-                    <td class="fw-bold">Night Wolves</td>
-                    <td>경기</td>
-                    <td>
-                        <span class="badge bg-secondary">비활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>3</td>
-                    <td class="fw-bold">Red Tigers</td>
-                    <td>부산</td>
-                    <td>
-                        <span class="badge bg-success">활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
+               
+ 	            <c:set var="allAnswered" value="true" />
+                <c:forEach var="dto" items="${list}">
+                	<c:if test="${dto.status != 2}">
+		 	            <c:set var="allAnswered" value="false" />
+                	
+                                <tr onclick="location.href='${pageContext.request.contextPath}/qna/article?board_qna_code=${dto.board_qna_code}&page=${page}'">
+                                    <td>
+                                                <span class="badge bg-light text-muted badge-qna border">답변대기</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">
+                                            ${dto.category==1?'계정':(dto.category==2?'구장':'기타')}
+                                        </span>
+                                    </td>
+                                    <td class="text-start fw-bold">
+                                        <i class="bi bi-lock-fill text-muted me-1"></i> ${dto.title}
+                                    </td>
+                                    <td>${dto.member_name}</td>
+                                    <td class="text-muted small">${dto.created_at}</td>
+                                </tr>
+                     </c:if>
+                </c:forEach>
+                	
+                <c:if test="${allAnswered}">
+    				<tr>
+        				<td colspan="5" class="text-center py-5 text-muted fw-bold">
+				            ✅ 모든 문의가 답변 완료되었습니다.
+				        </td>
+				    </tr>
+				</c:if>
+				
+			
+                	
             </tbody>
         </table>
     </div>

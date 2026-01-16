@@ -64,7 +64,7 @@
 
                 <tr>
                     <td>3</td>
-                    <td class="fw-bold">Red Tigers</td>
+                    <td class="fw-bold">${stadium.size()}</td>
                     <td>부산</td>
                     <td>
                         <span class="badge bg-success">활성</span>

@@ -102,11 +102,11 @@
                     </a>
                 </div>
                 <div class="list-group shadow-sm rounded-4 overflow-hidden border-0 modern-card">
-                    <a href="${pageContext.request.contextPath}/member/mypage" class="list-group-item list-group-item-action py-3 fw-bold bg-light border-0">🚀 관리메뉴</a>
-                    <a href="${pageContext.request.contextPath}/member/mypage?menu=team" class="list-group-item list-group-item-action py-3 border-light">구단 관리</a>
-                    <a href="${pageContext.request.contextPath}/member/mypage?menu=stadium" class="list-group-item list-group-item-action py-3 border-light">구장 관리</a>
-                    <a href="${pageContext.request.contextPath}/member/mypage?menu=member" class="list-group-item list-group-item-action py-3 border-light">회원 관리</a>
-                    <a href="${pageContext.request.contextPath}/member/mypage?menu=faq" class="list-group-item list-group-item-action py-3 border-light">FAQ 수정</a>
+                    <a href="${pageContext.request.contextPath}/admin/mypage" class="list-group-item list-group-item-action py-3 fw-bold bg-light border-0">🚀 관리메뉴</a>
+                    <a href="${pageContext.request.contextPath}/admin/mypage?menu=team" class="list-group-item list-group-item-action py-3 border-light">구단 관리</a>
+                    <a href="${pageContext.request.contextPath}/admin/mypage?menu=stadium" class="list-group-item list-group-item-action py-3 border-light">구장 관리</a>
+                    <a href="${pageContext.request.contextPath}/admin/mypage?menu=member" class="list-group-item list-group-item-action py-3 border-light">회원 관리</a>
+                    <a href="${pageContext.request.contextPath}/admin/mypage?menu=faq" class="list-group-item list-group-item-action py-3 border-light">FAQ 수정</a>
                     <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action py-3 border-0 text-danger fw-bold">로그아웃</a>
                 </div>
             </div>
@@ -135,21 +135,21 @@
                     <div class="col-md-4">
                         <div class="modern-card p-3 h-100 text-center d-flex flex-column justify-content-center">
                             <span class="text-muted small fw-bold mb-1">전체 구단 수</span>
-                            <h3 class="fw-bold m-0">? <span class="fs-6 text-muted">개 구단</span></h3>
+                            <h3 class="fw-bold m-0">${team.size()} <span class="fs-6 text-muted">개 구단</span></h3>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="modern-card p-3 h-100 text-center d-flex flex-column justify-content-center">
                             <span class="text-muted small fw-bold mb-1">전체 구장 수</span>
-                            <h3 class="fw-bold m-0">? <span class="fs-6 text-muted">개 구장</span></h3>
+                            <h3 class="fw-bold m-0">${stadium.size()} <span class="fs-6 text-muted">개 구장</span></h3>
                         </div>
                     </div>
 
                     <div class="col-md-4">
                         <div class="modern-card p-3 h-100 text-center d-flex flex-column justify-content-center">
                             <span class="text-muted small fw-bold mb-1">전체 회원 수</span>
-                            <h3 class="fw-bold m-0">? <span class="fs-6 text-muted">명</span></h3>
+                            <h3 class="fw-bold m-0">${member.size()} <span class="fs-6 text-muted">명</span></h3>
                         </div>
                     </div>
                 </div>
