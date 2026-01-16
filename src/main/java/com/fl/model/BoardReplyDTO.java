@@ -1,18 +1,18 @@
 package com.fl.model;
 
 public class BoardReplyDTO {
-    private long comment_id;            // 댓글 코드 (PK)
-    private Integer parent_comment_id; // 부모 댓글 코드 (FK, 답글 기능용)
-    private long member_code;          // 회원 코드 (FK)
-    private long board_main_code;      // 게시판 코드 (FK) - recruit_id에서 변경
-    private String content;            // 댓글 내용
-    private String created_at;         // 작성일
+    private long comment_id;          
+    private Integer parent_comment_id; 
+    private long member_code;          
+    private long board_main_code;     
+    private String content;           
+    private String created_at;         
+    private Long gallery_code;
+    private String profile_image;
     
-    // 조인(Join) 및 UI 표시를 위한 추가 필드
-    private String member_name;        // 작성자 이름 (MEMBER 테이블과 조인)
-    private int answerCount;           // 해당 댓글에 달린 답글(대댓글) 개수
-    
-    // Getter 및 Setter
+    private String member_name;       
+    private int answerCount;           
+ 
     public long getComment_id() {
         return comment_id;
     }
@@ -61,4 +61,18 @@ public class BoardReplyDTO {
     public void setAnswerCount(int answerCount) {
         this.answerCount = answerCount;
     }
+	public Long getGallery_code() {
+		return gallery_code;
+	}
+	public void setGallery_code(Long gallery_code) {
+		this.gallery_code = gallery_code;
+	}
+	public String getProfile_image() {
+		return profile_image;
+	}
+	public void setProfile_image(String profile_image) {
+		this.profile_image = profile_image;
+	}
+    
+    
 }

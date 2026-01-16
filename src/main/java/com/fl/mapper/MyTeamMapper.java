@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.fl.model.BoardReplyDTO;
 import com.fl.model.FileDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
@@ -102,4 +103,14 @@ public interface MyTeamMapper {
 	public void updateGallery(GalleryDTO dto);
 	
 	public void deleteGallery(long gallery_code);
+	
+	public void insertGalleryFile(FileDTO dto); 
+
+    public void insertReply(BoardReplyDTO dto);
+    
+    public List<BoardReplyDTO> listReply(Map<String, Object> map);
+    
+    public int replyCount(Map<String, Object> map);
+    
+    public void deleteReply(Map<String, Object> map);
 }

@@ -9,11 +9,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
-    
     <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
     
     <style>
         /* 갤러리 카드 디자인 */
@@ -65,7 +63,7 @@
 
         .sidebar-title { font-size: 0.85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* [중요] MyUtil이 생성하는 .paginate 스타일 정의 */
+        /* 페이징 스타일 */
         .paginate {
             text-align: center;
             margin-top: 40px;
@@ -89,7 +87,6 @@
             color: #0d6efd;
             border-color: #dee2e6;
         }
-        /* 현재 페이지 (span 태그로 생성됨) */
         .paginate span {
             background-color: #0d6efd;
             color: #fff;
@@ -140,7 +137,7 @@
                     </div>
                     
                     <button type="button" class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" 
-                            onclick="location.href='${pageContext.request.contextPath}/myteam/galleryWrite?teamCode=${teamCode}';">
+                            onclick="location.href='${pageContext.request.contextPath}/myteam/gallery_write?teamCode=${teamCode}';">
                         <i class="bi bi-camera-fill me-1"></i> 사진 올리기
                     </button>
                 </div>
@@ -149,12 +146,12 @@
                     
                     <c:forEach var="dto" items="${list}">
                         <div class="col">
-                            <div class="gallery-card" onclick="location.href='${pageContext.request.contextPath}/myteam/galleryArticle?num=${dto.num}&page=${page}&teamCode=${teamCode}';">
+                            <div class="gallery-card" onclick="location.href='${pageContext.request.contextPath}/myteam/galleryArticle?gallery_code=${dto.gallery_code}&page=${page}&teamCode=${teamCode}';">
                                 
                                 <div class="gallery-img-box">
                                     <c:choose>
-                                        <c:when test="${not empty dto.saveFilename}">
-                                            <img src="${pageContext.request.contextPath}/uploads/gallery/${dto.saveFilename}" alt="${dto.subject}">
+                                        <c:when test="${not empty dto.title_image}">
+                                            <img src="${pageContext.request.contextPath}/uploads/gallery/${dto.title_image}" alt="${dto.title}">
                                         </c:when>
                                         <c:otherwise>
                                             <img src="${pageContext.request.contextPath}/resources/images/no_image.png" style="object-fit: contain; padding: 20px;">
@@ -162,24 +159,24 @@
                                     </c:choose>
                                     
                                     <div class="gallery-overlay text-white d-flex justify-content-between small">
-                                        <span><i class="bi bi-eye"></i> ${dto.hitCount}</span>
-                                        <span><i class="bi bi-chat-dots"></i> ${dto.replyCount}</span>
+                                        <span><i class="bi bi-eye"></i> ${dto.view_count}</span>
+                                        <span><i class="bi bi-chat-dots"></i> ${dto.reply_count}</span>
                                     </div>
                                 </div>
 
                                 <div class="p-3">
-                                    <h6 class="fw-bold text-dark text-truncate mb-1">${dto.subject}</h6>
+                                    <h6 class="fw-bold text-dark text-truncate mb-1">${dto.title}</h6>
                                     
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <div class="d-flex align-items-center">
                                             <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2 overflow-hidden" style="width: 24px; height: 24px;">
                                                 <img src="${pageContext.request.contextPath}/uploads/profile/${dto.profile_image}" 
                                                      style="width:100%; height:100%; object-fit:cover;"
-                                                     onerror="this.src='${pageContext.request.contextPath}/resources/images/default_profile.png'">
+                                                     onerror="this.src='${pageContext.request.contextPath}/dist/images/avatar.png'">
                                             </div>
-                                            <span class="text-muted small text-truncate" style="max-width: 80px;">${dto.userName}</span>
+                                            <span class="text-muted small text-truncate" style="max-width: 80px;">${dto.member_name}</span>
                                         </div>
-                                        <span class="text-muted small" style="font-size: 0.75rem;">${dto.created_date}</span>
+                                        <span class="text-muted small" style="font-size: 0.75rem;">${dto.created_at}</span>
                                     </div>
                                 </div>
                             </div>
@@ -211,8 +208,6 @@
     </footer>
     
     <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

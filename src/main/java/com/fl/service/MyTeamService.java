@@ -3,6 +3,7 @@ package com.fl.service;
 import java.util.List;
 import java.util.Map;
 
+import com.fl.model.BoardReplyDTO;
 import com.fl.model.JoinRequestDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.TeamBoardDTO;
@@ -107,4 +108,12 @@ public interface MyTeamService {
 	public void updateGallery(com.fl.model.GalleryDTO dto) throws Exception;
 	
 	public void deleteGallery(long gallery_code) throws Exception;
+	
+	public void insertReply(BoardReplyDTO dto) throws Exception;
+	
+	public List<BoardReplyDTO> listReply(Map<String, Object> map);
+	
+	public int replyCount(Map<String, Object> map);
+	
+	public void deleteReply(Map<String, Object> map) throws Exception;
 }

@@ -9,15 +9,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=1">
 
     <style>
-       
+       /* 필요한 경우 추가 스타일 작성 */
     </style>
 </head>
-	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+
 <body>
 
     <header>
@@ -34,10 +34,25 @@
                         <p class="sidebar-title">구단 관리</p>
                         <div class="list-group">
                             <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action">구단 프로필 수정</a>
-                            <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action">구단 정보 수정</a>
-                            <a href="${pageContext.request.contextPath}/myteam/squad" class="list-group-item list-group-item-action">스쿼드(선수) 관리</a>
-                            <a href="${pageContext.request.contextPath}/myteam/match" class="list-group-item list-group-item-action active-menu">매치 일정 / 투표</a>
-                            <a href="${pageContext.request.contextPath}/team/apply" class="list-group-item list-group-item-action">가입 신청 관리</a>
+                            
+                            <c:if test="${myRoleLevel >= 10}">
+                                <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action">구단 정보 수정</a>
+                            </c:if>
+
+                            <a href="${pageContext.request.contextPath}/myteam/squad?teamCode=${teamCode}" class="list-group-item list-group-item-action">
+                                <c:choose>
+                                    <c:when test="${myRoleLevel >= 10}">스쿼드(선수) 관리</c:when>
+                                    <c:otherwise>구단 스쿼드</c:otherwise>
+                                </c:choose>
+                            </a>
+                            
+                            <a href="${pageContext.request.contextPath}/myteam/manage/match?teamCode=${teamCode}" class="list-group-item list-group-item-action active-menu fw-bold bg-light text-primary">매치 관리</a>
+                            
+                            <c:if test="${myRoleLevel >= 10}">
+                                <a href="${pageContext.request.contextPath}/myteam/requestList?teamCode=${teamCode}" class="list-group-item list-group-item-action">
+                                    가입 신청 관리 
+                                </a>
+                            </c:if>
                         </div>
                     </div>
                 </div>
@@ -188,8 +203,7 @@
 	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
 	</footer>
 	
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
     
     <script>
         // 투표 버튼 클릭 시 스타일 변경 예시 스크립트

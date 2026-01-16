@@ -9,11 +9,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
-    
     <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
     
     <style>
         .modern-card { border: none; box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); border-radius: 0.35rem; }
@@ -144,9 +142,7 @@
 	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
 	</footer>
 	
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
     <script>
         function previewImage(input) {

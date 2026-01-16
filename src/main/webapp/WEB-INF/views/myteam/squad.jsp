@@ -9,11 +9,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
-    
     <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
     
     <style>
         /* 포지션별 배지 스타일 */
@@ -33,7 +31,7 @@
         .squad-tab-item.active { color: #0d6efd; border-bottom-color: #0d6efd; }
         .squad-tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid #dee2e6; }
         
-        /* [수정됨] 프로필 이미지 영역 스타일 */
+        /* 프로필 이미지 영역 스타일 */
         .profile-placeholder { 
             width: 80px; 
             height: 80px; 
@@ -43,11 +41,10 @@
             justify-content: center; 
             border-radius: 50%; 
             margin: 10px auto; 
-            overflow: hidden; /* 이미지가 원을 넘지 않게 자름 */
+            overflow: hidden; 
             border: 1px solid #dee2e6;
         }
         
-        /* [추가됨] 이미지 꽉 차게 설정 */
         .profile-img-fit {
             width: 100%;
             height: 100%;
@@ -425,8 +422,6 @@
    </footer>
    
    <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         function filterSquad(position, element) {

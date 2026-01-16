@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.mapper.MyTeamMapper;
+import com.fl.model.BoardReplyDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
 import com.fl.model.ScheduleDTO;
@@ -419,4 +420,45 @@ public class MyTeamServiceImpl implements MyTeamService {
 			throw e;
 		}
 	}
+	
+	@Override
+	public void insertReply(BoardReplyDTO dto) throws Exception {
+		try {
+			mapper.insertReply(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+
+	@Override
+	public List<BoardReplyDTO> listReply(Map<String, Object> map) {
+		try {
+			return mapper.listReply(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public int replyCount(Map<String, Object> map) {
+		try {
+			return mapper.replyCount(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0;
+		}
+	}
+
+	@Override
+	public void deleteReply(Map<String, Object> map) throws Exception {
+		try {
+			mapper.deleteReply(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
+	}
+	
 }

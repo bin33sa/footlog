@@ -288,80 +288,123 @@
 	
 	<insert id="insertGallery" parameterType="com.fl.model.GalleryDTO">
 		<selectKey keyProperty="gallery_code" resultType="Long" order="BEFORE">
-			SELECT gallery_seq.NEXTVAL FROM DUAL
+			SELECT team_gallery_seq.NEXTVAL FROM DUAL
 		</selectKey>
 	
-		INSERT INTO GALLERY(GALLERY_CODE, TEAM_CODE, MEMBER_CODE, TITLE, CONTENT, TITLE_IMAGE, VIEW_COUNT, CREATED_AT)
+		INSERT INTO team_gallery(gallery_code, team_code, member_code, title, content, title_image, view_count, created_at)
 		VALUES (#{gallery_code}, #{team_code}, #{member_code}, #{title}, #{content}, #{title_image, jdbcType=VARCHAR}, 0, SYSDATE)
 	</insert>
 
 	<select id="galleryDataCount" parameterType="map" resultType="Integer">
 		SELECT NVL(COUNT(*), 0) 
-		FROM GALLERY 
-		WHERE TEAM_CODE = #{team_code}
+		FROM team_gallery 
+		WHERE team_code = #{team_code}
 	</select>
 
 	<select id="listGallery" parameterType="map" resultType="com.fl.model.GalleryDTO">
 		SELECT 
-			g.GALLERY_CODE, 
-			g.TEAM_CODE, 
-			g.MEMBER_CODE, 
-			g.TITLE, 
-			g.TITLE_IMAGE, 
-			g.VIEW_COUNT,
-			TO_CHAR(g.CREATED_AT, 'YYYY-MM-DD') AS created_at,
-			m.MEMBER_NAME,       
-			tm.PROFILE_IMAGE,    
-			(SELECT COUNT(*) FROM COMMENT_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS reply_count,
-			(SELECT COUNT(*) FROM LIKE_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS like_count
+			g.gallery_code, 
+			g.team_code, 
+			g.member_code, 
+			g.title, 
+			g.title_image, 
+			g.view_count,
+			TO_CHAR(g.created_at, 'YYYY-MM-DD') AS created_at,
+			m.member_name,       
+			tm.profile_image,
+			/* 댓글수, 좋아요수 서브쿼리 */
+			(SELECT COUNT(*) FROM team_gallery_comment WHERE gallery_code = g.gallery_code) AS reply_count,
+			(SELECT COUNT(*) FROM team_gallery_like WHERE gallery_code = g.gallery_code) AS like_count
 
-		FROM GALLERY g
-		JOIN MEMBER m ON g.MEMBER_CODE = m.MEMBER_CODE
-		LEFT JOIN MEMBER_TEAM tm ON g.TEAM_CODE = tm.TEAM_CODE AND g.MEMBER_CODE = tm.MEMBER_CODE
+		FROM team_gallery g
+		JOIN member m ON g.member_code = m.member_code
+		LEFT JOIN member_team tm ON g.team_code = tm.team_code AND g.member_code = tm.member_code
 		
-		WHERE g.TEAM_CODE = #{team_code}
-		ORDER BY g.GALLERY_CODE DESC
+		WHERE g.team_code = #{team_code}
+		ORDER BY g.gallery_code DESC
 		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
 	</select>
 
 	<select id="readGallery" parameterType="Long" resultType="com.fl.model.GalleryDTO">
 		SELECT 
-			g.GALLERY_CODE, g.TEAM_CODE, g.MEMBER_CODE, 
-			g.TITLE, g.CONTENT, g.TITLE_IMAGE, g.VIEW_COUNT, 
-			TO_CHAR(g.CREATED_AT, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-			m.MEMBER_NAME, m.MEMBER_ID,
-			tm.PROFILE_IMAGE,
-			(SELECT COUNT(*) FROM COMMENT_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS reply_count,
-			(SELECT COUNT(*) FROM LIKE_GALLERY WHERE GALLERY_CODE = g.GALLERY_CODE) AS like_count
+			g.gallery_code, g.team_code, g.member_code, 
+			g.title, g.content, g.title_image, g.view_count, 
+			TO_CHAR(g.created_at, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+			m.member_name, m.member_id,
+			tm.profile_image,
+			(SELECT COUNT(*) FROM team_gallery_comment WHERE gallery_code = g.gallery_code) AS reply_count,
+			(SELECT COUNT(*) FROM team_gallery_like WHERE gallery_code = g.gallery_code) AS like_count
 			
-		FROM GALLERY g
-		JOIN MEMBER m ON g.MEMBER_CODE = m.MEMBER_CODE
-		LEFT JOIN MEMBER_TEAM tm ON g.TEAM_CODE = tm.TEAM_CODE AND g.MEMBER_CODE = tm.MEMBER_CODE
-		WHERE g.GALLERY_CODE = #{gallery_code}
-	</select>
-	
-	<select id="listGalleryFiles" parameterType="Long" resultType="com.fl.model.FileDTO">
-		SELECT FILE_ID, GALLERY_CODE, FILE_SERVER_NAME AS saveFilename
-		FROM FILE_GALLERY
-		WHERE GALLERY_CODE = #{gallery_code}
+		FROM team_gallery g
+		JOIN member m ON g.member_code = m.member_code
+		LEFT JOIN member_team tm ON g.team_code = tm.team_code AND g.member_code = tm.member_code
+		WHERE g.gallery_code = #{gallery_code}
 	</select>
 	
 	<update id="updateGalleryHitCount" parameterType="Long">
-		UPDATE GALLERY SET VIEW_COUNT = VIEW_COUNT + 1 WHERE GALLERY_CODE = #{gallery_code}
+		UPDATE team_gallery SET view_count = view_count + 1 WHERE gallery_code = #{gallery_code}
 	</update>
 
 	<update id="updateGallery" parameterType="com.fl.model.GalleryDTO">
-		UPDATE GALLERY
-		SET TITLE = #{title},
-			CONTENT = #{content}
+		UPDATE team_gallery
+		SET title = #{title},
+			content = #{content}
 			<if test="title_image != null and title_image != ''">
-				, TITLE_IMAGE = #{title_image}
+				, title_image = #{title_image}
 			</if>
-		WHERE GALLERY_CODE = #{gallery_code}
+		WHERE gallery_code = #{gallery_code}
 	</update>
 
 	<delete id="deleteGallery" parameterType="Long">
-		DELETE FROM GALLERY WHERE GALLERY_CODE = #{gallery_code}
+		DELETE FROM team_gallery WHERE gallery_code = #{gallery_code}
+	</delete>
+
+
+	<insert id="insertGalleryFile" parameterType="com.fl.model.FileDTO">
+		INSERT INTO team_gallery_file(file_code, gallery_code, file_server_name, file_origin_name)
+		VALUES (team_gallery_file_seq.NEXTVAL, #{gallery_code}, #{file_server_name}, #{file_name})
+	</insert>
+
+	<select id="listGalleryFiles" parameterType="Long" resultType="com.fl.model.FileDTO">
+		SELECT 
+			file_code AS file_id,
+			gallery_code,
+			file_server_name,
+			file_origin_name AS file_name
+		FROM team_gallery_file
+		WHERE gallery_code = #{gallery_code}
+	</select>
+
+
+	<insert id="insertReply" parameterType="com.fl.model.BoardReplyDTO">
+		INSERT INTO team_gallery_comment(comment_code, gallery_code, member_code, content, created_at)
+		VALUES (team_gallery_comment_seq.NEXTVAL, #{gallery_code}, #{member_code}, #{content}, SYSDATE)
+	</insert>
+
+	<select id="listReply" parameterType="map" resultType="com.fl.model.BoardReplyDTO">
+		SELECT 
+			c.comment_code AS comment_id,  
+			c.gallery_code,
+			c.member_code,
+			c.content,
+			TO_CHAR(c.created_at, 'YYYY-MM-DD HH24:MI') AS created_at,
+			m.member_name,
+			tm.profile_image               
+		FROM team_gallery_comment c
+		JOIN member m ON c.member_code = m.member_code
+		LEFT JOIN member_team tm ON m.member_code = tm.member_code AND tm.team_code = #{team_code}
+		WHERE c.gallery_code = #{gallery_code}
+		ORDER BY c.comment_code DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+
+	<select id="replyCount" parameterType="map" resultType="Integer">
+		SELECT NVL(COUNT(*), 0) FROM team_gallery_comment WHERE gallery_code = #{gallery_code}
+	</select>
+
+	<delete id="deleteReply" parameterType="map">
+		DELETE FROM team_gallery_comment 
+		WHERE comment_code = #{comment_id}
 	</delete>
 	
 </mapper>

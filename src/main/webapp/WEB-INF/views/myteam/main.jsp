@@ -8,13 +8,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
     
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
 
 </head>
-	<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+
 <body>
 
    <header>
@@ -29,20 +28,35 @@
                 
                 <div class="modern-card p-0 mb-4 bg-dark text-white overflow-hidden position-relative">
                     <div class="d-flex align-items-center justify-content-between p-4">
-                        <button class="btn btn-icon text-white-50 hover-white"><i class="bi bi-chevron-left fs-4"></i></button>
+                        
+                        <c:choose>
+                            <c:when test="${myTeamsCount > 1}">
+                                <button class="btn btn-icon text-white-50 hover-white" 
+                                        onclick="location.href='${pageContext.request.contextPath}/myteam/main?teamCode=${prevTeamCode}'"
+                                        title="이전 팀 보기">
+                                    <i class="bi bi-chevron-left fs-4"></i>
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <button class="btn btn-icon text-white-50" style="visibility: hidden; cursor: default;">
+                                    <i class="bi bi-chevron-left fs-4"></i>
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
+
                         <div class="d-flex align-items-center gap-3">
                             
                             <div class="bg-white rounded-circle d-flex align-items-center justify-content-center text-dark overflow-hidden" style="width: 50px; height: 50px;">
                                 
                                 <c:set var="defaultEmblem" value="${pageContext.request.contextPath}/dist/images/icon.jpg" />
 
-                                <c:choose>                         
+                                <c:choose>                          
                                     <c:when test="${not empty myTeam.emblem_image}">
                                         <img src="${pageContext.request.contextPath}/uploads/team/${myTeam.emblem_image}" 
                                              alt="Team Emblem" 
                                              style="width: 100%; height: 100%; object-fit: cover;"
                                              onerror="this.src='${defaultEmblem}'">
-                                    </c:when>                             
+                                    </c:when>
                                     <c:otherwise>
                                         <img src="${defaultEmblem}" 
                                              alt="Default Team"
@@ -56,7 +70,22 @@
                                 <h4 class="fw-bold mb-0">${myTeamName}</h4>
                             </div>
                         </div>
-                        <button class="btn btn-icon text-white-50 hover-white"><i class="bi bi-chevron-right fs-4"></i></button>
+
+                        <c:choose>
+                            <c:when test="${myTeamsCount > 1}">
+                                <button class="btn btn-icon text-white-50 hover-white" 
+                                        onclick="location.href='${pageContext.request.contextPath}/myteam/main?teamCode=${nextTeamCode}'"
+                                        title="다음 팀 보기">
+                                    <i class="bi bi-chevron-right fs-4"></i>
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <button class="btn btn-icon text-white-50" style="visibility: hidden; cursor: default;">
+                                    <i class="bi bi-chevron-right fs-4"></i>
+                                </button>
+                            </c:otherwise>
+                        </c:choose>
+
                     </div>
                 </div>
 
@@ -270,9 +299,7 @@
 	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
 	</footer>
 	
-	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
     <script>
         const track = document.getElementById('matchTrack');

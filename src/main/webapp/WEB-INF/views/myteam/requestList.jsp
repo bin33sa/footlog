@@ -8,11 +8,9 @@
     <meta charset="UTF-8">
     <title>구단 가입 신청 현황 | Footlog</title>
     
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
-    
     <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
+    
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
     
     <style>
         /* 테이블 스타일 */
@@ -56,7 +54,7 @@
             margin-bottom: 30px;
         }
 
-        /* [추가] 사이드바 스타일 */
+        /* 사이드바 스타일 */
         .sidebar-title { font-size: 0.85rem; font-weight: 700; color: #6c757d; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
@@ -75,16 +73,28 @@
                         <p class="sidebar-title mb-3">구단 관리</p>
                         <div class="list-group">
                             <a href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 프로필 수정</a>
-                            <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 정보 수정</a>
-                            <a href="${pageContext.request.contextPath}/myteam/squad" class="list-group-item list-group-item-action border-0">스쿼드(선수) 관리</a>
-                            <a href="${pageContext.request.contextPath}/myteam/match" class="list-group-item list-group-item-action border-0">매치 관리</a>
                             
-                            <a href="${pageContext.request.contextPath}/myteam/requestList" class="list-group-item list-group-item-action border-0 active fw-bold bg-light text-primary">
-                                가입 신청 관리 
-                                <c:if test="${requestCount > 0}">
-                                    <span class="badge bg-danger rounded-pill ms-1">${requestCount}</span>
-                                </c:if>
+                            <c:if test="${myRoleLevel >= 10}">
+                                <a href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">구단 정보 수정</a>
+                            </c:if>
+
+                            <a href="${pageContext.request.contextPath}/myteam/squad?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">
+                                <c:choose>
+                                    <c:when test="${myRoleLevel >= 10}">스쿼드(선수) 관리</c:when>
+                                    <c:otherwise>구단 스쿼드</c:otherwise>
+                                </c:choose>
                             </a>
+                            
+                            <c:if test="${myRoleLevel >= 10}">
+                                <a href="${pageContext.request.contextPath}/myteam/manage/match?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">매치 관리</a>
+                                
+                                <a href="${pageContext.request.contextPath}/myteam/requestList?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0 active fw-bold bg-light text-primary">
+                                    가입 신청 관리 
+                                    <c:if test="${requestCount > 0}">
+                                        <span class="badge bg-danger rounded-pill ms-1">${requestCount}</span>
+                                    </c:if>
+                                </a>
+                            </c:if>
                         </div>
                     </div>
                 </div>
