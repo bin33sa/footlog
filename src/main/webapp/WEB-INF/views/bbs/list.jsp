@@ -10,6 +10,31 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     
     <style>
+    
+    .gallery-img-wrapper {
+    position: relative;
+    width: 100%;
+    /* padding-top: 75%는 4:3, 66.66%는 3:2 비율입니다. */
+    padding-top: 66.66% !important; 
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+/* 카드 내 제목 줄바꿈 방지 및 폰트 크기 조절 */
+.gallery-card .card-title {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.9rem !important;
+}
+
+/* 호버 시 이미지가 컨테이너를 벗어나지 않도록 고정 */
+.gallery-card:hover .gallery-img-wrapper img {
+    transform: scale(1.08);
+    transition: transform 0.4s ease;
+}
+
         .board-table thead th { background-color: #111; color: #fff; border: none; padding: 15px; font-weight: 700; }
         .board-table tbody tr { transition: 0.2s; cursor: pointer; }
         .board-table tbody tr:hover { background-color: rgba(212, 246, 63, 0.1); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
@@ -90,32 +115,33 @@
                 <c:choose>
                     <%-- [갤러리 게시판 디자인] --%>
                     <c:when test="${category == 4}">
-                        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-                            <c:forEach var="dto" items="${list}">
-                                <div class="col">
-                                    <div class="card gallery-card shadow-sm h-100" onclick="location.href='${pageContext.request.contextPath}/bbs/article?board_main_code=${dto.board_main_code}&page=${page}&category=${category}'">
-                                        <div class="gallery-img-wrapper">
-                                            <c:choose>
-                                                <c:when test="${not empty dto.imageFilename}">
-                                                    <img src="${pageContext.request.contextPath}/uploads/gallery/${dto.imageFilename}">
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <img src="${pageContext.request.contextPath}/dist/images/no-image.png">
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </div>
-                                        <div class="card-body">
-                                            <h5 class="card-title fw-bold text-truncate mb-2">${dto.title}</h5>
-                                            <div class="d-flex justify-content-between align-items-center small text-secondary">
-                                                <span>${dto.member_name}</span>
-                                                <span>${dto.created_at}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:forEach>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 row-cols-lg-5 g-3">
+        <c:forEach var="dto" items="${list}">
+            <div class="col">
+                <div class="card gallery-card shadow-sm h-100" 
+                     onclick="location.href='${pageContext.request.contextPath}/bbs/article?board_main_code=${dto.board_main_code}&page=${page}&category=${category}'">
+                    
+                    <div class="gallery-img-wrapper" style="padding-top: 66.66%;"> <c:choose>
+                            <c:when test="${not empty dto.imageFilename}">
+                                <img src="${pageContext.request.contextPath}/uploads/gallery/${dto.imageFilename}" alt="갤러리 이미지">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${pageContext.request.contextPath}/dist/images/no-image.png" alt="이미지 없음">
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                    
+                    <div class="card-body p-3"> <h6 class="card-title fw-bold text-truncate mb-2" style="font-size: 0.95rem;">${dto.title}</h6>
+                        <div class="d-flex justify-content-between align-items-center small text-secondary" style="font-size: 0.8rem;">
+                            <span>${dto.member_name}</span>
+                            <span>${dto.created_at}</span>
                         </div>
-                    </c:when>
+                    </div>
+                </div>
+            </div>
+        </c:forEach>
+    </div>
+</c:when>
 
                     <%-- [일반 게시판 디자인] --%>
                     <c:otherwise>

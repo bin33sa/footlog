@@ -225,14 +225,21 @@ public class BbsController {
         long board_main_code = Long.parseLong(req.getParameter("board_main_code"));
 
         try {
-            // category를 함께 넘겨서 해당 테이블(gallery 또는 board_main)에서 데이터를 가져와야 함
-            BoardDTO dto = service.findById(board_main_code);
+            // 1. MyBatis 전달용 Map 생성
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_main_code", board_main_code);
+            map.put("category", Integer.parseInt(category)); // category 정보를 반드시 포함
+       
+            // 2. 서비스 호출 시 Map 전달 (수정된 부분)
+            // 이제 파라미터 타입 불일치 에러가 사라집니다.
+            BoardDTO dto = service.findById(map);
 
             if (dto == null || dto.getMember_code() != info.getMember_code()) {
                 return new ModelAndView("redirect:/bbs/list?page=" + page + "&category=" + category);
             }
 
-            ModelAndView mav = new ModelAndView("bbs/write");
+            // 갤러리/일반글 모두 'write.jsp'를 공유하므로 경로는 유지
+            ModelAndView mav = new ModelAndView("bbs/write"); 
             mav.addObject("dto", dto);
             mav.addObject("page", page);
             mav.addObject("category", category);
@@ -293,13 +300,19 @@ public class BbsController {
         ModelAndView mav = new ModelAndView("bbs/article");
 
         try {
+            // 파라미터 받기
             long board_main_code = Long.parseLong(req.getParameter("board_main_code"));
             String page = req.getParameter("page");
-            String category = req.getParameter("category");
+            int category = Integer.parseInt(req.getParameter("category")); // int로 변환
 
-            // ServiceImpl 내부에서 updateHitCount 호출됨
-            service.updateHitCount(board_main_code);
-            BoardDTO dto = service.findById(board_main_code);
+            // 핵심: MyBatis 전달용 Map 생성
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_main_code", board_main_code);
+            map.put("category", category); // 이 값이 있어야 갤러리/일반 게시판 분기가 작동함
+
+            // 이제 에러 없이 실행될 것입니다.
+            service.updateHitCount(map); 
+            BoardDTO dto = service.findById(map);
 
             if (dto == null) {
                 return new ModelAndView("redirect:/bbs/list?page=" + page + "&category=" + category);

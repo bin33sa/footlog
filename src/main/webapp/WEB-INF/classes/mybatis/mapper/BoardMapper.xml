@@ -94,23 +94,30 @@
     <choose>
         <when test="category == 4">
             SELECT 
-                g.gallery_code AS board_main_code, g.member_code, g.title, g.content, 
-                g.created_at, 4 AS category, g.view_count, m.member_name,
-                f.file_server_name AS imageFilename
-            FROM gallery g
+                g.gallery_code AS board_main_code, 
+                g.member_code, 
+                g.title, 
+                g.content, 
+                g.created_at, 
+                4 AS category, 
+                g.view_count, 
+                m.member_name,
+                g.title_image AS imageFilename  FROM gallery g
             JOIN member m ON g.member_code = m.member_code
-            LEFT OUTER JOIN (
-                SELECT gallery_code, MIN(file_server_name) AS file_server_name
-                FROM file_gallery
-                GROUP BY gallery_code
-            ) f ON g.gallery_code = f.gallery_code
             WHERE g.gallery_code = #{board_main_code}
         </when>
 
         <otherwise>
             SELECT 
-                b.board_main_code, b.member_code, b.title, b.content, 
-                b.created_at, b.category, b.view_count, b.video_url, m.member_name
+                b.board_main_code, 
+                b.member_code, 
+                b.title, 
+                b.content, 
+                b.created_at, 
+                b.category, 
+                b.view_count, 
+                b.video_url, 
+                m.member_name
             FROM board_main b
             JOIN member m ON b.member_code = m.member_code
             WHERE b.board_main_code = #{board_main_code}

@@ -47,15 +47,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public BoardDTO findById(long board_main_code) {
-        BoardDTO dto = null;
-        try {
-            getMapper().updateHitCount(board_main_code);
-            dto = getMapper().findById(board_main_code);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return dto;
+    public BoardDTO findById(Map<String, Object> map) throws Exception {
+        // return mapper.findById(map); (X) -> 아래로 수정
+        return getMapper().findById(map); // (O)
     }
 
     @Override
@@ -81,13 +75,9 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public void updateHitCount(long board_main_code) throws Exception {
-        try {
-            getMapper().updateHitCount(board_main_code);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+    public void updateHitCount(Map<String, Object> map) throws Exception {
+        // Mapper.updateHitCount(map); (X) -> 아래로 수정
+        getMapper().updateHitCount(map); // (O)
     }
 
     // --- 댓글 관련 구현 ---

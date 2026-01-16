@@ -13,13 +13,13 @@ public interface BoardService {
     public void deleteBoard(Map<String, Object> map) throws Exception;
     public void insertGallery(BoardDTO dto) throws Exception;
     // board_main_code를 사용하여 상세 정보 조회
-    public BoardDTO findById(long board_main_code);
+    public BoardDTO findById(Map<String, Object> map) throws Exception;
     // 메인 게시판 리스트 조회 (카테고리 필터링 포함 가능)
     public List<BoardDTO> listBoard(Map<String, Object> map);
     public int dataCount(Map<String, Object> map);
     
     // 조회수 증가 로직
-    public void updateHitCount(long board_main_code) throws Exception;
+    public void updateHitCount(Map<String, Object> map) throws Exception;
     
     // 2. 댓글 관련 비즈니스 로직
     public void insertReply(BoardReplyDTO dto) throws Exception;

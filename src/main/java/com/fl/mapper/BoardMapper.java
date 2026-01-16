@@ -16,8 +16,8 @@ public interface BoardMapper {
     public void insertBoard(BoardDTO dto) throws SQLException;
     public void updateBoard(BoardDTO dto) throws SQLException;
     public void deleteBoard(Map<String, Object> map) throws SQLException;
-    public void updateHitCount(long board_main_code) throws SQLException;
-    public BoardDTO findById(long board_main_code);
+    public void updateHitCount(Map<String, Object> map) throws SQLException;;
+    public BoardDTO findById(Map<String, Object> map);
     
     public List<BoardDTO> listBoard(Map<String, Object> map);
     public List<BoardDTO> listTeam(Map<String, Object> map);    

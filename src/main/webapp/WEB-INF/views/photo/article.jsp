@@ -17,7 +17,7 @@
 	   <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
 	</header>
 
-    <div class="container mt-5 mb-5" style="max-width: 900px;">
+    <div class="container mt-5 mb-5" style="max-width: 500px;">
         
         <div class="modern-card p-5 mb-4 shadow-sm">
             
@@ -36,7 +36,7 @@
             </div>
 
             <div class="text-center mb-5 bg-light rounded-4 p-2">
-                <img src="https://via.placeholder.com/800x600/111/D4F63F?text=Best+Uniform+Shot" class="img-fluid rounded-3 shadow-sm" alt="본문 이미지">
+                <img src="https://via.placeholder.com/800x600/111/D4F63F?text=Best+Uniform+Shot" class="gallery-main-img" alt="본문 이미지">
             </div>
 
             <div class="content-body mb-5" style="font-size: 1.05rem; line-height: 1.8;">
