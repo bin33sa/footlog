@@ -21,6 +21,7 @@ public interface MatchMapper {
 	public List<MatchApplyDTO> listApplicant(Map<String, Object> map);
 	public MatchDTO findById(long num);
 	public List<TeamDTO> listUserTeams(long member_code);
+	public int getUserTeamRole(Map<String, Object> map);
 	public MatchDTO findByPrev(Map<String, Object> map);
 	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws SQLException;
@@ -30,5 +31,7 @@ public interface MatchMapper {
 	public List<MatchDTO> listNoticeFile(long num);
 	public MatchDTO findByFileId(long fileNum);
 	
-	
+	public void insertMatchApply(MatchApplyDTO dto) throws SQLException;
+	public void updateMatchApply(MatchApplyDTO dto) throws Exception;
+	public void deleteMatchApply(MatchApplyDTO dto) throws Exception;
 }

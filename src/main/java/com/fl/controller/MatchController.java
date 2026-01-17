@@ -117,8 +117,8 @@ public class MatchController {
 		String page = req.getParameter("page");
 		String query = "page="+page;
 		
-		//HttpSession session = req.getSession();
-		//SessionInfo info = (SessionInfo)session.getAttribute("member");
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
 		
 		try {
 			long match_code = Long.parseLong(req.getParameter("match_code"));
@@ -156,19 +156,25 @@ public class MatchController {
 			
 			ModelAndView mav = new ModelAndView("match/article");
 			
-			//map.put("member_code",info.getMember_id());
 			
-			//if(info != null) {
-            //    map.put("member_code", info.getMember_id());
-                // 필요하다면 mav에 로그인 정보 추가
-            //}
+			map.put("member_code",info.getMember_id());
+			int myTeamRole = 0;
+			
+			if(info != null) {
+				Map<String, Object> roleMap = new HashMap<String, Object>();
+				roleMap.put("member_code", info.getMember_id());
+				roleMap.put("team_code", dto.getHome_code());
+				
+				myTeamRole = service.getUserTeamRole(roleMap);
+            }
 			
 			mav.addObject("dto", dto);
 			mav.addObject("page", page);
 			mav.addObject("query", query);
 			mav.addObject("prevDto", prevDto);
 			mav.addObject("nextDto", nextDto);
-			mav.addObject("applicant", applicantList);
+			mav.addObject("applicantList", applicantList);
+			mav.addObject("myTeamRole", myTeamRole);
 			
 			return mav;
 			
@@ -204,6 +210,7 @@ public class MatchController {
 		return mav;
 	}
 	
+	@ResponseBody
 	@PostMapping("write")
 	public ModelAndView writeSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		HttpSession session = req.getSession();
@@ -339,6 +346,30 @@ public class MatchController {
 		}
 		
 		return new ModelAndView("redirect:/match/list?page="+page);
+	}
+	
+	@ResponseBody
+	@PostMapping("insertApply")
+	public void insertApply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		try {
+			MatchApplyDTO dto = new MatchApplyDTO();
+			
+			long match_code = Long.parseLong(req.getParameter("match_code"));
+			long team_code = Long.parseLong(req.getParameter("team_code"));
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("match_code", match_code);
+			map.put("team_code", team_code);
+			map.put("member_code", info.getMember_code());
+			
+			service.insertMatchApply(dto);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@ResponseBody

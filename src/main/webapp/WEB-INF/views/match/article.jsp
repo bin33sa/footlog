@@ -128,7 +128,7 @@
 
 							<c:if test="${sessionScope.member.member_code != dto.member_code}">
 								<button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm hover-scale"
-									onclick="alert('신청이 완료되었습니다!')"> 매치 신청하기 <i class="bi bi-check-lg ms-1"></i>
+									onclick="apply()"> 매치 신청하기 <i class="bi bi-check-lg ms-1"></i>
 								</button>
 							</c:if>
 						</div>
@@ -211,16 +211,36 @@
 		}
 	</script>
 	
-	<c:if test="${sessionScope.member.member_code == dto.member_code || sessionScope.member.role_level>=1 }">
-		<script type="text/javascript">
-			function deleteOk(){
-				if(confirm('매치 게시글을 삭제하시겠습니까?')){
-					let params = 'match_code=${dto.match_code}&${query}';
-					let url = '${pageContext.request.contextPath}/match/delete?'+params;
-					location.href=url;
+	<c:choose>
+		<c:when test="${sessionScope.member.member_code == dto.member_code || sessionScope.member_team.role_level>=10 }">
+			<script type="text/javascript">
+				function deleteOk(){
+					if(confirm('매치 게시글을 삭제하시겠습니까?')){
+						let params = 'match_code=${dto.match_code}&${query}';
+						let url = '${pageContext.request.contextPath}/match/delete?'+params;
+						location.href=url;
+					}
 				}
-			}
-		</script>
-	</c:if>
+			</script>
+		</c:when>
+		<c:otherwise>
+			<script type="text/javascript">
+				function apply(){
+					if("${sessionScope.member}"==""){
+						alert('로그인이 필요합니다.');
+						location.href="${pageContext.request.contextPath}/member/login";
+						return;
+					}
+					if(!confirm('매치를 신청하시겠습니까?')){
+						return;
+					}
+					if(!my)
+					let params = 'match_code=${dto.match_code}&${query}';
+					let url = '${pageContext.request.contextPath}/match/'
+				}
+			</script>
+		</c:otherwise>
+	</c:choose>
+	
 </body>
 </html>

@@ -16,7 +16,7 @@
                    OR INSTR(ht.team_name, #{kwd}) &gt; 0 
                    OR INSTR(stadium_name, #{kwd}) &gt; 0 )
          </if>
-</sql>
+	</sql>
 	
 	<!-- 글 등록 -->
 	<insert id="insertMatch" parameterType="com.fl.model.MatchDTO">
@@ -28,15 +28,26 @@
 	      0,#{matchType},#{gender},#{fee},#{member_code},#{matchLevel},#{stadiumCode})
 	</insert>
 	
+	<!-- 매치신청 등록 -->
+	<insert id="insertMatchApply" parameterType="matchApplyDTO">
+		INSERT INTO match_apply(apply_code,match_code,team_code,apply_date,status)
+		VALUES (seq.match_apply.NEXTVAL, #{match_code},#{team_code},SYSDATE,'신청중')
+	</insert>
+	
+	<!-- 매치신청 상태 변경 -->
+	<update id="" parameterType="matchApplyDTO" >
+	
+	</update>
+	
 	<!-- 글 수정 -->
-	<update id="updateMatch">
+	<update id="updateMatch" parameterType="matchDTO" >
 		UPDATE match_post SET title=#{title}, content=#{content}, match_date=TO_DATE(#{match_date}, 'YYYY-MM-DD"T"HH24:MI'), status=#{status}, 
 		 		matchType=#{matchType}, gender=#{gender},fee=#{fee}, matchLevel=#{matchLevel}, stadium_code=#{stadium_code}, home_code=#{home_code}
 		WHERE match_code=#{match_code}
 	</update>
 	
 	<!-- 매치 성사되었을 때 상태 변경 -->
-	<update id="updateMatchStatus">
+	<update id="updateMatchStatus" parameterType="matchDTO">
 		UPDATE match_post SET status=#{status}, away_code=#{away_code}, 
 		WHERE match_code=#{match_code}
 	</update>
@@ -88,6 +99,16 @@
     ORDER BY m.match_date
     OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 </select>
+
+	<!-- 매치 신청 리스트 -->
+	<select id="listApplicant" parameterType="map" resultType="com.fl.model.matchApplyDTO">
+		SELECT apply_code, a.match_code, a.team_code, TO_CHAR(a.apply_date,'YYYY-MM-DD HH24:MI') as apply_date, status,
+		 		t.team_name, t.team_level
+		FROM match_apply a
+		JOIN team t ON t.team_code = a.team_code
+		WHERE a.match_code = #{match_code}
+		ORDER BY a.apply_code 
+	</select>
 	
 	<!-- 코드로 정보갖고오기 -->
 	<select id="findById" parameterType="Long" resultType="com.fl.model.MatchDTO">
@@ -116,6 +137,11 @@
 	    WHERE mt.member_code = #{member_code}
     </select>
     
+    <select id="getUserTeamRole" parameterType="Integer" resultType="map">
+    	SELECT role_level
+    	FROM member_team
+    	WHERE member_code = #{member_code} AND team_code=#{team_code}
+    </select>
     
 	
 </mapper>

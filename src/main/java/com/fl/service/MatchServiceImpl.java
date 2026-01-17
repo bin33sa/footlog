@@ -154,8 +154,46 @@ public class MatchServiceImpl implements MatchService{
 	    return list;
 	}
 
-	
-	
-	
+	@Override
+	public int getUserTeamRole(Map<String, Object> map) {
+		int role = 0;
+		try {
+			Integer result = mapper.getUserTeamRole(map);
+			if(result != null) {
+				role=result;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return role;
+	}
+
+	@Override
+	public void insertMatchApply(MatchApplyDTO dto) throws Exception {
+		try {
+			mapper.insertMatchApply(dto);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void updateMatchApply(MatchApplyDTO dto) throws Exception {
+		try {
+			mapper.updateMatchApply(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void deleteMatchApply(MatchApplyDTO dto) throws Exception {
+		try {
+			mapper.deleteMatchApply(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
 }
