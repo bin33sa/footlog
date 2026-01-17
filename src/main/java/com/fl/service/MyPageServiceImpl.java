@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fl.mapper.MyPageMapper;
 import com.fl.model.MatchDTO;
+import com.fl.model.MatchHistoryDTO;
 import com.fl.model.MemberDTO;
 import com.fl.mybatis.support.MapperContainer;
 
@@ -31,5 +32,27 @@ public class MyPageServiceImpl implements MyPageService {
 	    }
 	    return dto;
 	}
+
+	@Override
+	public List<MatchHistoryDTO> listMatchApply(long member_code) {
+		List<MatchHistoryDTO> list = null;
+        try {
+            list = mapper.listMatchApply(member_code);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;	
+   }
+
+	@Override
+	public List<MatchHistoryDTO> listMercenaryApply(long member_code) {
+		List<MatchHistoryDTO> list = null;
+        try {
+            list = mapper.listMercenaryApply(member_code);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 	
 }

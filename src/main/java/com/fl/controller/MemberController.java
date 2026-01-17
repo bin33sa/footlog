@@ -3,11 +3,14 @@ package com.fl.controller;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.fl.model.MatchDTO;
+import com.fl.model.MatchHistoryDTO;
 import com.fl.model.MemberDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.TeamDTO;
@@ -198,7 +201,7 @@ public class MemberController {
 	}
 
 	
-	// 회원가입 폼
+	// 회원가입 
 	@GetMapping("signup")
 	public ModelAndView signupForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("member/signup");
@@ -305,14 +308,64 @@ public class MemberController {
 		
 		try {
 			if(info != null) {
+				// 기본 정보 조회
 				MemberDTO myInfo = myPageService.readMember(info.getMember_code());
 				List<MatchDTO> matchList = myPageService.listMyMatch(info.getMember_code());
-				
 				List<TeamDTO> myTeams = teamService.readMyTeam(info.getMember_code());
 				
+				// 대시보드 통계 계산 로직 추가
+				Map<String, Object> stats = new HashMap<>();
+				int monthMatchCount = 0;
+				MatchDTO nextMatch = null;
+				long minDaysDiff = Long.MAX_VALUE;
+				
+				LocalDate today = LocalDate.now();
+				
+				if(matchList != null) {
+					for(MatchDTO m : matchList) {
+						// 날짜 처리 (String -> LocalDate 변환, 예외처리 포함)
+						try {
+							// DB에서 가져온 날짜 문자열 (예: "2026-01-23 16:24")
+							String dateStr = m.getMatch_date(); 
+							if(dateStr.length() > 10) dateStr = dateStr.substring(0, 10); // 시간 자르고 날짜만
+							
+							LocalDate matchDate = LocalDate.parse(dateStr);
+							
+							// A. 이번 달 경기 수 카운트
+							if(matchDate.getYear() == today.getYear() && matchDate.getMonth() == today.getMonth()) {
+								monthMatchCount++;
+							}
+							
+							// B. 다가오는 가장 가까운 경기 (Next Match) 찾기
+							// 경기가 오늘 이후이고, 가장 가까운 날짜인지 확인
+							if( (matchDate.isEqual(today) || matchDate.isAfter(today)) && !m.getStatus().equals("완료")) {
+								long daysDiff = ChronoUnit.DAYS.between(today, matchDate);
+								if(daysDiff < minDaysDiff) {
+									minDaysDiff = daysDiff;
+									nextMatch = m;
+								}
+							}
+						} catch (Exception e) {
+							// 날짜 파싱 에러나면 무시하고 다음 거 진행
+						}
+					}
+				}
+				
+				// 통계 맵에 담기
+				stats.put("month_match_count", monthMatchCount);
+				stats.put("total_point", 0); // 공격 포인트는 아직 DB 컬럼 없으면 0으로 처리
+				
+				if(nextMatch != null) {
+					stats.put("next_match_dday", minDaysDiff == 0 ? "Day" : minDaysDiff); // D-Day
+					stats.put("next_match_opponent", nextMatch.getAway_team_name()); // 상대팀
+					stats.put("next_match_date", nextMatch.getMatch_date());
+				}
+
+				// 3. JSP로 데이터 전송
 				mav.addObject("dto", myInfo);
 				mav.addObject("matchList", matchList);
 				mav.addObject("myTeams", myTeams);
+				mav.addObject("stats", stats); // 통계 데이터 추가
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -330,9 +383,27 @@ public class MemberController {
 	// 매치/용병 신청내역 가기 
 	@GetMapping("history")
 	public ModelAndView match_history(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		return new ModelAndView("/member/history");
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+	    
+	    if(info == null) return new ModelAndView("redirect:/member/login");
+	    
+	    ModelAndView mav = new ModelAndView("member/match_history");
+	    
+	    try {
+	        // 하나의 DTO 클래스로 두 가지 리스트 모두 처리!
+	        List<MatchHistoryDTO> matchApplyList = myPageService.listMatchApply(info.getMember_code());
+	        List<MatchHistoryDTO> mercenaryApplyList = myPageService.listMercenaryApply(info.getMember_code());
+	        
+	        mav.addObject("matchApplyList", matchApplyList);
+	        mav.addObject("mercenaryApplyList", mercenaryApplyList);
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return mav;
 	}
-	
 
 	@GetMapping("updateInfo")
 	public ModelAndView updateInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
