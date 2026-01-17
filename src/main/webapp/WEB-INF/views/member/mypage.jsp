@@ -9,6 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     
     <style>
@@ -39,7 +42,6 @@
             background-color: #f8f9fa;
         }
 
-        /* 수정된 버튼 스타일: 주변 레이아웃을 깨트리지 않음 */
         .btn-mypage {
             background-color: #212529 !important;
             color: #fff !important;
@@ -52,7 +54,7 @@
 
         .btn-mypage:hover {
             background-color: #000 !important;
-            transform: scale(1.03); /* 적당한 확대 */
+            transform: scale(1.03); 
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             color: #fff !important;
         }
@@ -102,7 +104,9 @@
                 </div>
                 <div class="list-group shadow-sm rounded-4 overflow-hidden border-0 modern-card">
                     <a href="#" class="list-group-item list-group-item-action py-3 fw-bold bg-light border-0">🚀 대시보드</a>
-                    <a href="${pageContext.request.contextPath}/myteam/main" class="list-group-item list-group-item-action py-3 border-light">내 구단 이동</a>
+                    
+                    <a href="#" class="list-group-item list-group-item-action py-3 border-light" onclick="openMyPageTeamModal(event)">내 구단 이동</a>
+                    
                     <a href="${pageContext.request.contextPath}/member/history" class="list-group-item list-group-item-action py-3 border-light">매치/용병 신청 내역</a>
                     <a href="${pageContext.request.contextPath}/calendar/match_calendar" class="list-group-item list-group-item-action py-3 border-light">매치 캘린더</a>
                     <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action py-3 border-0 text-danger fw-bold">로그아웃</a>
@@ -193,21 +197,98 @@
                     </c:choose>
                 </div>
             </div> 
-            </div> </div> 
+        </div> 
+    </div> 
             
     <footer>
        <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
     </footer>
 
     <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script type="text/javascript">
-    
-    
-    
+    <div class="modal fade" id="myPageTeamModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h1 class="modal-title fs-5 fw-bold">내 구단 선택</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="myPageTeamListArea">
+                    <div class="text-center text-secondary py-3">
+                        <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
+                        <p class="small mb-0">불러오는 중...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openMyPageTeamModal(e) {
+        e.preventDefault();
+        
+        const modalEl = document.getElementById('myPageTeamModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+        
+        $('#myPageTeamListArea').html(`
+            <div class="text-center text-secondary py-4">
+                <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
+                <p class="small mb-0">구단 목록을 불러오는 중...</p>
+            </div>
+        `);
+        
+        // 헤더와 동일한 JSON 경로 호출
+        $.ajax({
+            url: '${pageContext.request.contextPath}/team/myList',
+            type: 'get',
+            dataType: 'json',
+            success: function(list) {
+                let html = '';
+
+                if (list && list.length > 0) {
+                    html += '<div class="list-group list-group-flush">';
+                    
+                    $.each(list, function(index, team) {
+                        let imgSrc = '${pageContext.request.contextPath}/dist/images/emblem.png';
+                        if(team.emblem_image) {
+                            imgSrc = '${pageContext.request.contextPath}/uploads/team/' + team.emblem_image;
+                        }
+
+                        html += '<a href="${pageContext.request.contextPath}/myteam/main?teamCode=' + team.team_code + '"';
+                        html += '   class="list-group-item list-group-item-action d-flex align-items-center py-3 px-2 border-0 rounded-3 mb-1"';
+                        html += '   style="transition: background 0.2s;">';
+                        html += '   <div class="rounded-circle border me-3 overflow-hidden bg-light d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; min-width: 48px;">';
+                        html += '       <img src="' + imgSrc + '" class="w-100 h-100 object-fit-cover" onerror="this.src=\'${pageContext.request.contextPath}/dist/images/emblem.png\'">';
+                        html += '   </div>';
+                        html += '   <div>';
+                        html += '       <div class="fw-bold text-dark" style="font-size: 1rem;">' + team.team_name + '</div>';
+                        html += '       <div class="small text-secondary mt-1"><i class="bi bi-geo-alt me-1"></i>' + (team.region ? team.region : '지역미정') + '</div>';
+                        html += '   </div>';
+                        html += '   <i class="bi bi-chevron-right ms-auto text-muted opacity-50"></i>';
+                        html += '</a>';
+                    });
+                    
+                    html += '</div>';
+
+                } else {
+                    html += '<div class="text-center pt-5 pb-0">';
+                    html += '   <i class="bi bi-exclamation-circle text-secondary fs-1 mb-3 d-block opacity-25"></i>';
+                    html += '   <p class="text-secondary mb-4">아직 가입된 구단이 없습니다.</p>';
+                    html += '   <a href="${pageContext.request.contextPath}/team/write" class="btn btn-dark rounded-pill w-100 py-2 fw-bold mt-5">새 구단 만들기</a>';
+                    html += '</div>';
+                }
+
+                $('#myPageTeamListArea').html(html);
+            },
+            error: function(xhr) {
+                console.log(xhr);
+                $('#myPageTeamListArea').html('<div class="text-center py-4 text-danger">목록을 불러오지 못했습니다.</div>');
+            }
+        });
+    }
     </script>
-    
-    
 </body>
 </html>

@@ -10,6 +10,7 @@ import java.util.Map;
 import com.fl.model.MatchDTO;
 import com.fl.model.MemberDTO;
 import com.fl.model.SessionInfo;
+import com.fl.model.TeamDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
@@ -19,6 +20,8 @@ import com.fl.service.MemberService;
 import com.fl.service.MemberServiceImpl;
 import com.fl.service.MyPageService;
 import com.fl.service.MyPageServiceImpl;
+import com.fl.service.TeamService;
+import com.fl.service.TeamServiceImpl;
 import com.fl.util.FileManager;
 import com.fl.util.MyMultipartFile;
 
@@ -34,6 +37,7 @@ public class MemberController {
 	
 	private MemberService service = new MemberServiceImpl();
 	private MyPageService myPageService = new MyPageServiceImpl();
+	private TeamService teamService = new TeamServiceImpl();
 	private FileManager fileManager = new FileManager();
 	
 
@@ -304,8 +308,11 @@ public class MemberController {
 				MemberDTO myInfo = myPageService.readMember(info.getMember_code());
 				List<MatchDTO> matchList = myPageService.listMyMatch(info.getMember_code());
 				
+				List<TeamDTO> myTeams = teamService.readMyTeam(info.getMember_code());
+				
 				mav.addObject("dto", myInfo);
 				mav.addObject("matchList", matchList);
+				mav.addObject("myTeams", myTeams);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
