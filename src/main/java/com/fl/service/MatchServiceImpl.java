@@ -33,16 +33,14 @@ public class MatchServiceImpl implements MatchService{
 	}
 	
 	@Override
-	public boolean updateMatchStatus(Map<String, Object> map) {
+	public void updateMatchStatus(Map<String, Object> map) {
 		try {
-			int result = mapper.updateMatchStatus(map);
+			mapper.updateMatchStatus(map);
 			
-			return result > 0;
+			mapper.updateApplyStatus(map);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			
-			return false;
 		}
 	
 	}
@@ -155,10 +153,10 @@ public class MatchServiceImpl implements MatchService{
 	}
 
 	@Override
-	public int getUserTeamRole(Map<String, Object> map) {
-		int role = 0;
+	public long getUserTeamRole(Map<String, Object> map) {
+		long role = 0;
 		try {
-			Integer result = mapper.getUserTeamRole(map);
+			Long result = mapper.getUserTeamRole(map);
 			if(result != null) {
 				role=result;
 			}
@@ -178,14 +176,7 @@ public class MatchServiceImpl implements MatchService{
 		}
 	}
 
-	@Override
-	public void updateMatchApply(MatchApplyDTO dto) throws Exception {
-		try {
-			mapper.updateMatchApply(dto);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	
 
 	@Override
 	public void deleteMatchApply(MatchApplyDTO dto) throws Exception {

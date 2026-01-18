@@ -25,7 +25,7 @@
 	    VALUES
 	    (seq_match_post.NEXTVAL, #{home_code},NULL,
 	     TO_DATE(#{match_date}, 'YYYY-MM-DD"T"HH24:MI'), '모집중',#{title},#{content},SYSDATE,
-	      0,#{matchType},#{gender},#{fee},#{member_code},#{matchLevel},#{stadiumCode})
+	      0,#{matchType},#{gender},#{fee},#{member_code},#{matchLevel},#{stadium_code})
 	</insert>
 	
 	<!-- 매치신청 등록 -->
@@ -34,11 +34,6 @@
 		VALUES (seq.match_apply.NEXTVAL, #{match_code},#{team_code},SYSDATE,'신청중')
 	</insert>
 	
-	<!-- 매치신청 상태 변경 -->
-	<update id="updateMatchApply" parameterType="com.fl.model.MatchApplyDTO" >
-	
-	</update>
-	
 	<!-- 글 수정 -->
 	<update id="updateMatch" parameterType="com.fl.model.MatchDTO" >
 		UPDATE match_post SET title=#{title}, content=#{content}, match_date=TO_DATE(#{match_date}, 'YYYY-MM-DD"T"HH24:MI'), status=#{status}, 
@@ -46,9 +41,19 @@
 		WHERE match_code=#{match_code}
 	</update>
 	
+	<!-- 매치신청 상태 변경 -->
+	<update id="updateApplyStatus" parameterType="com.fl.model.MatchApplyDTO" >
+		UPDATE match_apply SET status=
+			CASE
+			 WHEN team_code=#{team_code} THEN '수락'
+			 ELSE '마감' END
+		#{apply_status}
+		WHERE apply_code=#{apply_code} AND match_code=#{match_code}
+	</update>
+	
 	<!-- 매치 성사되었을 때 상태 변경 -->
 	<update id="updateMatchStatus" parameterType="com.fl.model.MatchDTO">
-		UPDATE match_post SET status=#{status}, away_code=#{away_code}, 
+		UPDATE match_post SET status=#{post_status}, away_code=#{away_code}
 		WHERE match_code=#{match_code}
 	</update>
 	
@@ -102,8 +107,8 @@
 
 	<!-- 매치 신청 리스트 -->
 	<select id="listApplicant" parameterType="map" resultType="com.fl.model.MatchApplyDTO">
-		SELECT apply_code, a.match_code, a.team_code, TO_CHAR(a.apply_date,'YYYY-MM-DD HH24:MI') as apply_date, status,
-		 		t.team_name, t.team_level
+		SELECT a.apply_code, a.match_code, a.team_code, TO_CHAR(a.apply_date,'YYYY-MM-DD HH24:MI') as apply_date, a.status,
+		 		t.team_name
 		FROM match_apply a
 		JOIN team t ON t.team_code = a.team_code
 		WHERE a.match_code = #{match_code}
@@ -113,7 +118,7 @@
 	<!-- 코드로 정보갖고오기 -->
 	<select id="findById" parameterType="Long" resultType="com.fl.model.MatchDTO">
 		SELECT m.match_code,ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, m.status,m.title, 
-		m.content, m.fee,s.stadium_name AS stadiumName, s.region AS region, matchType, gender, matchLevel, m.stadium_code, home_code
+		m.content, m.fee,s.stadium_name AS stadiumName, s.region AS region, matchType, gender, matchLevel, m.stadium_code, home_code,m.member_code
 		FROM match_post m
 		JOIN team ht ON ht.team_code = m.home_code
 		JOIN stadium s ON s.stadium_code = m.stadium_code
@@ -124,20 +129,20 @@
 	
 	<!-- 내 팀 매치 리스트 -->
 	<select id="listMyMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
-		SELECT match_code,home_code,away_code,match_date,status,title,content,view_count,matchType,gender,fee,member_code
+		SELECT m.match_code,home_code,away_code,match_date,status,title,content,view_count,matchType,gender,fee,m.member_code
 		FROM match_post m
 		JOIN team t ON t.team_code =(m.home_code || m.away_code)
 		WHERE m.member_code = #{member_code}
 	</select>
 	
 	<select id="listUserTeams" parameterType="Long" resultType="com.fl.model.TeamDTO">
-	    SELECT t.team_code, t.team_name
+	    SELECT t.team_code, t.team_name, mt.role_level
 	    FROM team t
 	    JOIN member_team mt ON t.team_code = mt.team_code 
 	    WHERE mt.member_code = #{member_code}
     </select>
     
-    <select id="getUserTeamRole" parameterType="Integer" resultType="map">
+    <select id="getUserTeamRole" parameterType="map" resultType="long">
     	SELECT role_level
     	FROM member_team
     	WHERE member_code = #{member_code} AND team_code=#{team_code}

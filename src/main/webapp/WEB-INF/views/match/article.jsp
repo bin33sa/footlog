@@ -28,7 +28,6 @@
 
 	<div class="container-fluid px-lg-5 mt-4">
 		<div class="row">
-
 			<div class="col-lg-2 d-none d-lg-block">
 				<div class="sidebar-menu sticky-top" style="top: 100px;">
 					<div class="mb-4">
@@ -162,12 +161,27 @@
 					                        </div>
 					                    </div>
 					                    
-					                    <c:if test="${dto.status == '모집중'}">
-					                        <button type="button" class="btn btn-primary btn-sm px-3 rounded-pill" 
-					                                onclick="confirmMatch('${apply.team_code}', '${apply.team_name}');">
-					                            수락하기
-					                        </button>
-					                    </c:if>
+					                  <div class="ms-auto"> 
+						                    <c:choose>
+						                        <%-- 1. 모집중일 때: 수락 가능 (파란 버튼) --%>
+						                        <c:when test="${dto.status == '모집중'}">
+						                            <button type="button" class="btn btn-primary btn-sm px-3 rounded-pill" 
+						                                    onclick="confirmMatch('${apply.team_code}', '${apply.team_name}');">
+						                                수락하기
+						                            </button>
+						                        </c:when>
+						                        
+						                        <c:otherwise>
+						                        	 <c:if test="${apply.status == '수락'}"> 
+						                        	
+						                            <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" disabled>
+						                                매칭완료 <i class="bi bi-check-all"></i>
+						                            </button>
+						                            
+						                            </c:if>
+						                        </c:otherwise>
+						                    </c:choose>
+					                    </div>
 					                </div>
 					            </c:forEach>
 					        </div>
@@ -177,7 +191,77 @@
 				</div>
 		</div>
 	</div>
+	<div class="modal fade" id="teamSelectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">매치 신청 팀 선택</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body">
+                <p class="text-muted small mb-3">신청할 팀을 선택해주세요. (팀 운영진만 신청 가능)</p>
+                
+                <div class="list-group">
+                    <c:choose>
+                        <c:when test="${not empty myTeams}">
+                            
+                            <c:set var="canApplyCount" value="0" />
 
+                            <c:forEach var="team" items="${myTeams}">
+                                <c:choose>
+                                    <c:when test="${team.role_level >= 10}">
+                                        <c:set var="canApplyCount" value="${canApplyCount + 1}" />
+                                        
+                                        <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer list-group-item-action">
+                                            <input class="form-check-input flex-shrink-0" type="radio" name="selectedTeam" 
+                                                   value="${team.team_code}" data-name="${team.team_name}" style="font-size: 1.2em;">
+                                            <span class="fw-bold text-dark">${team.team_name}</span>
+                                            <span class="badge bg-primary ms-auto">신청가능</span>
+                                        </label>
+                                    </c:when>
+                                    
+                                    <c:otherwise>
+                                        <label class="list-group-item d-flex gap-3 align-items-center bg-light text-muted" style="cursor: not-allowed; opacity: 0.6;">
+                                            <input class="form-check-input flex-shrink-0" type="radio" disabled>
+                                            <span class="fw-bold text-decoration-line-through">${team.team_name}</span>
+                                            <span class="badge bg-secondary ms-auto">권한부족</span>
+                                        </label>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:forEach>
+                            
+                            <c:if test="${canApplyCount == 0}">
+                                 <div class="alert alert-warning text-center mt-3 p-2 small">
+                                    <i class="bi bi-exclamation-triangle-fill"></i><br>
+                                    매치 신청은 <b>팀 운영진(매니저 이상)</b>만 가능합니다.<br>
+                                    소속된 팀에서 권한을 확인해주세요.
+                                 </div>
+                                 <script>$(function(){ $('#btnApplySubmit').hide(); });</script>
+                            </c:if>
+
+                        </c:when>
+                        
+                        <c:otherwise>
+                            <div class="text-center py-3">
+                                <p>소속된 팀이 없습니다.</p>
+                                <a href="${pageContext.request.contextPath}/team/write" class="btn btn-sm btn-outline-primary">팀 생성하러 가기</a>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <c:if test="${not empty myTeams}">
+                    <button type="button" class="btn btn-primary" id="btnApplySubmit" onclick="submitApply()">신청 완료</button>
+                </c:if>
+            </div>
+        </div>
+    </div>
+</div>
+	
 	<footer>
 		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
 	</footer>
@@ -206,13 +290,79 @@
 	</script>
 	
 	<script type="text/javascript">
-		function confirmMatch(awayCode, awayName) {
+		function apply(){
+			let myTeamCode = "${sessionScope.member_team.team_code}";
+			
+			
+			
+			if(${empty myTeams}){
+				
+				if(confirm("소속된 팀이 없습니다. 팀을 생성하거나 가입하시겠습니까?")){
+					location.href="${pageContext.request.contextPath}/team/list";
+				}
+				return;	
+			}
+			
+			let hasAuth = false;
+			<c:if test="${not empty myTeams}">
+				<c:forEach var="team" items="${myTeams}">
+					if(${team.role_level}>=10 ){hasAuth=true;}
+				</c:forEach>
+			</c:if>
+			
+			if(!hasAuth){
+				alert("매치 신청은 팀의 운영진(매니저 이상)만 가능합니다.");
+				return;
+			}
+			
+			var myModal = new bootstrap.Modal(document.getElementById('teamSelectModal'));
+	        myModal.show();
+		}
+		
+		function submitApply(){
+			let selectedInput = $('input[name="selectedTeam"]:checked');
+			
+			if(selectedInput.length===0){
+				alert('신청할 팀을 선택해주세요.');
+				return;
+			}
+			let teamCode = selectedInput.val();
+			let teamName = selectedInput.attr("data-name");
+			
+			if(!confirm("['"+teamName+"']으로 매치를 신청하시겠습니까?")){
+				return;
+			}
+			
+			let url = '${pageContext.request.contextPath}/match/insertApply';
+			let params = {match_code:${dto.match_code},team_code:teamCode}
+			
+			ajaxRequest(url,'post',params,'text',function(data){
+				alert('매치신청이 완료되었습니다.');
+				location.reload();
+			});
 			
 		}
+		
+		function confirmMatch(applyTeamCode,applyTeamName){
+			if(!confirm("['" + applyTeamName + "'] 팀과의 매치를 수락하시겠습니까?\n수락 시 모집이 마감됩니다.")) {
+                return;
+            }
+			
+			let url = '${pageContext.request.contextPath}/match/confirmMatch';
+			let params = {match_code:${dto.match_code}, team_code:applyTeamCode}
+			
+			ajaxRequest(url,'post',params,'json',function(data){
+				if(data.state=='true'){
+					alert('매치가 수락되었습니다!');
+				}else{
+					alert('매치가 실패했습니다.');
+				}
+			})
+		}
+	
 	</script>
 	
-	<c:choose>
-		<c:when test="${sessionScope.member.member_code == dto.member_code || sessionScope.member_team.role_level>=10 }">
+		<c:if test="${sessionScope.member.member_code == dto.member_code || sessionScope.member_team.role_level>=10 }">
 			<script type="text/javascript">
 				function deleteOk(){
 					if(confirm('매치 게시글을 삭제하시겠습니까?')){
@@ -222,25 +372,8 @@
 					}
 				}
 			</script>
-		</c:when>
-		<c:otherwise>
-			<script type="text/javascript">
-				function apply(){
-					if("${sessionScope.member}"==""){
-						alert('로그인이 필요합니다.');
-						location.href="${pageContext.request.contextPath}/member/login";
-						return;
-					}
-					if(!confirm('매치를 신청하시겠습니까?')){
-						return;
-					}
-					if(!my)
-					let params = 'match_code=${dto.match_code}&${query}';
-					let url = '${pageContext.request.contextPath}/match/'
-				}
-			</script>
-		</c:otherwise>
-	</c:choose>
+		</c:if>
+
 	
 </body>
 </html>

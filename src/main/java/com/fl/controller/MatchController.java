@@ -37,12 +37,23 @@ public class MatchController {
 	@GetMapping("list")
 	public ModelAndView matchList(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/list");
+		HttpSession session  = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		if(info!=null) {
+			List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
+			mav.addObject("myTeams", myTeams);
+		}
+		
 		return mav;
 	}
 	
 	@GetMapping("listAjax")
 	public ModelAndView matchListAjax(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/listAjax");
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
 		
 		try {
 			String page = req.getParameter("page");
@@ -86,6 +97,11 @@ public class MatchController {
 			
 			List<MatchDTO> list = service.listMatch(map);
 			
+			if(info!=null) {
+				List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
+				mav.addObject("myTeams", myTeams);
+			}
+			
 			String query = "";
 			String cp = req.getContextPath();
 			String articleUrl = cp + "/match/article?page=" + current_page;
@@ -102,6 +118,7 @@ public class MatchController {
 			mav.addObject("articleUrl", articleUrl);
 			mav.addObject("schType", schType);
 			mav.addObject("kwd", kwd);
+
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -157,15 +174,21 @@ public class MatchController {
 			ModelAndView mav = new ModelAndView("match/article");
 			
 			
-			map.put("member_code",info.getMember_id());
-			int myTeamRole = 0;
+			long myTeamRole = 0;
 			
 			if(info != null) {
+				map.put("member_code",info.getMember_code());
+				
 				Map<String, Object> roleMap = new HashMap<String, Object>();
-				roleMap.put("member_code", info.getMember_id());
+				roleMap.put("member_code", info.getMember_code());
 				roleMap.put("team_code", dto.getHome_code());
 				
 				myTeamRole = service.getUserTeamRole(roleMap);
+				
+				List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
+				mav.addObject("myTeams", myTeams);
+            }else {
+            	map.put("member_code",0);
             }
 			
 			mav.addObject("dto", dto);
@@ -188,25 +211,33 @@ public class MatchController {
 	@GetMapping("write")
 	public ModelAndView writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("match/write");
-		
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		if(info == null || (info.getRole_level()!=1 && info.getRole_level()!=60)) {
-			resp.setContentType("text/html; charset=utf-8");
-			PrintWriter out = resp.getWriter();
-			out.print("<script>alert('권한이 없습니다.'); location.href='"+req.getContextPath()+"/match/list';</script>");
-			out.flush();
-			out.close();
-			return null;
+
+		try {
+			
+			List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
+			boolean hasPermission = false;
+			
+			if(myTeams!=null) {
+				for(TeamDTO team:myTeams) {
+					if(team.getRole_level()>=10) {
+						hasPermission = true;
+						break;
+					}
+				}
+			}
+			
+			List<StadiumDTO> list = stadiumservice.listStadiumAll();
+			mav.addObject("stadiumList", list);
+			mav.addObject("myTeams", myTeams);
+			mav.addObject("mode", "write");
+			
+			return mav;
+			
+		} catch (Exception e) {
+		e.printStackTrace();
 		}
-		long memberCode = info.getMember_code();
-		List<TeamDTO> myTeamList = service.listUserTeams(memberCode);
-		
-		List<StadiumDTO> list = stadiumservice.listStadiumAll();
-		mav.addObject("stadiumList", list);
-		mav.addObject("myTeamList", myTeamList);
-		mav.addObject("mode", "write");
-		
 		return mav;
 	}
 	
@@ -223,9 +254,17 @@ public class MatchController {
 			
 			dto.setHome_code(home_code);
 			
-			if (info == null || (info.getRole_level() ==0)) {
-		        return new ModelAndView("redirect:/match/list");
-		    }
+			List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
+			boolean hasPermission = false;
+			
+			if(myTeams!=null) {
+				for(TeamDTO team:myTeams) {
+					if(team.getRole_level()>=10) {
+						hasPermission = true;
+						break;
+					}
+				}
+			}
 			
 			//long memberCode = Long.parseLong(info.getMember_code());
 			dto.setMember_code(info.getMember_code());
@@ -373,37 +412,41 @@ public class MatchController {
 	}
 	
 	@ResponseBody
-	@PostMapping("updateStatus")
-	public Map<String, Object> updateStatus(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+	@PostMapping("confirmMatch")
+	public Map<String, Object> confirmMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> result = new HashMap<String, Object>();
 		
 		try {
+			Map<String, Object> map = new HashMap<String, Object>();
+			
 			if(info==null) {
 				map.put("state","login_required");
 			}
-			long away_code = Long.parseLong(req.getParameter("away_code"));
+			
 			long match_code = Long.parseLong(req.getParameter("match_code"));
+			long team_code = Long.parseLong(req.getParameter("team_code"));
 			
 			map.put("match_code", match_code);
-			map.put("away_code", away_code);
-			map.put("status","마감");
+			map.put("away_code", team_code);
+			map.put("team_code", team_code);
+			map.put("post_status", "매칭성공");
 		
-			boolean isSuccess = service.updateMatchStatus(map);
+		    service.updateMatchStatus(map);
 			
-			if(isSuccess) {
-				map.put("state", "true");
-			}else {
-				map.put("state", "false");
-			}
+
+			result.put("state", "true");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			map.put("state","error");
+			result.put("state","false");
 		}
 		
-		return map;
+		return result;
 	}
+	
+	
+	
 	
 }

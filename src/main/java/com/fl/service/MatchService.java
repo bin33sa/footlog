@@ -10,7 +10,7 @@ import com.fl.model.TeamDTO;
 public interface MatchService {
 	public void insertMatch(MatchDTO dto) throws Exception;
 	public void updateMatch(MatchDTO dto) throws Exception;
-	public boolean updateMatchStatus(Map<String, Object> map);
+	public void updateMatchStatus(Map<String, Object> map);
 	public void deleteMatch(Map<String,Object> map) throws Exception;
 	
 	public int dataCount(Map<String, Object> map);
@@ -18,7 +18,7 @@ public interface MatchService {
 	public List<MatchApplyDTO> listApplicant(Map<String, Object> map);
 	public MatchDTO findById(long num);
 	public List<TeamDTO> listUserTeams(long member_code);
-	public int getUserTeamRole(Map<String, Object> map);
+	public long getUserTeamRole(Map<String, Object> map);
 	public MatchDTO findByPrev(Map<String, Object> map);
 	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws Exception;
@@ -29,7 +29,6 @@ public interface MatchService {
 	
 	
 	public void insertMatchApply(MatchApplyDTO dto) throws Exception;
-	public void updateMatchApply(MatchApplyDTO dto) throws Exception;
 	public void deleteMatchApply(MatchApplyDTO dto) throws Exception;
 	
 }

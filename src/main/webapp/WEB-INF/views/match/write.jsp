@@ -58,11 +58,11 @@
 					    <label class="form-label fw-bold">주최 팀 선택</label>
 					    <select name="home_code" class="form-select rounded-pill shadow-sm">
 					        <c:choose>
-					            <c:when test="${empty myTeamList}">
+					            <c:when test="${empty myTeams}">
 					                <option value="" disabled selected>소속된 팀이 없습니다.</option>
 					            </c:when>
 					            <c:otherwise>
-					                <c:forEach var="team" items="${myTeamList}">
+					                <c:forEach var="team" items="${myTeams}">
 					                    <option value="${team.team_code}" ${dto.home_code==team.team_code? "selected":""}>${team.team_name}</option>
 					                </c:forEach>
 					            </c:otherwise>

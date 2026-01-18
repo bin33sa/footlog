@@ -13,7 +13,7 @@ public interface MatchMapper {
 	
 	public void insertMatch(MatchDTO dto) throws SQLException;
 	public void updateMatch(MatchDTO dto) throws SQLException;
-	public int updateMatchStatus(Map<String, Object> map);
+	public long updateMatchStatus(Map<String, Object> map);
 	public void deleteMatch(Map<String, Object> map) throws SQLException;
 	
 	public int dataCount(Map<String, Object> map);
@@ -21,7 +21,7 @@ public interface MatchMapper {
 	public List<MatchApplyDTO> listApplicant(Map<String, Object> map);
 	public MatchDTO findById(long num);
 	public List<TeamDTO> listUserTeams(long member_code);
-	public int getUserTeamRole(Map<String, Object> map);
+	public long getUserTeamRole(Map<String, Object> map);
 	public MatchDTO findByPrev(Map<String, Object> map);
 	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws SQLException;
@@ -32,6 +32,6 @@ public interface MatchMapper {
 	public MatchDTO findByFileId(long fileNum);
 	
 	public void insertMatchApply(MatchApplyDTO dto) throws SQLException;
-	public void updateMatchApply(MatchApplyDTO dto) throws Exception;
+	public void updateApplyStatus(Map<String, Object> map) throws Exception;
 	public void deleteMatchApply(MatchApplyDTO dto) throws Exception;
 }
