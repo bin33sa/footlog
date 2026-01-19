@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
+<%@ page trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
@@ -12,13 +13,19 @@
     
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?ver=2">
 
+    <style>
+        /* 게시글 행 클릭 시 효과 */
+        .board-row:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
 </head>
 
 <body>
 
    <header>
-	   <jsp:include page="/WEB-INF/views/layout/teamheader.jsp"/>
-	</header>
+       <jsp:include page="/WEB-INF/views/layout/teamheader.jsp"/>
+    </header>
 
 
     <div class="container-fluid px-lg-5 mt-4">
@@ -45,11 +52,8 @@
                         </c:choose>
 
                         <div class="d-flex align-items-center gap-3">
-                            
                             <div class="bg-white rounded-circle d-flex align-items-center justify-content-center text-dark overflow-hidden" style="width: 50px; height: 50px;">
-                                
                                 <c:set var="defaultEmblem" value="${pageContext.request.contextPath}/dist/images/icon.jpg" />
-
                                 <c:choose>                          
                                     <c:when test="${not empty myTeam.emblem_image}">
                                         <img src="${pageContext.request.contextPath}/uploads/team/${myTeam.emblem_image}" 
@@ -92,7 +96,8 @@
                 <div class="row g-4 mb-5">
                     <div class="col-md-6">
                         <div class="modern-card dashboard-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center bg-light"
-                             onclick="location.href='${pageContext.request.contextPath}/myteam/match?teamCode=${myTeam.team_code}'"> 
+                             onclick="location.href='${pageContext.request.contextPath}/myteam/match?teamCode=${myTeam.team_code}'"
+                             style="cursor: pointer;"> 
                             <div class="mb-3 p-3 rounded-circle bg-white shadow-sm">
                                 <i class="bi bi-calendar-check-fill fs-2 text-primary"></i>
                             </div>
@@ -103,7 +108,8 @@
 
                     <div class="col-md-6">
                         <div class="modern-card dashboard-card p-4 h-100 d-flex flex-column align-items-center justify-content-center text-center bg-light"
-                             onclick="location.href='${pageContext.request.contextPath}/myteam/squad?teamCode=${myTeam.team_code}'">
+                             onclick="location.href='${pageContext.request.contextPath}/myteam/squad?teamCode=${myTeam.team_code}'"
+                             style="cursor: pointer;">
                             <div class="mb-3 p-3 rounded-circle bg-white shadow-sm">
                                 <i class="bi bi-people-fill fs-2 text-success"></i>
                             </div>
@@ -142,7 +148,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="match-slide-item">
                                     <div class="match-card bg-away">
                                         <span class="match-date-badge">SAT 28 SEP • 20:00</span>
@@ -160,7 +165,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="match-slide-item">
                                     <div class="match-card bg-home">
                                         <span class="match-date-badge">SUN 02 OCT • 08:00</span>
@@ -178,7 +182,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="match-slide-item">
                                     <div class="match-card bg-away">
                                         <span class="match-date-badge">SUN 09 OCT • 10:00</span>
@@ -196,43 +199,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="match-slide-item">
-                                    <div class="match-card bg-home">
-                                        <span class="match-date-badge">SAT 15 OCT • 18:00</span>
-                                        <div class="match-teams">
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder bg-dark"></span> FC 풋로그
-                                            </div>
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder"></span> 마포 호랑이
-                                            </div>
-                                        </div>
-                                        <div class="match-footer">
-                                            <span>Match Center</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="match-slide-item">
-                                    <div class="match-card bg-away">
-                                        <span class="match-date-badge">SAT 22 OCT • 14:00</span>
-                                        <div class="match-teams">
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder"></span> 레알 마드리드
-                                            </div>
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder bg-dark"></span> FC 풋로그
-                                            </div>
-                                        </div>
-                                        <div class="match-footer">
-                                            <span>Coming Soon</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
                             </div>
                         </div>
 
@@ -245,7 +211,7 @@
                 <div class="modern-card p-4 bg-white" style="min-height: 400px;">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="fw-bold"><i class="bi bi-card-text me-2"></i>팀 게시판 최근 글</h5>
-                        <a href="#" class="text-muted small text-decoration-none">더보기 &rarr;</a>
+                        <a href="${pageContext.request.contextPath}/myteam/board?teamCode=${myTeam.team_code}" class="text-muted small text-decoration-none">더보기 &rarr;</a>
                     </div>
                     
                     <table class="table table-hover align-middle">
@@ -259,34 +225,47 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr style="cursor: pointer;" onclick="location.href='#'">
-                                <td class="text-center text-muted">5</td>
-                                <td class="fw-bold text-truncate" style="max-width: 200px;">
-                                    <span class="badge bg-danger rounded-pill me-1">공지</span> 이번 주 회식 장소 투표해주세요!
-                                </td>
-                                <td class="text-center">주장</td>
-                                <td class="text-center text-muted small">09.20</td>
-                                <td class="text-center text-muted small">42</td>
-                            </tr>
-                            <tr style="cursor: pointer;" onclick="location.href='#'">
-                                <td class="text-center text-muted">4</td>
-                                <td>다음 주 유니폼 챙겨오세요</td>
-                                <td class="text-center">총무</td>
-                                <td class="text-center text-muted small">09.19</td>
-                                <td class="text-center text-muted small">35</td>
-                            </tr>
-                            <tr style="cursor: pointer;" onclick="location.href='#'">
-                                <td class="text-center text-muted">3</td>
-                                <td>전술 공유합니다 (영상 첨부)</td>
-                                <td class="text-center">전술코치</td>
-                                <td class="text-center text-muted small">09.18</td>
-                                <td class="text-center text-muted small">28</td>
-                            </tr>
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
-                                    등록된 게시글이 없습니다.
-                                </td>
-                            </tr>
+                            <c:choose>
+                                <c:when test="${not empty boardList}">
+                                    <c:forEach var="dto" items="${boardList}">
+                                        <tr class="board-row" style="cursor: pointer;" 
+                                            onclick="location.href='${pageContext.request.contextPath}/myteam/board_article?board_team_code=${dto.board_team_code}&teamCode=${myTeam.team_code}&page=1'">
+                                            
+                                            <td class="text-center text-muted">
+                                                <c:choose>
+                                                    <c:when test="${dto.notice == 1}">
+                                                        <span class="badge bg-danger rounded-pill">공지</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        ${dto.board_team_code}
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            
+                                            <td class="fw-bold text-truncate" style="max-width: 200px;">
+                                                ${dto.title}
+                                                <c:if test="${dto.replyCount > 0}">
+                                                    <span class="text-primary small fw-normal ms-1">[${dto.replyCount}]</span>
+                                                </c:if>
+                                            </td>
+                                            
+                                            <td class="text-center">${dto.member_name}</td>
+                                            
+                                            <td class="text-center text-muted small">${dto.created_at}</td>
+                                            
+                                            <td class="text-center text-muted small">${dto.view_count}</td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <tr>
+                                        <td colspan="5" class="text-center py-5 text-muted">
+                                            <i class="bi bi-clipboard-x fs-1 d-block mb-3 text-secondary"></i>
+                                            등록된 게시글이 없습니다.
+                                        </td>
+                                    </tr>
+                                </c:otherwise>
+                            </c:choose>
                         </tbody>
                     </table>
                 </div>
@@ -296,9 +275,9 @@
     </div>
 
     <footer>
-	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
-	</footer>
-	
+       <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
+    </footer>
+    
     <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
     <script>
@@ -307,8 +286,8 @@
         const nextBtn = document.getElementById('nextMatchBtn');
         
         let currentIndex = 0;
-        const totalItems = 6; // 아이템 총 개수
-        const itemsPerView = 3; // 한 화면에 보이는 개수
+        const totalItems = 6; // 아이템 총 개수 (추후 동적으로 변경 필요)
+        const itemsPerView = 3; // 한 화면에 보이는 개수 (반응형에 따라 조정 필요할 수 있음)
         
         function updateSlider() {
             // 33.333% 씩 이동
@@ -320,19 +299,21 @@
             nextBtn.disabled = (currentIndex >= totalItems - itemsPerView);
         }
 
-        nextBtn.addEventListener('click', () => {
-            if (currentIndex < totalItems - itemsPerView) {
-                currentIndex++;
-                updateSlider();
-            }
-        });
+        if(nextBtn && prevBtn && track) {
+            nextBtn.addEventListener('click', () => {
+                if (currentIndex < totalItems - itemsPerView) {
+                    currentIndex++;
+                    updateSlider();
+                }
+            });
 
-        prevBtn.addEventListener('click', () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSlider();
-            }
-        });
+            prevBtn.addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateSlider();
+                }
+            });
+        }
     </script>
 
 </body>

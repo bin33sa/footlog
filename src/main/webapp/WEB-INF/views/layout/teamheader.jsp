@@ -117,7 +117,7 @@
                                     <span class="fw-bold">${sessionScope.member.member_name}님</span>
                                 </div>
                                 
-                                <a href="${pageContext.request.contextPath}/mypage" class="btn btn-outline-secondary rounded-pill btn-sm me-2">마이페이지</a>
+                                <a href="${pageContext.request.contextPath}/member/mypage" class="btn btn-outline-secondary rounded-pill btn-sm me-2">마이페이지</a>
                                 <a href="${pageContext.request.contextPath}/member/logout" class="btn btn-dark rounded-pill btn-sm">로그아웃</a>
                             </div>
                         </c:otherwise>

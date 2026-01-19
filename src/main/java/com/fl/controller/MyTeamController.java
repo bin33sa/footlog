@@ -139,6 +139,9 @@ public class MyTeamController {
             return new ModelAndView("redirect:/team/list?msg=noteam"); 
         }
 
+        List<TeamBoardDTO> boardList = service.listHomeTeamBoard(teamCode);
+        mav.addObject("boardList", boardList);
+        
         return mav;
     }
 
@@ -1097,8 +1100,8 @@ public class MyTeamController {
             TeamBoardDTO preReadDto = service.preReadTeamBoard(map);
             TeamBoardDTO nextReadDto = service.nextReadTeamBoard(map);
             
-            mav.addObject("preReadDto", preReadDto);
-            mav.addObject("nextReadDto", nextReadDto);
+            mav.addObject("preDto", preReadDto);
+            mav.addObject("nextDto", nextReadDto);
 
             mav.addObject("dto", dto);
             mav.addObject("page", page);
@@ -1115,6 +1118,266 @@ public class MyTeamController {
         }
 
         return mav;
+    }
+    
+    @ResponseBody
+    @GetMapping("listBoardReply")
+    public Map<String, Object> listBoardReply(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        try {
+            String boardTeamCodeStr = req.getParameter("board_team_code");
+            String pageNoStr = req.getParameter("pageNo");
+            
+            if(boardTeamCodeStr == null) {
+                model.put("state", "false");
+                return model;
+            }
+            
+            long board_team_code = Long.parseLong(boardTeamCodeStr);
+            int current_page = 1;
+            if(pageNoStr != null) {
+                try {
+                    current_page = Integer.parseInt(pageNoStr);
+                } catch(Exception e) { }
+            }
+            
+            int rows = 5; 
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_team_code", board_team_code);
+            
+            int dataCount = service.dataCountBoardReply(map);
+            int total_page = util.pageCount(rows, dataCount);
+            if(current_page > total_page) current_page = total_page;
+            
+            int offset = (current_page - 1) * rows;
+            if(offset < 0) offset = 0;
+            
+            map.put("offset", offset);
+            map.put("size", rows);
+            
+            List<BoardReplyDTO> list = service.listBoardReply(map);
+            
+            String paging = util.pagingMethod(current_page, total_page, "listPage");
+            
+            model.put("listReply", list);
+            model.put("replyCount", dataCount);
+            model.put("pageNo", current_page);
+            model.put("total_page", total_page);
+            model.put("paging", paging);
+            model.put("state", "true");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "error");
+        }
+        
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("insertBoardReply")
+    public Map<String, Object> insertBoardReply(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+        
+        try {
+            BoardReplyDTO dto = new BoardReplyDTO();
+            
+            long board_team_code = Long.parseLong(req.getParameter("board_team_code"));
+            String content = req.getParameter("content");
+            
+            dto.setBoard_team_code(board_team_code);
+            dto.setContent(content);
+            dto.setMember_code(info.getMember_code());
+            
+            service.insertBoardReply(dto);
+            
+            model.put("state", "true");
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        return model;
+    }
+    
+    @ResponseBody
+    @PostMapping("updateBoardReply") 
+    public Map<String, Object> updateBoardReply(HttpServletRequest req, HttpServletResponse resp) { 
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if(info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+        
+        try {
+            long comment_id = Long.parseLong(req.getParameter("comment_id"));
+            String content = req.getParameter("content");
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("comment_id", comment_id);
+            map.put("content", content);
+            map.put("member_code", info.getMember_code());
+            
+            service.updateBoardReply(map); 
+            
+            model.put("state", "true");
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        return model;
+    }
+    
+    @ResponseBody
+    @PostMapping("deleteBoardReply")
+    public Map<String, Object> deleteBoardReply(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        try {
+            long reply_code = Long.parseLong(req.getParameter("reply_code"));
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("reply_code", reply_code);
+            
+            service.deleteBoardReply(map);
+            model.put("state", "true");
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        return model;
+    }
+    
+    @ResponseBody
+    @PostMapping("updateBoardLike")
+    public Map<String, Object> updateBoardLike(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if (info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+        
+        try {
+            long board_team_code = Long.parseLong(req.getParameter("board_team_code"));
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_team_code", board_team_code);
+            map.put("member_code", info.getMember_code());
+            
+            boolean userLiked = service.isUserBoardLiked(map);
+            
+            if(userLiked) {
+                service.deleteBoardLike(map);
+                model.put("state", "false");
+            } else {
+                service.insertBoardLike(map);
+                model.put("state", "true");
+            }
+            
+            int likeCount = service.countBoardLike(board_team_code);
+            model.put("likeCount", likeCount);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "error");
+        }
+        
+        return model;
+    }
+    
+    @GetMapping("board_update")
+    public ModelAndView boardUpdateForm(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        ModelAndView mav = new ModelAndView("myteam/board_write"); 
+        HttpSession session = req.getSession();
+
+        long teamCode = setTeamInfoAndRole(req, session, mav);
+        if (teamCode == -1) return new ModelAndView("redirect:/myteam/main");
+
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        String page = req.getParameter("page");
+
+        try {
+            long board_team_code = Long.parseLong(req.getParameter("board_team_code"));
+            
+            TeamBoardDTO dto = service.readTeamBoard(board_team_code);
+
+            if(dto == null || dto.getMember_code() != info.getMember_code()) {
+                return new ModelAndView("redirect:/myteam/board?teamCode=" + teamCode + "&page=" + page);
+            }
+
+            mav.addObject("dto", dto);
+            mav.addObject("mode", "update");
+            mav.addObject("page", page);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ModelAndView("redirect:/myteam/board?teamCode=" + teamCode);
+        }
+
+        return mav;
+    }
+
+    @PostMapping("board_update")
+    public ModelAndView boardUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        String teamCode = req.getParameter("teamCode");
+        String page = req.getParameter("page");
+
+        try {
+            TeamBoardDTO dto = new TeamBoardDTO();
+            
+            dto.setBoard_team_code(Long.parseLong(req.getParameter("board_team_code")));
+            dto.setTeam_code(Long.parseLong(teamCode));
+            dto.setTitle(req.getParameter("title"));
+            dto.setContent(req.getParameter("content"));
+            dto.setMember_code(info.getMember_code());
+
+            service.updateTeamBoard(dto);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ModelAndView("redirect:/myteam/board_article?board_team_code=" + req.getParameter("board_team_code") + "&teamCode=" + teamCode + "&page=" + page);
+    }
+
+    @GetMapping("board_delete")
+    public ModelAndView boardDelete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        String teamCode = req.getParameter("teamCode");
+        String page = req.getParameter("page");
+
+        try {
+            long board_team_code = Long.parseLong(req.getParameter("board_team_code"));
+            
+            TeamBoardDTO dto = service.readTeamBoard(board_team_code);
+            if(dto != null && dto.getMember_code() == info.getMember_code()) {
+                service.deleteTeamBoard(board_team_code); 
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ModelAndView("redirect:/myteam/board?teamCode=" + teamCode + "&page=" + page);
     }
     
 }

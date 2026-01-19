@@ -9,6 +9,7 @@ public class BoardReplyDTO {
     private String created_at;         
     private Long gallery_code;
     private String profile_image;
+    private long board_team_code;
     
     private String member_name;       
     private int answerCount;           
@@ -72,6 +73,12 @@ public class BoardReplyDTO {
 	}
 	public void setProfile_image(String profile_image) {
 		this.profile_image = profile_image;
+	}
+	public long getBoard_team_code() {
+		return board_team_code;
+	}
+	public void setBoard_team_code(long board_team_code) {
+		this.board_team_code = board_team_code;
 	}
     
     

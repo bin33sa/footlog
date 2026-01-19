@@ -52,6 +52,17 @@ public class MyTeamServiceImpl implements MyTeamService {
 	}
 	
 	@Override
+    public List<TeamBoardDTO> listHomeTeamBoard(long team_code) {
+        List<TeamBoardDTO> list = null;
+        try {
+            list = mapper.listHomeTeamBoard(team_code);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+	
+	@Override
 	public void updateTeamMember(TeamMemberDTO dto) throws Exception {
 		try {
 			mapper.updateTeamMember(dto);		
@@ -325,13 +336,20 @@ public class MyTeamServiceImpl implements MyTeamService {
 
 	@Override
 	public TeamBoardDTO readTeamBoard(long board_team_code) {
-		try {
-			return mapper.readTeamBoard(board_team_code);
-		} catch (Exception e) {
-			e.printStackTrace();
-			
-			throw e;
-		}
+		TeamBoardDTO dto = null;
+
+	    try {
+	        dto = mapper.readTeamBoard(board_team_code);
+
+	        if(dto != null) {
+	            List<FileDTO> listFile = mapper.listFile(board_team_code);
+	            dto.setListFile(listFile);
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return dto;
 	}
 
 	@Override
@@ -363,7 +381,17 @@ public class MyTeamServiceImpl implements MyTeamService {
             throw e;
         }
     }
-
+	
+	@Override
+    public void updateBoardReply(Map<String, Object> map) throws Exception {
+        try {
+            mapper.updateBoardReply(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+	
     @Override
     public TeamBoardDTO preReadTeamBoard(Map<String, Object> map) {
         TeamBoardDTO dto = null;
@@ -553,4 +581,94 @@ public class MyTeamServiceImpl implements MyTeamService {
         }
     }
 	
+	@Override
+    public void insertBoardReply(BoardReplyDTO dto) throws Exception {
+        try {
+            mapper.insertBoardReply(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public List<BoardReplyDTO> listBoardReply(Map<String, Object> map) {
+        List<BoardReplyDTO> list = null;
+        try {
+            list = mapper.listBoardReply(map);
+            
+            for(BoardReplyDTO dto : list) {
+                if(dto.getContent() != null) {
+                    dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
+    public int dataCountBoardReply(Map<String, Object> map) {
+        int result = 0;
+        try {
+            result = mapper.dataCountBoardReply(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    public void deleteBoardReply(Map<String, Object> map) throws Exception {
+        try {
+            mapper.deleteBoardReply(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    @Override
+    public void insertBoardLike(Map<String, Object> map) throws Exception {
+        try {
+            mapper.insertBoardLike(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public void deleteBoardLike(Map<String, Object> map) throws Exception {
+        try {
+            mapper.deleteBoardLike(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    public int countBoardLike(long board_team_code) {
+        int result = 0;
+        try {
+            result = mapper.countBoardLike(board_team_code);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isUserBoardLiked(Map<String, Object> map) {
+        boolean result = false;
+        try {
+            int count = mapper.checkBoardLike(map);
+            result = count > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

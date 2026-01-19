@@ -24,7 +24,20 @@
 	    FROM team
 	    WHERE team_code = #{team_code}
 	</select>
-
+	
+	<select id="listHomeTeamBoard" parameterType="long" resultType="com.fl.model.TeamBoardDTO">
+        SELECT b.board_team_code, b.title, 
+               m.member_name, 
+               TO_CHAR(b.created_at, 'MM.DD') as created_at, -- 메인 화면용 짧은 날짜
+               b.hit_count AS view_count,
+               b.category AS notice
+        FROM board_team b
+        JOIN member m ON b.member_code = m.member_code 
+        WHERE b.team_code = #{team_code}
+        ORDER BY b.category DESC, b.board_team_code DESC
+        FETCH FIRST 5 ROWS ONLY
+    </select>
+	
 	<select id="readMyTeamStatus" parameterType="map" resultType="com.fl.model.TeamMemberDTO">
 	    SELECT 
 	        team_code, 
@@ -252,37 +265,26 @@
         SELECT * FROM (
             SELECT ROWNUM rnum, tb.* FROM (
                 SELECT b.board_team_code, b.title, 
-                       m.member_name AS user_name,  
-                       TO_CHAR(b.created_at, 'YYYY-MM-DD') as created_at, 
-                       b.hit_count
+                       b.hit_count AS view_count, TO_CHAR(b.created_at, 'YYYY-MM-DD') as created_at,
+                       
+                       m.member_name, 
+                       m.member_id,      b.category AS notice,   (SELECT COUNT(*) FROM comment_team r WHERE r.board_team_code = b.board_team_code) AS replyCount,
+                       
+                       (SELECT COUNT(*) FROM file_team f WHERE f.board_team_code = b.board_team_code) AS file_count
+
                 FROM board_team b
-                JOIN member m ON b.member_code = m.member_code WHERE b.team_code = #{team_code}
+                JOIN member m ON b.member_code = m.member_code 
+                WHERE b.team_code = #{team_code}
                 
                 <if test="keyword != null and keyword != ''">
-                    AND (
-                        <choose>
-                            <when test="condition == 'all'">
-                                INSTR(title, #{keyword}) &gt; 0 OR INSTR(content, #{keyword}) &gt; 0
-                            </when>
-                            <when test="condition == 'subject' or condition == 'title'">
-                                INSTR(title, #{keyword}) &gt; 0
-                            </when>
-                            <when test="condition == 'content'">
-                                INSTR(content, #{keyword}) &gt; 0
-                            </when>
-                            <when test="condition == 'userName'">
-                                INSTR(m.member_name, #{keyword}) &gt; 0 
-                            </when>
-                            <when test="condition == 'created_at'">
-                                TO_CHAR(b.created_at, 'YYYY-MM-DD') = #{keyword}
-                            </when>
-                        </choose>
-                    )
-                </if>
-                ORDER BY b.board_team_code DESC
+                   </if>
+                
+                ORDER BY b.category DESC, b.board_team_code DESC
             ) tb WHERE ROWNUM &lt;= #{end}
         ) WHERE rnum &gt;= #{start}
     </select>
+    
+    
 
     <select id="dataCountTeamBoard" parameterType="map" resultType="Integer">
         SELECT NVL(COUNT(*), 0) 
@@ -315,13 +317,15 @@
         UPDATE board_team SET hit_count = hit_count + 1 WHERE board_team_code = #{board_team_code}
     </update>
 
-    <select id="readTeamBoard" parameterType="Long" resultType="com.fl.model.TeamBoardDTO">
-        SELECT b.board_team_code, b.team_code, 
-               b.member_code, b.title, b.content, b.hit_count, b.category, b.video_url,
-               TO_CHAR(b.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at, 
-               m.member_name AS user_name 
+    <select id="readTeamBoard" parameterType="long" resultType="com.fl.model.TeamBoardDTO">
+        SELECT b.board_team_code, b.team_code, b.member_code, b.title, b.content, 
+               b.created_at, 
+               b.hit_count AS view_count,  b.video_url,           
+               (SELECT COUNT(*) FROM board_team_like L WHERE L.board_team_code = b.board_team_code) AS like_count,
+               m.member_name
         FROM board_team b
-        JOIN member m ON b.member_code = m.member_code WHERE board_team_code = #{board_team_code}
+        JOIN member m ON b.member_code = m.member_code
+        WHERE b.board_team_code = #{board_team_code}
     </select>
 
     <update id="updateTeamBoard" parameterType="com.fl.model.TeamBoardDTO">
@@ -336,61 +340,116 @@
     <select id="preReadTeamBoard" parameterType="map" resultType="com.fl.model.TeamBoardDTO">
         SELECT board_team_code, title
         FROM board_team b
-        JOIN member m ON b.member_code = m.member_code WHERE team_code = #{team_code} 
-          AND board_team_code &gt; #{board_team_code}
+        JOIN member m ON b.member_code = m.member_code
+        WHERE b.team_code = #{team_code}
+          AND b.board_team_code &gt; #{board_team_code}
+          
           <if test="keyword != null and keyword != ''">
               AND (
-                 <choose>
-                    <when test="condition == 'all'">
-                        INSTR(title, #{keyword}) &gt; 0 OR INSTR(content, #{keyword}) &gt; 0
-                    </when>
-                    <when test="condition == 'subject' or condition == 'title'">
-                        INSTR(title, #{keyword}) &gt; 0
-                    </when>
-                    <when test="condition == 'content'">
-                        INSTR(content, #{keyword}) &gt; 0
-                    </when>
-                    <when test="condition == 'userName'">
-                        INSTR(m.member_name, #{keyword}) &gt; 0 
-                    </when>
-                    <when test="condition == 'created_at'">
-                        TO_CHAR(b.created_at, 'YYYY-MM-DD') = #{keyword}
-                    </when>
-                 </choose>
+                  <if test="condition == 'all'">
+                      INSTR(b.title, #{keyword}) &gt; 0 OR INSTR(b.content, #{keyword}) &gt; 0
+                  </if>
+                  <if test="condition == 'title'">
+                      INSTR(b.title, #{keyword}) &gt; 0
+                  </if>
+                  <if test="condition == 'content'">
+                      INSTR(b.content, #{keyword}) &gt; 0
+                  </if>
+                  <if test="condition == 'userName'">
+                      INSTR(m.member_name, #{keyword}) &gt; 0
+                  </if>
               )
           </if>
-        ORDER BY board_team_code ASC
+          
+        ORDER BY b.board_team_code ASC
         FETCH FIRST 1 ROWS ONLY
     </select>
 
     <select id="nextReadTeamBoard" parameterType="map" resultType="com.fl.model.TeamBoardDTO">
         SELECT board_team_code, title
         FROM board_team b
-        JOIN member m ON b.member_code = m.member_code WHERE team_code = #{team_code} 
-          AND board_team_code &lt; #{board_team_code}
+        JOIN member m ON b.member_code = m.member_code
+        WHERE b.team_code = #{team_code}
+          AND b.board_team_code &lt; #{board_team_code}
+          
           <if test="keyword != null and keyword != ''">
               AND (
-                 <choose>
-                    <when test="condition == 'all'">
-                        INSTR(title, #{keyword}) &gt; 0 OR INSTR(content, #{keyword}) &gt; 0
-                    </when>
-                    <when test="condition == 'subject' or condition == 'title'">
-                        INSTR(title, #{keyword}) &gt; 0
-                    </when>
-                    <when test="condition == 'content'">
-                        INSTR(content, #{keyword}) &gt; 0
-                    </when>
-                    <when test="condition == 'userName'">
-                        INSTR(m.member_name, #{keyword}) &gt; 0 
-                    </when>
-                    <when test="condition == 'created_at'">
-                        TO_CHAR(b.created_at, 'YYYY-MM-DD') = #{keyword}
-                    </when>
-                 </choose>
+                  <if test="condition == 'all'">
+                      INSTR(b.title, #{keyword}) &gt; 0 OR INSTR(b.content, #{keyword}) &gt; 0
+                  </if>
+                  <if test="condition == 'title'">
+                      INSTR(b.title, #{keyword}) &gt; 0
+                  </if>
+                  <if test="condition == 'content'">
+                      INSTR(b.content, #{keyword}) &gt; 0
+                  </if>
+                  <if test="condition == 'userName'">
+                      INSTR(m.member_name, #{keyword}) &gt; 0
+                  </if>
               )
           </if>
-        ORDER BY board_team_code DESC
+          
+        ORDER BY b.board_team_code DESC
         FETCH FIRST 1 ROWS ONLY
+    </select>
+	
+	<insert id="insertBoardReply" parameterType="com.fl.model.BoardReplyDTO">
+        INSERT INTO comment_team(
+            comment_id, board_team_code, member_code, content, created_at
+        ) VALUES (
+            comment_team_seq.NEXTVAL, #{board_team_code}, #{member_code}, #{content}, SYSDATE
+        )
+    </insert>
+
+    <select id="listBoardReply" parameterType="map" resultType="com.fl.model.BoardReplyDTO">
+        SELECT r.comment_id,   r.board_team_code, 
+               r.member_code, 
+               r.content, 
+               r.created_at, 
+               m.member_name   FROM comment_team r
+        JOIN member m ON r.member_code = m.member_code
+        WHERE r.board_team_code = #{board_team_code}
+        ORDER BY r.comment_id DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <select id="dataCountBoardReply" parameterType="map" resultType="Integer">
+        SELECT NVL(COUNT(*), 0)
+        FROM comment_team
+        WHERE board_team_code = #{board_team_code}
+    </select>
+	
+	<update id="updateBoardReply" parameterType="map">
+        UPDATE comment_team
+        SET content = #{content}
+        WHERE comment_id = #{comment_id} AND member_code = #{member_code}
+    </update>
+	
+    <delete id="deleteBoardReply" parameterType="map">
+        DELETE FROM comment_team
+        WHERE comment_id = #{reply_code}
+    </delete>
+
+    <insert id="insertBoardLike" parameterType="map">
+        INSERT INTO board_team_like(board_team_code, member_code)
+        VALUES (#{board_team_code}, #{member_code})
+    </insert>
+
+    <delete id="deleteBoardLike" parameterType="map">
+        DELETE FROM board_team_like
+        WHERE board_team_code = #{board_team_code} AND member_code = #{member_code}
+    </delete>
+
+    <select id="countBoardLike" parameterType="Long" resultType="Integer">
+        SELECT COUNT(*) 
+        FROM board_team_like
+        WHERE board_team_code = #{board_team_code}
+    </select>
+
+    <select id="checkBoardLike" parameterType="map" resultType="Integer">
+        SELECT COUNT(*) 
+        FROM board_team_like
+        WHERE board_team_code = #{board_team_code} AND member_code = #{member_code}
     </select>
 	
 	<select id="readMemberRoleLevel" parameterType="map" resultType="Integer">
@@ -541,6 +600,12 @@
 		FROM team_gallery_like
 		WHERE gallery_code = #{gallery_code}
 	</select>
+	
+	<select id="listFile" parameterType="long" resultType="com.fl.model.FileDTO">
+        SELECT file_id, file_name, file_server_name, file_size
+        FROM file_team
+        WHERE board_team_code = #{board_team_code}
+    </select>
 	
 	<update id="updateReply" parameterType="map">
 	    UPDATE team_gallery_comment 

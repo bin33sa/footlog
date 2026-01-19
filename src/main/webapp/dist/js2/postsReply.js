@@ -1,4 +1,3 @@
-// 1. 가장 먼저 ajaxFun을 전역(window)에 선언하여 다른 스크립트에서 즉시 사용할 수 있게 합니다.
 window.ajaxFun = function(url, method, params, dataType, fn) {
     $.ajax({
         type: method, 
@@ -88,7 +87,6 @@ window.ajaxFun = function(url, method, params, dataType, fn) {
     }
 })();
 
-// --- 유틸리티 함수 (기존 유지) ---
 function isHidden(el) {
     const styles = window.getComputedStyle(el);
     return styles.display === 'none' || styles.visibility === 'hidden' || styles.opacity === '0';

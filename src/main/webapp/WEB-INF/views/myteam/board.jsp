@@ -177,7 +177,7 @@
                                         <td>${dataCount - (page-1) * size - status.index}</td>
                                         <td class="text-start ps-3">
                                             <a href="${articleUrl}&board_team_code=${dto.board_team_code}" class="subject-link text-truncate" style="max-width: 500px;">
-                                                ${dto.subject}
+                                                ${dto.title}
                                                 <c:if test="${dto.replyCount > 0}">
                                                     <span class="text-primary small fw-bold ms-1">[${dto.replyCount}]</span>
                                                 </c:if>
@@ -186,9 +186,9 @@
                                                 </c:if>
                                             </a>
                                         </td>
-                                        <td>${dto.user_name}</td>
-                                        <td>${dto.reg_date}</td>
-                                        <td>${dto.hit_count}</td>
+                                        <td>${dto.member_name}</td>
+                                        <td>${dto.created_at}</td>
+                                        <td>${dto.view_count}</td>
                                     </tr>
                                 </c:forEach>
                                 
@@ -216,8 +216,8 @@
                             <option value="all" ${condition=="all"?"selected":""}>제목+내용</option>
                             <option value="subject" ${condition=="subject"?"selected":""}>제목</option>
                             <option value="content" ${condition=="content"?"selected":""}>내용</option>
-                            <option value="userName" ${condition=="userName"?"selected":""}>작성자</option>
-                            <option value="reg_date" ${condition=="reg_date"?"selected":""}>등록일</option>
+                            <option value="userName" ${condition=="member_name"?"selected":""}>작성자</option>
+                            <option value="reg_date" ${condition=="created_at"?"selected":""}>등록일</option>
                         </select>
                         
                         <input type="text" name="keyword" value="${keyword}" class="form-control search-input shadow-none" placeholder="검색어를 입력하세요" style="width: 250px;">

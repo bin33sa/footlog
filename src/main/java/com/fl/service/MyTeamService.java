@@ -24,6 +24,8 @@ public interface MyTeamService {
 	
 	public TeamMemberDTO readMyTeamStatus(Map<String, Object> map);
 	
+	public List<TeamBoardDTO> listHomeTeamBoard(long team_code);
+	
 	public void updateTeamInfo(TeamDTO dto) throws Exception;
 	
 	public void leaveTeam(Map<String, Object> map) throws Exception;
@@ -132,5 +134,23 @@ public interface MyTeamService {
     public void updateReply(Map<String, Object> map) throws Exception;
     
     public void updateGallery(GalleryDTO dto) throws Exception;
+    
+    public void insertBoardReply(BoardReplyDTO dto) throws Exception;
+    
+    public List<BoardReplyDTO> listBoardReply(Map<String, Object> map);
+    
+    public int dataCountBoardReply(Map<String, Object> map);
+    
+    public void updateBoardReply(Map<String, Object> map) throws Exception;
+    
+    public void deleteBoardReply(Map<String, Object> map) throws Exception;
+
+    public void insertBoardLike(Map<String, Object> map) throws Exception;
+    
+    public void deleteBoardLike(Map<String, Object> map) throws Exception;
+    
+    public int countBoardLike(long board_team_code);
+    
+    public boolean isUserBoardLiked(Map<String, Object> map);
 
 }

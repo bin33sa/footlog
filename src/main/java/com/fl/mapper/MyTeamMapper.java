@@ -1,6 +1,7 @@
 package com.fl.mapper;
 
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +26,9 @@ public interface MyTeamMapper {
 	public Integer readMemberRoleLevel(Map<String, Object> map);
 	
 	public TeamDTO readTeamInfo(long team_code);
-
+	
+	public List<TeamBoardDTO> listHomeTeamBoard(long team_code);
+	
 	public TeamMemberDTO readMyTeamStatus(Map<String, Object> map);
 
 	public void updateTeamInfo(TeamDTO dto);
@@ -92,6 +95,24 @@ public interface MyTeamMapper {
 	
 	public TeamBoardDTO nextReadTeamBoard(Map<String, Object> map) throws Exception;
 	
+	public void insertBoardReply(BoardReplyDTO dto) throws SQLException;
+	
+    public List<BoardReplyDTO> listBoardReply(Map<String, Object> map);
+    
+    public List<FileDTO> listFile(long board_team_code);
+    
+    public int dataCountBoardReply(Map<String, Object> map);
+    
+    public void deleteBoardReply(Map<String, Object> map) throws SQLException;
+
+    public void insertBoardLike(Map<String, Object> map) throws SQLException;
+    
+    public void deleteBoardLike(Map<String, Object> map) throws SQLException;
+    
+    public int countBoardLike(long board_team_code);
+    
+    public int checkBoardLike(Map<String, Object> map);
+	
 	public void insertGallery(GalleryDTO dto);
 	
 	public List<GalleryDTO> listGallery(Map<String, Object> map);
@@ -129,4 +150,6 @@ public interface MyTeamMapper {
     public void updateReply(Map<String, Object> map) throws Exception;
     
     public void deleteGalleryFiles(long gallery_code) throws Exception;
+    
+    public void updateBoardReply(Map<String, Object> map) throws SQLException;
 }

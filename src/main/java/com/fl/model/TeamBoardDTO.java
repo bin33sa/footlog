@@ -10,9 +10,11 @@ public class TeamBoardDTO {
     private String content;         
     private String created_at;      
     private int view_count;         
-    
+    private int like_count;
+    private String video_url;           
     private int notice; 
-
+    private int replyCount;
+    
     private String member_name;     
     private String member_id;       
     
@@ -132,6 +134,30 @@ public class TeamBoardDTO {
 
 	public void setListFile(List<FileDTO> listFile) {
 		this.listFile = listFile;
+	}
+
+	public String getVideo_url() {
+		return video_url;
+	}
+
+	public void setVideo_url(String video_url) {
+		this.video_url = video_url;
+	}
+
+	public int getReplyCount() {
+		return replyCount;
+	}
+
+	public void setReplyCount(int replyCount) {
+		this.replyCount = replyCount;
+	}
+
+	public int getLike_count() {
+		return like_count;
+	}
+
+	public void setLike_count(int like_count) {
+		this.like_count = like_count;
 	}
     
     
