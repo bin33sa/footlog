@@ -127,10 +127,10 @@
                     <div class="mb-4">
                         <p class="sidebar-title">Community</p>
                         <div class="list-group">
-                            <a href="#" class="list-group-item list-group-item-action">게시판</a>
-                            <a href="#" class="list-group-item list-group-item-action">공지사항</a>
-                            <a href="#" class="list-group-item list-group-item-action">자유 게시판</a>
-                            <a href="#" class="list-group-item list-group-item-action">이벤트 / 뉴스</a>
+                            <a href="${pageContext.request.contextPath}/bbs/list?category=1" class="list-group-item list-group-item-action">공지사항</a>
+                			<a href="${pageContext.request.contextPath}/bbs/list?category=2" class="list-group-item list-group-item-action">자유 게시판</a>
+                			<a href="${pageContext.request.contextPath}/bbs/list?category=3" class="list-group-item list-group-item-action">이벤트 / 뉴스</a>
+                			<a href="${pageContext.request.contextPath}/bbs/list?category=4" class="list-group-item list-group-item-action">갤러리</a>
                         </div>
                     </div>
                 </div>
