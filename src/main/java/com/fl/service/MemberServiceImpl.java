@@ -1,5 +1,6 @@
 package com.fl.service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -86,6 +87,31 @@ public class MemberServiceImpl implements MemberService {
 	public List<Map<String, Object>> listAgeSection() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	// 아이디 찾기 (이메일, 이름)
+	@Override
+	public MemberDTO findId(Map<String, Object> map) {
+		MemberDTO dto = null;
+	    try {
+	        dto = mapper.findId(map);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return dto;
+	}
+
+	@Override
+	public void updateMemberPw(MemberDTO dto) throws SQLException {
+		try {
+			mapper.updateMemberPw(dto);
+		} catch (Exception e) {
+			SqlSessionManager.setRollbackOnly();
+			
+			e.printStackTrace();
+			throw e;
+		}
+		
 	}
 
 }

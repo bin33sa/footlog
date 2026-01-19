@@ -48,7 +48,7 @@
 		)
 	</insert>
 	
-	<!-- 아이디 찾기 -->
+	<!-- 아이디 찾기(중복 아이디 확인) -->
 	<select id="findById" parameterType="String" resultType="com.fl.model.MemberDTO">
 		SELECT member_code, member_id, password, member_name, phone_number, email, 
 			region, profile_image, preferred_position, role_level, is_deleted, deleted_at
@@ -63,13 +63,18 @@
 			preferred_position = #{preferred_position}
 		WHERE member_id = #{member_id}
 	</update>
+
+	<!-- 패스워드 찾기 업데이트 -->
+	<update id="updateMemberPw" parameterType="com.fl.model.MemberDTO">
+		UPDATE member SET password = #{password}
+		WHERE member_id = #{member_id}
+	</update>
 	
 	<!-- 프로필사진 지우기 -->
 	<update id="deleteProfileImage" parameterType="map">
 		UPDATE member SET profile_image = ''
 		WHERE member_id = #{member_id}
 	</update>
-	
 	
 	<!-- 회원탈퇴 -->
 	<!-- role_level(권한레벨): 0이면 일반회원, 99이면 관리자 -->
@@ -79,4 +84,13 @@
 		WHERE member_id = #{member_id} 
 	</update>
 	
+	<!-- 아이디찾기(이름, 이메일이 일치) -->
+	<select id="findId" parameterType="map" resultType="com.fl.model.MemberDTO">
+	    SELECT *
+	    FROM member
+	    WHERE member_name = #{member_name} 
+	      AND email = #{email}
+	      AND is_deleted = 0
+	</select>
+		
 </mapper>

@@ -1,5 +1,6 @@
 package com.fl.service;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -10,10 +11,12 @@ public interface MemberService {
 	
 	public void insertMember(MemberDTO dto) throws Exception;
 	public void updateMember(MemberDTO dto) throws Exception;	
+	public void updateMemberPw(MemberDTO dto) throws SQLException;
 	public void updateMemberLevel(Map<String, Object> map) throws Exception;
 	public void deleteProfilePhoto(Map<String, Object> map) throws Exception;
 	public void deleteMember(Map<String, Object> map) throws Exception;
 	
-	public MemberDTO findById(String userId);	
+	public MemberDTO findId(Map<String, Object> map); // 아이디 찾기
+	public MemberDTO findById(String userId); // 아이디 중복 확인 
 	public List<Map<String, Object>> listAgeSection();
 }

@@ -110,6 +110,7 @@ public class LoginFilter implements Filter {
 				"/member/userIdCheck",
 
 				"/member/findInfo", "/member/findIdDo", "/member/findPwDo",
+				"/member/findPwResult",
 
 				"/notice/list", "/notice/d",
 				"/bbs/list", "/bbs/view",

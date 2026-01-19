@@ -12,8 +12,10 @@ public interface MemberMapper {
 	public void updateMember(MemberDTO dto) throws SQLException;
 	public void deleteProfileImage(Map<String, Object> map) throws SQLException;
 	public void deleteMember(Map<String, Object> map) throws SQLException;
+	public void updateMemberPw(MemberDTO dto) throws SQLException;
 	
-	public MemberDTO findById(String userId);	
+	public MemberDTO findById(String userId); // 아이디 중복확인 
+	public MemberDTO findId(Map<String, Object> map); // 아이디 찾기
 	
 	// 할지 안할지 모르겠지만 일단 남겨놓기 
 	public List<Map<String, Object>> listAgeSection();

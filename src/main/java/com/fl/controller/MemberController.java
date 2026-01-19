@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fl.mail.MailDTO;
+import com.fl.mail.MailSender;
 import com.fl.model.MatchDTO;
 import com.fl.model.MatchHistoryDTO;
 import com.fl.model.MemberDTO;
@@ -126,30 +128,33 @@ public class MemberController {
 	// 3. 회원가입 관련
 	// ==========================================
 		
-		// 아이디 중복 검사 
-		@PostMapping("userIdCheck")
-		public void userIdCheck(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-			
-			String member_id = req.getParameter("member_id");
-			
-			MemberDTO dto = null;
-			try {
-				dto = service.findById(member_id);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			String passed = "false";
-			if(dto == null) {
-				passed = "true";
-			}
-			
-			
-			resp.setContentType("application/json; charset=UTF-8");
-			
-			
-			resp.getWriter().write("{\"passed\": \"" + passed + "\"}");
-		}
+	// MemberController.java
+
+	// 아이디 중복 검사 
+    @PostMapping("userIdCheck")
+    public void userIdCheck(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+       
+       String member_id = req.getParameter("member_id");
+       
+       MemberDTO dto = null;
+       try {
+          dto = service.findById(member_id);
+       } catch (Exception e) {
+          e.printStackTrace();
+       }
+       
+       String passed = "false";
+       if(dto == null) {
+          passed = "true";
+       }
+       
+       
+       resp.setContentType("application/json; charset=UTF-8");
+       
+       
+       resp.getWriter().write("{\"passed\": \"" + passed + "\"}");
+    }
+ 
 	
 	// 패스워드 확인 폼
 	@GetMapping("pwd")
@@ -489,4 +494,166 @@ public class MemberController {
 	        return mav;
 	    }
 	}
+	
+	
+	// 아이디 찾기 실행
+	@PostMapping("findIdDo")
+	public ModelAndView findIdDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		
+		String name = req.getParameter("name");
+		String email = req.getParameter("email");
+		
+		Map<String, Object> map = new HashMap<>();
+		map.put("member_name", name);
+		map.put("email", email);
+		
+		// 서비스 호출
+		MemberDTO dto = service.findId(map);
+		
+		ModelAndView mav = new ModelAndView("member/findUserInfo"); // 원래 페이지로 돌아감 (결과 보여주기 위해)
+		
+		if (dto != null) {
+			
+			String rawId = dto.getMember_id();
+			String maskedId = rawId;
+
+			// 아이디가 3글자 초과일 때만 뒤 3글자 마스킹 (예: yeonhwa -> yeon***)
+			if(rawId.length() > 3) {
+				maskedId = rawId.substring(0, rawId.length() - 3) + "***";
+			} else {
+				
+				maskedId = "***"; 
+			}
+	
+			// 메시지에 마스킹된 아이디(maskedId)를 넣음
+			mav.addObject("message", "회원님의 아이디는 <b>" + maskedId + "</b> 입니다.");
+			
+			// 탭 유지를 위해 추가 
+			mav.addObject("activeTab", "id"); 
+		} else {
+			// 못 찾았을 경우
+			mav.addObject("message", "일치하는 회원 정보가 없습니다.");
+			mav.addObject("activeTab", "id");
+		}
+		
+		return mav;
+	}
+	
+	
+
+	@PostMapping("findPwDo")
+    public ModelAndView findPwDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        
+		// 처리가 끝나면 무조건 결과 페이지로 리다이렉트
+        String url = "redirect:/member/findPwResult";
+        
+        HttpSession session = req.getSession();
+        String userId = req.getParameter("userId");
+        String email = req.getParameter("email");
+        
+        try {
+            // 1. 회원 정보 확인
+            MemberDTO dto = service.findById(userId);
+            
+            // 아이디가 없거나 이메일이 다르면 -> 실패 (파라미터 전달)
+            if(dto == null || !dto.getEmail().equals(email)) {
+                return new ModelAndView("redirect:/member/findPwResult?fail=notfound");
+            }
+            
+            // 2. 임시 비밀번호 생성 및 DB 업데이트
+            String tempPw = generateTempPassword(10);
+            dto.setPassword(tempPw); 
+            service.updateMemberPw(dto); // DB 업데이트
+            
+            // 3. 메일 발송 준비
+            MailDTO mail = new MailDTO();
+            mail.setSenderName("Footlog 관리자");
+            mail.setSenderEmail("yeonhwa7992@gmail.com"); // 성공했던 그 이메일!
+            mail.setReceiverEmail(email);
+            mail.setSubject("[Footlog] 임시 비밀번호 안내입니다.");
+            
+            String content = "<div style='text-align:center; border:1px solid #ddd; padding:20px;'>"
+                           + "<h2>임시 비밀번호 발급</h2>"
+                           + "<p>회원님의 임시 비밀번호는 <span style='color:blue; font-weight:bold; font-size:1.2em;'>" 
+                           + tempPw + "</span> 입니다.</p>"
+                           + "<p>로그인 후 반드시 비밀번호를 변경해 주세요.</p>"
+                           + "</div>";
+            mail.setContent(content);
+
+            // 4. 메일 전송
+            MailSender sender = new MailSender();
+            boolean b = sender.mailSend(mail);
+            
+            if(b) {
+                // 성공 시 받는 사람 이메일을 세션에 잠깐 저장 (결과 페이지에서 보여주기 위함)
+                session.setAttribute("receiverEmail", email);
+            } else {
+                // DB는 바꼈는데 메일 전송만 실패한 경우
+                url += "?fail=send";
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            url += "?fail=error";
+        }
+        
+        return new ModelAndView(url);
+    }
+	
+	// 이메일 전송 확인 
+	@GetMapping("findPwResult")
+    public ModelAndView findPwResult(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ModelAndView mav = new ModelAndView("member/findPwResult");
+        HttpSession session = req.getSession();
+        
+        String fail = req.getParameter("fail");
+        String receiver = (String)session.getAttribute("receiverEmail");
+        
+        // 세션 값 삭제 (새로고침 시 계속 남는 것 방지)
+        session.removeAttribute("receiverEmail");
+        
+        String msg = "";
+        boolean isSuccess = false;
+        
+        if(fail == null) {
+            // 성공 케이스
+            if(receiver != null) {
+                isSuccess = true;
+                msg = "<span style='color:blue; font-weight:bold;'>" + receiver + "</span>님에게<br>"
+                    + "임시 비밀번호를 전송했습니다.<br>메일함을 확인해주세요.";
+            } else {
+                // 비정상 접근 (새로고침 등)
+                return new ModelAndView("redirect:/member/login");
+            }
+        } else if("notfound".equals(fail)) {
+            msg = "일치하는 회원 정보가 없습니다.<br>아이디와 이메일을 확인해주세요.";
+        } else if("send".equals(fail)) {
+            msg = "비밀번호는 재설정되었으나<br>메일 전송에 실패했습니다.";
+        } else {
+            msg = "시스템 오류가 발생했습니다.<br>잠시 후 다시 시도해주세요.";
+        }
+        
+        mav.addObject("message", msg);
+        mav.addObject("isSuccess", isSuccess); // JSP에서 아이콘 분기 처리용
+        
+        return mav;
+    }
+	
+
+    // 임시 비밀번호 생성기 (영문+숫자)
+    private String generateTempPassword(int length) {
+        char[] charSet = new char[] { 
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 
+            'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' 
+        };
+        
+        StringBuilder sb = new StringBuilder();
+        int idx = 0;
+        for (int i = 0; i < length; i++) {
+            idx = (int) (charSet.length * Math.random());
+            sb.append(charSet[idx]);
+        }
+        return sb.toString();
+    }
 }
