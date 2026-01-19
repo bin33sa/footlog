@@ -21,7 +21,10 @@ public class MatchHistoryDTO {
     private String title;        // 제목 (mercenary_post)
     private String match_date;   // 경기일 (match_post)
     private String created_at;   // 작성일 (mercenary_post)
-    private String sort_date;    // 정
+    private String sort_date;    // 정렬
+    
+    private String team_emblem;      // 내 팀(혹은 신청한 팀) 엠블럼
+    private String opponent_emblem;  // 상대 팀 엠블럼
     
 	public long getApply_code() {
 		return apply_code;
@@ -106,6 +109,18 @@ public class MatchHistoryDTO {
 	}
 	public void setSort_date(String sort_date) {
 		this.sort_date = sort_date;
+	}
+	public String getTeam_emblem() {
+		return team_emblem;
+	}
+	public void setTeam_emblem(String team_emblem) {
+		this.team_emblem = team_emblem;
+	}
+	public String getOpponent_emblem() {
+		return opponent_emblem;
+	}
+	public void setOpponent_emblem(String opponent_emblem) {
+		this.opponent_emblem = opponent_emblem;
 	}
     
     

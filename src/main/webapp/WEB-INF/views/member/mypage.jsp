@@ -24,37 +24,37 @@
             overflow: hidden;
         }
 
-        /* 매치 리스트 카드 디자인 */
+        /* [NEW] 가로형 매치 카드 디자인 */
         .match-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             background: #fff;
             border-radius: 16px;
-            padding: 20px 25px;
-            margin-bottom: 15px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.02);
             border: 1px solid #eee;
             transition: all 0.2s;
-            border-left: 6px solid transparent; /* 상태 표시줄 */
+            border-left: 6px solid transparent; 
         }
-        .match-card:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
-
-        /* 상태별 스타일 */
-        .match-card.status-active { border-left-color: #D4F63F; } /* 라임색 (모집중) */
-        .match-card.status-end { border-left-color: #6c757d; background-color: #fcfcfc; opacity: 0.85; } /* 종료 */
+        .match-card:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
+        .match-card.status-active { border-left-color: #D4F63F; } /* 라임색 (확정) */
 
         /* 배지 */
         .badge-custom {
             font-size: 0.75rem; font-weight: 700; padding: 6px 12px; border-radius: 20px;
         }
         .badge-lime { background-color: #111; color: #D4F63F; }
-        .badge-gray { background-color: #eee; color: #555; }
 
-        /* 프로필 이미지 */
+        /* 프로필 이미지 (좌측 메뉴용) */
         .profile-img-lg {
             width: 100px; height: 100px; object-fit: cover; border-radius: 50%;
             border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* [NEW] 매치 리스트용 작은 엠블럼 */
+        .match-emblem {
+            width: 32px; height: 32px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 1px solid #eee;
+            background-color: #f8f9fa;
         }
     </style>
 </head>
@@ -129,77 +129,80 @@
                     
                     <div class="col-md-4">
                         <div class="modern-card p-4 h-100 d-flex flex-column justify-content-center text-center">
-                            <span class="text-muted small fw-bold mb-1">공격 포인트</span>
-                            <h2 class="fw-bold m-0">${stats.total_point} <span class="fs-6 text-muted fw-normal">points</span></h2>
+                            <span class="text-muted small fw-bold mb-1">소속 구단</span>
+                            <h2 class="fw-bold m-0">${stats.my_team_count} <span class="fs-6 text-muted fw-normal">teams</span></h2>
                         </div>
                     </div>
                 </div>
                 
-                <h5 class="fw-bold mb-3 ms-1"><i class="bi bi-calendar-event me-2"></i>나의 매치 일정</h5>
+                <h5 class="fw-bold mb-3 ms-1"><i class="bi bi-calendar-event me-2"></i>확정된 매치 일정</h5>
                 
                 <c:choose>
                     <c:when test="${empty matchList}">
                          <div class="modern-card p-5 text-center">
-                            <div class="mb-3 text-muted"><i class="bi bi-emoji-frown fs-1 display-4"></i></div>
+                            <div class="mb-3 text-muted"><i class="bi bi-emoji-frown fs-1 display-4 opacity-50"></i></div>
                             <h6 class="text-muted fw-bold mb-2">아직 참여한 매치 내역이 없습니다.</h6>
                             <a href="${pageContext.request.contextPath}/match/list" class="btn btn-dark rounded-pill px-4 mt-3">매치 둘러보기</a>
                          </div>
                     </c:when>
-                        <c:otherwise>
+                    
+                    <c:otherwise>
                         <div class="mb-5">
+                            <c:set var="hasConfirmedMatch" value="false" />
+                            
                             <c:forEach var="match" items="${matchList}">
                                 
-                                <%-- 진행중/예정 매치 (라임색 테두리) --%>
-                                <c:if test="${match.status != '완료' && match.status != 'END'}">
-                                    <div class="match-card status-active">
-                                        <div>
-                                            <span class="badge badge-custom badge-lime mb-2">
-                                                ${match.status == '확정' ? '매치확정' : '모집중'}
-                                            </span>
+                                <%-- '매칭완료' 또는 '확정' 인 경우만 출력 --%>
+                                <c:if test="${match.status == '매칭완료' || match.status == '확정'}">
+                                    <c:set var="hasConfirmedMatch" value="true" />
+                                    
+                                    <div class="match-card status-active py-3 px-4 mb-3">
+                                        <div class="d-flex align-items-center w-100 justify-content-between">
                                             
-                                            <h5 class="fw-bold mb-1 text-dark" style="font-size: 1.1rem;">
-                                                ${match.home_team_name} 
-                                                <span class="text-danger small mx-1">vs</span> 
-                                                ${match.away_team_name}
-                                            </h5>
-                                            
-                                            <div class="text-muted small mt-2">
-                                                <i class="bi bi-geo-alt me-1"></i>${match.region} 
-                                                <span class="mx-2">|</span> 
-                                                <i class="bi bi-clock me-1"></i>${match.match_date}
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge badge-custom badge-lime me-3 text-nowrap">매치확정</span>
+                                                
+                                                <img src="${pageContext.request.contextPath}/uploads/team/${match.home_team_emblem}" 
+                                                     class="match-emblem me-2" 
+                                                     onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
+                                                <h5 class="fw-bold mb-0 text-dark text-nowrap me-2">${match.home_team_name}</h5>
+                                                
+                                                <span class="text-danger small mx-2 fst-italic fw-bold">VS</span>
+                                                
+                                                <h5 class="fw-bold mb-0 text-dark text-nowrap ms-2">${match.away_team_name}</h5>
+                                                <img src="${pageContext.request.contextPath}/uploads/team/${match.away_team_emblem}" 
+                                                     class="match-emblem ms-2" 
+                                                     onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
                                             </div>
-                                        </div>
-                                        
-                                        <a href="${pageContext.request.contextPath}/match/article?matchNum=${match.match_code}" class="btn btn-outline-dark btn-sm rounded-pill px-3">상세보기</a>
-                                    </div>
-                                </c:if>
 
-                                <%--  종료된 매치 (회색 테두리) --%>
-                                <c:if test="${match.status == '완료' || match.status == 'END'}">
-                                    <div class="match-card status-end">
-                                        <div>
-                                            <span class="badge badge-custom badge-gray mb-2">종료됨</span>
-                                            
-                                            <h6 class="fw-bold mb-1 text-secondary text-decoration-line-through">
-                                                ${match.home_team_name} vs ${match.away_team_name}
-                                            </h6>
-                                            
-                                            <div class="text-muted small mt-2 fw-bold">
-                                                결과: <span class="text-dark">${match.home_score} : ${match.away_score}</span>
-                                                <span class="mx-2">|</span>
-                                                ${fn:substring(match.match_date, 0, 10)}
+                                            <div class="d-flex align-items-center">
+                                                <div class="text-muted small me-4 text-end d-none d-lg-block">
+                                                    <span><i class="bi bi-geo-alt-fill me-1"></i>${match.region}</span>
+                                                    <span class="mx-2 text-light-gray">|</span> 
+                                                    <span><i class="bi bi-clock-fill me-1"></i>${fn:substring(match.match_date, 0, 16)}</span>
+                                                </div>
+                                                <a href="${pageContext.request.contextPath}/match/article?match_code=${match.match_code}" class="btn btn-outline-dark btn-sm rounded-pill px-4 fw-bold text-nowrap">상세보기</a>
                                             </div>
+                                            
                                         </div>
-                                        <a href="${pageContext.request.contextPath}/match/article?matchNum=${match.match_code}" class="btn btn-outline-secondary btn-sm rounded-pill px-3">상세보기</a>
                                     </div>
                                 </c:if>
-                                
                             </c:forEach>
+                            
+                            <%-- 리스트는 있지만 '확정'된 매치가 하나도 없는 경우 --%>
+                            <c:if test="${not hasConfirmedMatch}">
+                                 <div class="modern-card p-5 text-center">
+                                    <div class="mb-3 text-muted"><i class="bi bi-calendar-x fs-1 display-4 opacity-50"></i></div>
+                                    <h6 class="text-muted fw-bold mb-2">예정된 매치 일정이 없습니다.</h6>
+                                    <p class="text-secondary small mb-4">매칭이 성사되면 이곳에 표시됩니다.</p>
+                                    <a href="${pageContext.request.contextPath}/match/list" class="btn btn-outline-dark rounded-pill px-4 btn-sm">매치 리스트 가기</a>
+                                 </div>
+                            </c:if>
                         </div>
                     </c:otherwise>
                 </c:choose>
 
-            </div> 
+            </div>
         </div> 
     </div> 
             
@@ -218,14 +221,13 @@
         </div>
     </div>
 
-   <script>
+    <script>
     function openMyPageTeamModal(e) {
         e.preventDefault();
         const modalEl = document.getElementById('myPageTeamModal');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
         
-        // 로딩바 표시 (헤더와 동일한 스타일)
         const loadingHtml = `
             <div class="text-center text-secondary py-4">
                 <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
@@ -239,57 +241,24 @@
             dataType: 'json',
             success: function(list) {
                 let html = '';
-                
                 if (list && list.length > 0) {
                     html += '<div class="list-group list-group-flush">';
-                    
                     $.each(list, function(index, team) {
                         let imgSrc = '${pageContext.request.contextPath}/dist/images/emblem.png';
-                        if(team.emblem_image) {
-                            imgSrc = '${pageContext.request.contextPath}/uploads/team/' + team.emblem_image;
-                        }
+                        if(team.emblem_image) imgSrc = '${pageContext.request.contextPath}/uploads/team/' + team.emblem_image;
                         
-                        // 헤더와 동일한 리스트 아이템 디자인 적용
-                        html += '<a href="${pageContext.request.contextPath}/myteam/main?teamCode=' + team.team_code + '"';
-                        html += '   class="list-group-item list-group-item-action d-flex align-items-center py-3 px-2 border-0 rounded-3 mb-1"';
-                        html += '   style="transition: background 0.2s;">';
-                        
-                        // 엠블럼 영역 (원형 크롭)
-                        html += '   <div class="rounded-circle border me-3 overflow-hidden bg-light d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; min-width: 48px;">';
-                        html += '       <img src="' + imgSrc + '" class="w-100 h-100 object-fit-cover" onerror="this.src=\'${pageContext.request.contextPath}/dist/images/emblem.png\'">';
-                        html += '   </div>';
-                        
-                        // 텍스트 영역
-                        html += '   <div>';
-                        html += '       <div class="fw-bold text-dark" style="font-size: 1rem;">' + team.team_name + '</div>';
-                        html += '       <div class="small text-secondary mt-1"><i class="bi bi-geo-alt me-1"></i>' + (team.region ? team.region : '지역미정') + '</div>';
-                        html += '   </div>';
-                        
-                        // 우측 화살표 아이콘
-                        html += '   <i class="bi bi-chevron-right ms-auto text-muted opacity-50"></i>';
-                        html += '</a>';
+                        html += '<a href="${pageContext.request.contextPath}/myteam/main?teamCode=' + team.team_code + '" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-2 border-0 rounded-3 mb-1" style="transition: background 0.2s;">';
+                        html += '<div class="rounded-circle border me-3 overflow-hidden bg-light d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; min-width: 48px;"><img src="' + imgSrc + '" class="w-100 h-100 object-fit-cover" onerror="this.src=\'${pageContext.request.contextPath}/dist/images/emblem.png\'"></div>';
+                        html += '<div><div class="fw-bold text-dark" style="font-size: 1rem;">' + team.team_name + '</div><div class="small text-secondary mt-1"><i class="bi bi-geo-alt me-1"></i>' + (team.region ? team.region : '지역미정') + '</div></div>';
+                        html += '<i class="bi bi-chevron-right ms-auto text-muted opacity-50"></i></a>';
                     });
-                    
                     html += '</div>';
-                    
                 } else {
-                   
-                    html += '<div class="text-center pt-5 pb-0">';
-                    html += '   <i class="bi bi-exclamation-circle text-secondary fs-1 mb-3 d-block opacity-25"></i>';
-                    html += '   <p class="text-secondary mb-4">아직 가입된 구단이 없습니다.</p>';
-                    html += '   <a href="${pageContext.request.contextPath}/team/write" class="btn btn-dark rounded-pill w-100 py-2 fw-bold mt-5">새 구단 만들기</a>';
-                    html += '</div>';
+                    html += '<div class="text-center pt-5 pb-0"><i class="bi bi-exclamation-circle text-secondary fs-1 mb-3 d-block opacity-25"></i><p class="text-secondary mb-4">아직 가입된 구단이 없습니다.</p><a href="${pageContext.request.contextPath}/team/write" class="btn btn-dark rounded-pill w-100 py-2 fw-bold mt-5">새 구단 만들기</a></div>';
                 }
-                
-                
-                setTimeout(() => {
-                    $('#myPageTeamListArea').html(html);
-                }, 200);
+                setTimeout(() => { $('#myPageTeamListArea').html(html); }, 200);
             },
-            error: function() { 
-                let msg = '<div class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle mb-2 d-block fs-4"></i>목록을 불러오지 못했습니다.</div>';
-                $('#myPageTeamListArea').html(msg); 
-            }
+            error: function() { $('#myPageTeamListArea').html('<div class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle mb-2 d-block fs-4"></i>목록을 불러오지 못했습니다.</div>'); }
         });
     }
     </script>

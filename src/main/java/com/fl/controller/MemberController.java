@@ -358,7 +358,7 @@ public class MemberController {
 				
 				// 통계 맵에 담기
 				stats.put("month_match_count", monthMatchCount);
-				stats.put("total_point", 0); // 공격 포인트는 아직 DB 컬럼 없으면 0으로 처리
+				stats.put("my_team_count", myTeams != null ? myTeams.size() : 0);
 				
 				if(nextMatch != null) {
 					stats.put("next_match_dday", minDaysDiff == 0 ? "Day" : minDaysDiff); // D-Day

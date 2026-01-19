@@ -3,30 +3,29 @@
 <mapper namespace="com.fl.mapper.MyPageMapper">
 
 	<select id="listMyMatch" parameterType="Long" resultType="com.fl.model.MatchDTO">
-	    SELECT 
-	        m.match_code,
-	        TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
-	        m.status,
-	        m.title,
-	        m.home_code,
-	        m.away_code,
-	        ht.team_name AS home_team_name,
-	        ht.emblem_image AS home_team_emblem,
-	        at.team_name AS away_team_name,
-	        at.emblem_image AS away_team_emblem,
-	        ht.region AS region,
-	        NVL(r.home_score, 0) AS home_score,
-	        NVL(r.away_score, 0) AS away_score
-	    FROM match_post m
-	    JOIN team ht ON m.home_code = ht.team_code
-	    JOIN team at ON m.away_code = at.team_code
-	    LEFT JOIN match_result r ON m.match_code = r.match_code
-	    WHERE 
-	        (m.home_code IN (SELECT team_code FROM member_team WHERE member_code = #{memberCode})
-	         OR 
-	         m.away_code IN (SELECT team_code FROM member_team WHERE member_code = #{memberCode}))
-	        AND m.status IN ('확정', '완료', 'END')
-	    ORDER BY m.match_date DESC
+		SELECT 
+            m.match_code, 
+            TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
+            m.status, 
+            m.title, 
+            m.home_code, 
+            m.away_code, 
+            ht.team_name AS home_team_name, 
+            ht.region AS region,
+            ht.emblem_image AS home_team_emblem,  at.team_name AS away_team_name,
+            at.emblem_image AS away_team_emblem,  NVL(r.home_score, 0) AS home_score, 
+            NVL(r.away_score, 0) AS away_score
+		FROM match_post m
+		JOIN team ht ON m.home_code = ht.team_code
+		LEFT JOIN team at ON m.away_code = at.team_code 
+		LEFT JOIN match_result r ON m.match_code = r.match_code
+		WHERE (
+            m.home_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code}) 
+            OR 
+            m.away_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
+        )
+		AND m.status IN ('확정', '완료', 'END', '매칭완료') 
+		ORDER BY m.match_date DESC
 	</select>
     
     <select id="readMember" parameterType="Long" resultType="com.fl.model.MemberDTO">
@@ -39,16 +38,21 @@
 	<select id="listMatchApply" parameterType="Long" resultType="com.fl.model.MatchHistoryDTO">
 	    SELECT 
             ma.apply_code,      
-            ma.status,
+            ma.status,                 -- 상태: '매칭대기', '수락'
             ma.match_code,
             t.team_name AS opponent_name,
-            (SELECT team_name FROM team WHERE team_code = ma.team_code) AS team_name,
+            t.emblem_image AS opponent_emblem,  -- 상대팀(홈팀) 엠블럼
+            
+            my_t.team_name AS team_name,
+            my_t.emblem_image AS team_emblem,   -- 내 팀(신청팀) 엠블럼
+            
             TO_CHAR(mp.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
             t.region,
             ma.apply_date AS sort_date
         FROM match_apply ma
         JOIN match_post mp ON ma.match_code = mp.match_code
-        JOIN team t ON mp.home_code = t.team_code
+        JOIN team t ON mp.home_code = t.team_code       -- 게시글 올린 팀(상대)
+        JOIN team my_t ON ma.team_code = my_t.team_code -- 내가 신청한 팀
         WHERE ma.team_code IN (
             SELECT team_code FROM member_team WHERE member_code = #{member_code}
         )
@@ -57,15 +61,20 @@
 
         SELECT 
             0 AS apply_code,
-            mp.status,
+            mp.status,                 -- 상태: '모집중', '매칭완료'
             mp.match_code,
             NVL(t.team_name, '상대 미정') AS opponent_name,
-            (SELECT team_name FROM team WHERE team_code = mp.home_code) AS team_name,
+            t.emblem_image AS opponent_emblem, -- 상대팀(원정팀) 엠블럼 (없으면 null)
+            
+            my_t.team_name AS team_name,
+            my_t.emblem_image AS team_emblem,  -- 내 팀(홈팀) 엠블럼
+            
             TO_CHAR(mp.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
-            (SELECT region FROM team WHERE team_code = mp.home_code) AS region,
+            my_t.region AS region,
             mp.created_at AS sort_date
         FROM match_post mp
-        LEFT JOIN team t ON mp.away_code = t.team_code
+        JOIN team my_t ON mp.home_code = my_t.team_code -- 내 팀
+        LEFT JOIN team t ON mp.away_code = t.team_code  -- 매칭된 상대팀
         WHERE mp.home_code IN (
             SELECT team_code FROM member_team WHERE member_code = #{member_code}
         )
