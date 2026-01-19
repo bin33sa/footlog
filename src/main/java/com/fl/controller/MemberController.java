@@ -571,13 +571,44 @@ public class MemberController {
             mail.setSenderEmail("yeonhwa7992@gmail.com"); // 성공했던 그 이메일!
             mail.setReceiverEmail(email);
             mail.setSubject("[Footlog] 임시 비밀번호 안내입니다.");
+           
+            String homeUrl = "http://localhost:9090/footlog/main"; 
             
-            String content = "<div style='text-align:center; border:1px solid #ddd; padding:20px;'>"
-                           + "<h2>임시 비밀번호 발급</h2>"
-                           + "<p>회원님의 임시 비밀번호는 <span style='color:blue; font-weight:bold; font-size:1.2em;'>" 
-                           + tempPw + "</span> 입니다.</p>"
-                           + "<p>로그인 후 반드시 비밀번호를 변경해 주세요.</p>"
-                           + "</div>";
+            String content = 
+                "<div style='background-color: #f8f9fa; padding: 50px 0; font-family: sans-serif;'>"
+              + "  <div style='width: 100%; max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid #eee;'>"
+              
+              + "    "
+              + "    <div style='padding: 30px; text-align: center; border-bottom: 1px solid #f1f1f1;'>"
+              + "      <a href='" + homeUrl + "' target='_blank' style='font-size: 24px; font-weight: 900; font-style: italic; color: #000; text-decoration: none;'>Footlog</a>"
+              + "    </div>"
+              
+              + "    "
+              + "    <div style='padding: 40px 30px; text-align: center;'>"
+              + "      <h2 style='color: #111; font-size: 20px; margin-bottom: 30px; font-weight: 800;'>임시 비밀번호 발급 안내</h2>"
+              + "      <p style='color: #666; font-size: 14px; line-height: 1.5; margin-bottom: 30px;'>"
+              + "        안녕하세요, 회원님.<br>"
+              + "        요청하신 임시 비밀번호가 발급되었습니다.<br>"
+              + "        아래 비밀번호로 로그인 후 반드시 변경해 주세요."
+              + "      </p>"
+              
+              + "      "
+              + "      <div style='background-color: #f8f9fa; padding: 20px; border-radius: 12px; margin-bottom: 30px; border: 1px solid #e9ecef;'>"
+              + "        <span style='color: #000; font-size: 24px; font-weight: 800; letter-spacing: 2px; display: block;'>" 
+              +            tempPw 
+              + "        </span>"
+              + "      </div>"
+              
+              + "      <a href='" + homeUrl + "/member/login' target='_blank' style='display: inline-block; padding: 15px 30px; background-color: #000; color: #fff; text-decoration: none; font-weight: bold; border-radius: 8px; font-size: 14px;'>로그인 하러 가기</a>"
+
+              + "      <p style='color: #999; font-size: 12px; margin-top: 40px;'>"
+              + "        본 메일은 발신 전용이며 회신되지 않습니다.<br>"
+              + "        &copy; Footlog Team"
+              + "      </p>"
+              + "    </div>"
+              + "  </div>"
+              + "</div>";
+              
             mail.setContent(content);
 
             // 4. 메일 전송

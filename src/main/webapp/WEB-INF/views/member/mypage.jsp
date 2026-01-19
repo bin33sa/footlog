@@ -149,7 +149,7 @@
                         <div class="mb-5">
                             <c:forEach var="match" items="${matchList}">
                                 
-                                <%-- [상태 1] 진행중/예정 매치 (라임색 테두리) --%>
+                                <%-- 진행중/예정 매치 (라임색 테두리) --%>
                                 <c:if test="${match.status != '완료' && match.status != 'END'}">
                                     <div class="match-card status-active">
                                         <div>
@@ -174,7 +174,7 @@
                                     </div>
                                 </c:if>
 
-                                <%-- [상태 2] 종료된 매치 (회색 테두리) --%>
+                                <%--  종료된 매치 (회색 테두리) --%>
                                 <c:if test="${match.status == '완료' || match.status == 'END'}">
                                     <div class="match-card status-end">
                                         <div>
@@ -218,14 +218,20 @@
         </div>
     </div>
 
-    <script>
+   <script>
     function openMyPageTeamModal(e) {
         e.preventDefault();
         const modalEl = document.getElementById('myPageTeamModal');
         const modal = new bootstrap.Modal(modalEl);
         modal.show();
         
-        $('#myPageTeamListArea').html('<div class="text-center py-4"><div class="spinner-border text-secondary"></div></div>');
+        // 로딩바 표시 (헤더와 동일한 스타일)
+        const loadingHtml = `
+            <div class="text-center text-secondary py-4">
+                <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
+                <p class="small mb-0">구단 목록을 불러오는 중...</p>
+            </div>`;
+        $('#myPageTeamListArea').html(loadingHtml);
         
         $.ajax({
             url: '${pageContext.request.contextPath}/team/myList',
@@ -233,20 +239,57 @@
             dataType: 'json',
             success: function(list) {
                 let html = '';
+                
                 if (list && list.length > 0) {
                     html += '<div class="list-group list-group-flush">';
+                    
                     $.each(list, function(index, team) {
                         let imgSrc = '${pageContext.request.contextPath}/dist/images/emblem.png';
-                        if(team.emblem_image) imgSrc = '${pageContext.request.contextPath}/uploads/team/' + team.emblem_image;
-                        html += '<a href="${pageContext.request.contextPath}/myteam/main?teamCode=' + team.team_code + '" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-2 border-0 rounded-3 mb-1"><div class="rounded-circle border me-3 overflow-hidden bg-light d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;"><img src="' + imgSrc + '" class="w-100 h-100 object-fit-cover" onerror="this.src=\'${pageContext.request.contextPath}/dist/images/emblem.png\'"></div><div><div class="fw-bold text-dark">' + team.team_name + '</div><div class="small text-secondary mt-1"><i class="bi bi-geo-alt me-1"></i>' + (team.region ? team.region : '지역미정') + '</div></div><i class="bi bi-chevron-right ms-auto text-muted opacity-50"></i></a>';
+                        if(team.emblem_image) {
+                            imgSrc = '${pageContext.request.contextPath}/uploads/team/' + team.emblem_image;
+                        }
+                        
+                        // 헤더와 동일한 리스트 아이템 디자인 적용
+                        html += '<a href="${pageContext.request.contextPath}/myteam/main?teamCode=' + team.team_code + '"';
+                        html += '   class="list-group-item list-group-item-action d-flex align-items-center py-3 px-2 border-0 rounded-3 mb-1"';
+                        html += '   style="transition: background 0.2s;">';
+                        
+                        // 엠블럼 영역 (원형 크롭)
+                        html += '   <div class="rounded-circle border me-3 overflow-hidden bg-light d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; min-width: 48px;">';
+                        html += '       <img src="' + imgSrc + '" class="w-100 h-100 object-fit-cover" onerror="this.src=\'${pageContext.request.contextPath}/dist/images/emblem.png\'">';
+                        html += '   </div>';
+                        
+                        // 텍스트 영역
+                        html += '   <div>';
+                        html += '       <div class="fw-bold text-dark" style="font-size: 1rem;">' + team.team_name + '</div>';
+                        html += '       <div class="small text-secondary mt-1"><i class="bi bi-geo-alt me-1"></i>' + (team.region ? team.region : '지역미정') + '</div>';
+                        html += '   </div>';
+                        
+                        // 우측 화살표 아이콘
+                        html += '   <i class="bi bi-chevron-right ms-auto text-muted opacity-50"></i>';
+                        html += '</a>';
                     });
+                    
                     html += '</div>';
+                    
                 } else {
-                    html += '<div class="text-center pt-5 pb-0"><i class="bi bi-exclamation-circle text-secondary fs-1 mb-3 d-block opacity-25"></i><p class="text-secondary mb-4">가입된 구단이 없습니다.</p><a href="${pageContext.request.contextPath}/team/write" class="btn btn-dark rounded-pill w-100 py-2">새 구단 만들기</a></div>';
+                   
+                    html += '<div class="text-center pt-5 pb-0">';
+                    html += '   <i class="bi bi-exclamation-circle text-secondary fs-1 mb-3 d-block opacity-25"></i>';
+                    html += '   <p class="text-secondary mb-4">아직 가입된 구단이 없습니다.</p>';
+                    html += '   <a href="${pageContext.request.contextPath}/team/write" class="btn btn-dark rounded-pill w-100 py-2 fw-bold mt-5">새 구단 만들기</a>';
+                    html += '</div>';
                 }
-                $('#myPageTeamListArea').html(html);
+                
+                
+                setTimeout(() => {
+                    $('#myPageTeamListArea').html(html);
+                }, 200);
             },
-            error: function() { $('#myPageTeamListArea').html('<div class="text-center text-danger">목록 로드 실패</div>'); }
+            error: function() { 
+                let msg = '<div class="text-center py-4 text-danger"><i class="bi bi-exclamation-triangle mb-2 d-block fs-4"></i>목록을 불러오지 못했습니다.</div>';
+                $('#myPageTeamListArea').html(msg); 
+            }
         });
     }
     </script>

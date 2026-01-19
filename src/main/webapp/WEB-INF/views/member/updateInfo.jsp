@@ -1,17 +1,15 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <title>프로필 편집 - Footlog</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <style>
+        /* 기존 스타일 그대로 유지 */
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { background-color: #f8f9fa; padding: 60px 0; font-family: 'Pretendard', sans-serif; color: #222; }
         .update-card { width: 100%; max-width: 480px; padding: 50px 40px; border-radius: 24px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.06); margin: auto; border: 1px solid rgba(0,0,0,0.02); }
@@ -84,18 +82,21 @@
             <label class="form-label">이메일</label>
             <input type="email" name="email" value="${dto.email}" class="form-control">
         </div>
+        
         <div class="mb-3">
             <label class="form-label">비밀번호 변경 <span class="text-muted fw-normal" style="font-size:0.75rem">(변경 시에만 입력)</span></label>
-            <input type="password" name="password" id="password" class="form-control">
+            <input type="password" name="password" id="password" class="form-control" placeholder="변경할 경우에만 입력하세요">
         </div>
         <div class="mb-4">
             <input type="password" id="passwordCheck" class="form-control" placeholder="비밀번호 확인">
             <div id="pwFeedback" class="msg-box"></div>
         </div>
+        
         <div class="row mb-4">
             <div class="col-6"><label class="form-label">이름</label><input type="text" name="member_name" value="${dto.member_name}" class="form-control"></div>
             <div class="col-6"><label class="form-label">연락처</label><input type="tel" name="phone_number" value="${dto.phone_number}" class="form-control"></div>
         </div>
+        
         <div class="mb-4">
             <label class="form-label">주 활동 지역</label>
             <select name="region" id="region" class="form-select">
@@ -109,6 +110,7 @@
                 <option value="제주" ${dto.region=="제주" ? "selected":""}>제주</option>
             </select>
         </div>
+        
         <div class="mb-5">
             <label class="form-label">주 포지션</label>
             <div class="btn-group-position">
@@ -122,6 +124,7 @@
                 <label class="btn btn-outline-custom text-center" for="pos_gk"><div class="fw-bold">GK</div></label>
             </div>
         </div>
+        
         <div class="row g-2">
             <div class="col-6"><button type="button" class="btn-cancel" onclick="location.href='${pageContext.request.contextPath}/member/mypage'">취소</button></div>
             <div class="col-6"><button type="button" class="btn-black" onclick="updateOk()">수정 완료</button></div>
@@ -132,7 +135,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// [성공 알림 및 페이지 이동]
+// [성공 알림]
 $(function() {
     if ("${updateComplete}" === "true") {
         alert("회원 정보 수정이 완료되었습니다!\n확인을 누르면 마이페이지로 이동합니다.");
@@ -140,6 +143,27 @@ $(function() {
     }
 });
 
+// [비밀번호 실시간 일치 확인]
+$("#passwordCheck, #password").on("keyup", function() {
+    const pw = $("#password").val();
+    const pwConfirm = $("#passwordCheck").val();
+    const feedback = $("#pwFeedback");
+    
+    if (pw === "") {
+        feedback.html("");
+        return;
+    }
+    
+    if (pwConfirm === "") { 
+        feedback.html(""); 
+    } else if (pw === pwConfirm) { 
+        feedback.html('<span class="msg-success"><i class="bi bi-check-circle-fill"></i> 비밀번호가 일치합니다.</span>'); 
+    } else { 
+        feedback.html('<span class="msg-error"><i class="bi bi-x-circle-fill"></i> 비밀번호가 일치하지 않습니다.</span>'); 
+    }
+});
+
+// [이미지 삭제 로직]
 function deleteImage() {
     if(!confirm("프로필 사진을 삭제하시겠습니까?")) return;
     document.getElementById('profilePreview').src = '${pageContext.request.contextPath}/dist/images/avatar.png';
@@ -147,14 +171,67 @@ function deleteImage() {
     document.getElementById('imageDeleted').value = "true";
 }
 
+// [수정 완료 전송 함수]
 function updateOk() {
     const f = document.memberForm;
-    // 유효성 검사 생략 (기존 코드와 동일)
+    let p;
+
+    // 1. 비밀번호 검사 (입력된 경우에만 체크!)
+    const pw = f.password.value;
+    const pwCheck = document.getElementById("passwordCheck").value;
+
+    if(pw.length > 0) {
+        p = /^(?=.*[a-z])(?=.*[!@#$%^*+=-]|.*[0-9]).{5,10}$/i;
+        if( ! p.test(pw) ) {
+            alert('패스워드 형식을 맞춰주세요 (문자+숫자/특수문자, 5~10자).');
+            f.password.focus();
+            return;
+        }
+
+        if(pw !== pwCheck) {
+            alert('패스워드가 일치하지 않습니다.');
+            f.passwordCheck.focus();
+            return;
+        }
+    }
+
+    // 2. 이름 검사
+    p = /^[가-힣]{2,5}$/;
+    if( ! p.test(f.member_name.value) ) {
+        alert('이름은 한글 2~5자로 입력해주세요.');
+        f.member_name.focus();
+        return;
+    }
+
+    // 3. 이메일 검사
+    if( ! f.email.value.trim() ) { 
+        alert('이메일을 입력하세요.'); 
+        f.email.focus(); 
+        return; 
+    }
+
+    // 4. 전화번호 검사 
+    const phone = f.phone_number.value.trim();
+    if( ! phone ) {
+        alert('전화번호를 입력하세요.');
+        f.phone_number.focus();
+        return;
+    }
+    
+    // 숫자와 하이픈만 허용하는 정규식
+    const phonePattern = /^[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}$/;
+    if( ! phonePattern.test(phone) ) {
+        alert("연락처 형식이 올바르지 않습니다.\n숫자와 하이픈(-)을 포함하여 정확히 입력해주세요.\n(예: 010-1234-5678)");
+        f.phone_number.focus();
+        return;
+    }
+
+    // 전송
     f.action = '${pageContext.request.contextPath}/member/updateDo';
     f.submit();
 }
 
-// 이미지 미리보기 및 기타 JS (기존 유지)
+// [이미지 미리보기]
 const inputEL = document.querySelector('input[name=selectFile]');
 inputEL.addEventListener('change', ev => {
     let file = ev.target.files[0];

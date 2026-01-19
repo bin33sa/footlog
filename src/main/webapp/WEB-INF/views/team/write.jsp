@@ -166,9 +166,20 @@
                 return false;
             }
             
-            // 3. 연락처 입력 확인
-            if(!f.contact_number.value.trim()) {
+            // 3. 연락처 입력 및 유효성 확인 (수정됨)
+            const contact = f.contact_number.value.trim();
+            if(!contact) {
                 alert("대표 연락처를 입력해주세요.");
+                f.contact_number.focus();
+                return false;
+            }
+            
+            // 전화번호 정규식: 숫자와 하이픈(-)만 허용하며, 일반적인 전화번호 패턴 확인
+            // 예: 010-1234-5678, 02-123-4567
+            const phonePattern = /^[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}$/;
+            
+            if(!phonePattern.test(contact)) {
+                alert("연락처 형식이 올바르지 않습니다.\n숫자와 하이픈(-)을 포함하여 정확히 입력해주세요.\n(예: 010-1234-5678)");
                 f.contact_number.focus();
                 return false;
             }

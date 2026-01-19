@@ -1,132 +1,41 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <title>회원가입 - Footlog</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
     <style>
+        /* CSS는 기존과 동일하게 유지 */
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        
         body { background-color: #f8f9fa; padding: 60px 0; font-family: 'Pretendard', sans-serif; color: #333; }
-        
-        .signup-card { 
-            width: 100%; max-width: 480px; 
-            padding: 50px 40px; 
-            border-radius: 24px; 
-            background: #fff; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.08); 
-            margin: auto; 
-            border: 1px solid rgba(0,0,0,0.02);
-        }
-        
-        .brand-logo { 
-            font-size: 2.2rem; font-weight: 900; font-style: italic; 
-            text-align: center; margin-bottom: 10px; display: block; 
-            text-decoration: none; color: #111; letter-spacing: -1px;
-        }
-        
+        .signup-card { width: 100%; max-width: 480px; padding: 50px 40px; border-radius: 24px; background: #fff; box-shadow: 0 15px 35px rgba(0,0,0,0.08); margin: auto; border: 1px solid rgba(0,0,0,0.02); }
+        .brand-logo { font-size: 2.2rem; font-weight: 900; font-style: italic; text-align: center; margin-bottom: 10px; display: block; text-decoration: none; color: #111; letter-spacing: -1px; }
         .sub-title { text-align: center; color: #888; font-size: 0.95rem; margin-bottom: 40px; font-weight: 500; }
-
-        /* 입력창 스타일 개선 */
         .form-label { font-size: 0.85rem; font-weight: 700; color: #444; margin-bottom: 6px; margin-left: 2px; }
-        .form-control, .form-select { 
-            border-radius: 12px; padding: 14px 16px; 
-            border: 1px solid #e1e1e1; 
-            background-color: #fcfcfc;
-            font-size: 0.95rem;
-            transition: all 0.2s ease; 
-        }
-        .form-control:focus, .form-select:focus { 
-            border-color: #111; 
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.03); 
-        }
-        .form-control::placeholder { color: #ccc; font-size: 0.9rem; }
-        
-        /* 버튼 스타일 */
-        .btn-black { 
-            background: #111; color: #fff; 
-            border-radius: 12px; width: 100%; padding: 16px; 
-            font-weight: 700; font-size: 1rem; border: none; 
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            margin-top: 10px;
-        }
+        .form-control, .form-select { border-radius: 12px; padding: 14px 16px; border: 1px solid #e1e1e1; background-color: #fcfcfc; font-size: 0.95rem; transition: all 0.2s ease; }
+        .form-control:focus, .form-select:focus { border-color: #111; background-color: #fff; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.03); }
+        .btn-black { background: #111; color: #fff; border-radius: 12px; width: 100%; padding: 16px; font-weight: 700; font-size: 1rem; border: none; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); margin-top: 10px; }
         .btn-black:hover { background: #000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .btn-black:disabled { background: #e9ecef; color: #adb5bd; transform: none; box-shadow: none; }
-        
-        /* 중복확인 버튼 */
-        .btn-check-id {
-            border-radius: 0 12px 12px 0;
-            background: #222; color: #fff;
-            border: 1px solid #222;
-            padding: 0 20px; font-weight: 600; font-size: 0.85rem;
-            transition: 0.2s;
-        }
+        .btn-check-id { border-radius: 0 12px 12px 0; background: #222; color: #fff; border: 1px solid #222; padding: 0 20px; font-weight: 600; font-size: 0.85rem; transition: 0.2s; }
         .btn-check-id:hover { background: #444; border-color: #444; color: #fff; }
         .input-group .form-control { border-radius: 12px 0 0 12px; }
-
-        /* 프로필 이미지 (모던한 스타일) */
         .profile-section { display: flex; justify-content: center; margin-bottom: 40px; }
-        .profile-wrapper { 
-            position: relative; width: 110px; height: 110px; 
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
+        .profile-wrapper { position: relative; width: 110px; height: 110px; cursor: pointer; transition: transform 0.2s; }
         .profile-wrapper:hover { transform: scale(1.02); }
-        
-        .profile-img { 
-            width: 100%; height: 100%; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            border: 2px solid #f1f3f5;
-            background-color: #f8f9fa; /* 기본 배경색 (이미지 없을 때) */
-        }
-        
-        /* 기본 이미지 없을 때 보여줄 아이콘 (CSS로 처리) */
-        .profile-placeholder-icon {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 2.5rem; color: #dee2e6; z-index: 1; pointer-events: none;
-        }
-
-        .profile-btn { 
-            position: absolute; 
-            bottom: 5px; right: 0px; 
-            background: #111; color: #fff; 
-            width: 34px; height: 34px; 
-            border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            border: 2px solid #fff;
-            z-index: 2;
-        }
-
-        /* 중복확인 메시지 스타일 */
-        .msg-box { 
-            font-size: 0.8rem; margin-top: 8px; font-weight: 600; display: flex; align-items: center; gap: 5px; 
-            min-height: 20px;
-        }
-        .msg-success { color: #00b894; } /* 세련된 민트그린 */
-        .msg-error { color: #ff7675; } /* 세련된 소프트레드 */
-
-        /* 라디오 버튼 */
+        .profile-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #f1f3f5; background-color: #f8f9fa; }
+        .profile-placeholder-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; color: #dee2e6; z-index: 1; pointer-events: none; }
+        .profile-btn { position: absolute; bottom: 5px; right: 0px; background: #111; color: #fff; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 2px solid #fff; z-index: 2; }
+        .msg-box { font-size: 0.8rem; margin-top: 8px; font-weight: 600; display: flex; align-items: center; gap: 5px; min-height: 20px; }
+        .msg-success { color: #00b894; }
+        .msg-error { color: #ff7675; }
         .btn-group-position { display: flex; gap: 8px; }
-        .btn-check + .btn-outline-custom {
-            flex: 1; border: 1px solid #e1e1e1; border-radius: 12px;
-            color: #888; padding: 12px; background: #fff; transition: 0.2s;
-        }
-        .btn-check:checked + .btn-outline-custom {
-            background-color: #111; color: #D4F63F; border-color: #111; font-weight: 800;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .text-muted { color: #adb5bd !important; }
+        .btn-check + .btn-outline-custom { flex: 1; border: 1px solid #e1e1e1; border-radius: 12px; color: #888; padding: 12px; background: #fff; transition: 0.2s; }
+        .btn-check:checked + .btn-outline-custom { background-color: #111; color: #D4F63F; border-color: #111; font-weight: 800; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         a { text-decoration: none; }
     </style>
 </head>
@@ -143,7 +52,7 @@
                 <c:choose>
                     <c:when test="${not empty dto.profile_image}">
                         <img src="${pageContext.request.contextPath}/uploads/member/${dto.profile_image}" id="profilePreview" class="profile-img">
-                        </c:when>
+                    </c:when>
                     <c:otherwise>
                         <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" id="profilePreview" class="profile-img">
                         <i class="bi bi-person-fill profile-placeholder-icon" id="defaultIcon"></i>
@@ -186,7 +95,7 @@
         <div class="row mb-4">
             <div class="col-6">
                 <label class="form-label">이름</label>
-                <input type="text" name="member_name" id="member_name" value="${dto.member_name}" class="form-control" placeholder="실명" ${mode=="update" ? "readonly":""}>
+                <input type="text" name="member_name" id="member_name" value="${dto.member_name}" class="form-control" placeholder="실명">
             </div>
             <div class="col-6">
                 <label class="form-label">연락처</label>
@@ -213,24 +122,13 @@
             <label class="form-label">주 포지션</label>
             <div class="btn-group-position">
                 <input type="radio" class="btn-check" name="preferred_position" id="pos_fw" value="FW" ${dto.preferred_position=="FW" ? "checked":""}>
-                <label class="btn btn-outline-custom text-center" for="pos_fw">
-                    <div class="fw-bold">FW</div><div style="font-size:0.7rem">공격수</div>
-                </label>
-
+                <label class="btn btn-outline-custom text-center" for="pos_fw"><div class="fw-bold">FW</div><div style="font-size:0.7rem">공격수</div></label>
                 <input type="radio" class="btn-check" name="preferred_position" id="pos_mf" value="MF" ${dto.preferred_position=="MF" ? "checked":""}>
-                <label class="btn btn-outline-custom text-center" for="pos_mf">
-                    <div class="fw-bold">MF</div><div style="font-size:0.7rem">미드필더</div>
-                </label>
-
+                <label class="btn btn-outline-custom text-center" for="pos_mf"><div class="fw-bold">MF</div><div style="font-size:0.7rem">미드필더</div></label>
                 <input type="radio" class="btn-check" name="preferred_position" id="pos_df" value="DF" ${dto.preferred_position=="DF" ? "checked":""}>
-                <label class="btn btn-outline-custom text-center" for="pos_df">
-                    <div class="fw-bold">DF</div><div style="font-size:0.7rem">수비수</div>
-                </label>
-
+                <label class="btn btn-outline-custom text-center" for="pos_df"><div class="fw-bold">DF</div><div style="font-size:0.7rem">수비수</div></label>
                 <input type="radio" class="btn-check" name="preferred_position" id="pos_gk" value="GK" ${dto.preferred_position=="GK" ? "checked":""}>
-                <label class="btn btn-outline-custom text-center" for="pos_gk">
-                    <div class="fw-bold">GK</div><div style="font-size:0.7rem">골키퍼</div>
-                </label>
+                <label class="btn btn-outline-custom text-center" for="pos_gk"><div class="fw-bold">GK</div><div style="font-size:0.7rem">골키퍼</div></label>
             </div>
         </div>
 
@@ -260,11 +158,10 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', ev => {
-    // 1. 프로필 이미지 미리보기
     const inputEL = document.querySelector('input[name=selectFile]');
     const avatarEL = document.querySelector('#profilePreview');
     const defaultIcon = document.querySelector('#defaultIcon');
-    const maxSize = 800 * 1024; // 800KB
+    const maxSize = 800 * 1024;
 
     inputEL.addEventListener('change', ev => {
         let file = ev.target.files[0];
@@ -279,14 +176,12 @@ window.addEventListener('DOMContentLoaded', ev => {
         var reader = new FileReader();
         reader.onload = function(e) {
             avatarEL.src = e.target.result;
-            // 이미지가 선택되면 기본 회색 아이콘 숨기기
             if(defaultIcon) defaultIcon.style.display = 'none';
         }
         reader.readAsDataURL(file);
     });
 });
 
-// 2. Select Box 색상 처리
 function toggleSelectColor(element) {
     if($(element).val() === "") {
         $(element).addClass("text-muted");
@@ -295,14 +190,12 @@ function toggleSelectColor(element) {
     }
 }
 
-// 3. 약관 동의 시 버튼 활성화
 function toggleSubmitBtn() {
     const isChecked = document.getElementById('agree').checked;
     const btn = document.querySelector('button[name=sendButton]');
     btn.disabled = !isChecked;
 }
 
-// 4. 비밀번호 실시간 확인
 $("#passwordCheck, #password").on("keyup", function() {
     const pw = $("#password").val();
     const pwConfirm = $("#passwordCheck").val();
@@ -317,7 +210,6 @@ $("#passwordCheck, #password").on("keyup", function() {
     }
 });
 
-// 5. 아이디 중복 확인 (AJAX) - 세련된 디자인 적용
 function userIdCheck() {
     let member_id = $('#member_id').val();
     let wrapper = $('.id-check-box');
@@ -340,36 +232,29 @@ function userIdCheck() {
         dataType: 'json',
         success: function(data) {
             let passed = data.passed;
-            
             if(passed === 'true') {
-                // 성공 메시지 (초록색 체크)
                 let str = '<span class="msg-success"><i class="bi bi-check-circle-fill"></i> 멋진 아이디네요! 사용 가능합니다.</span>';
                 feedback.html(str);
                 $('#idValid').val('true'); 
             } else {
-                // 에러 메시지 (붉은색 X)
                 let str = '<span class="msg-error"><i class="bi bi-x-circle-fill"></i> 이미 사용 중인 아이디입니다.</span>';
                 feedback.html(str);
                 $('#idValid').val('false');
                 $('#member_id').val('').focus();
             }
         },
-        error: function(e) {
-            console.log(e.responseText);
-            alert("서버 통신 오류"); 
-        }
+        error: function(e) { console.log(e.responseText); alert("서버 통신 오류"); }
     });
 }
 
-// 6. 회원가입 전송
 function memberOk() {
     const f = document.memberForm;
-    let str, p;
+    let p;
 
     // 아이디 유효성
     p = /^[a-z][a-z0-9_]{4,9}$/i;
     if( !p.test(f.member_id.value) ) { 
-        alert('아이디를 확인해주세요.');
+        alert('아이디를 확인해주세요 (영문 소문자/숫자, 4~10자).');
         f.member_id.focus();
         return;
     }
@@ -379,6 +264,13 @@ function memberOk() {
         $('.id-check-box').find('.help-block').html('<span class="msg-error">중복 확인이 필요합니다.</span>');
         f.member_id.focus();
         return;
+    }
+
+    // 이메일
+    if( ! f.email.value.trim() ) { 
+        alert('이메일을 입력하세요.'); 
+        f.email.focus(); 
+        return; 
     }
 
     // 비밀번호
@@ -402,12 +294,23 @@ function memberOk() {
         f.member_name.focus();
         return;
     }
-
-    // 필수값 체크
-    if( ! f.email.value.trim() ) { alert('이메일을 입력하세요.'); f.email.focus(); return; }
-    if( ! f.phone_number.value ) { alert('전화번호를 입력하세요.'); f.phone_number.focus(); return; }
     
-    // 전송
+    // 4. 전화번호 검사 
+    const phone = f.phone_number.value.trim();
+    if( ! phone ) {
+        alert('전화번호를 입력하세요.');
+        f.phone_number.focus();
+        return;
+    }
+    
+    // 숫자와 하이픈만 허용하는 정규식
+    const phonePattern = /^[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}$/;
+    if( ! phonePattern.test(phone) ) {
+        alert("연락처 형식이 올바르지 않습니다.\n숫자와 하이픈(-)을 포함하여 정확히 입력해주세요.\n(예: 010-1234-5678)");
+        f.phone_number.focus();
+        return;
+    }
+    
     f.action = '${pageContext.request.contextPath}/member/signup';
     f.submit();
 }
