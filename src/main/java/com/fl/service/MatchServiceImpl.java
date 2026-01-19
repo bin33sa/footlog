@@ -153,13 +153,11 @@ public class MatchServiceImpl implements MatchService{
 	}
 
 	@Override
-	public long getUserTeamRole(Map<String, Object> map) {
-		long role = 0;
+	public int getUserTeamRole(Map<String, Object> map) {
+		int role = 0;
 		try {
-			Long result = mapper.getUserTeamRole(map);
-			if(result != null) {
-				role=result;
-			}
+			role = mapper.getUserTeamRole(map);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

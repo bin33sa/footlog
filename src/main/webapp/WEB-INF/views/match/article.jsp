@@ -255,7 +255,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
                 <c:if test="${not empty myTeams}">
-                    <button type="button" class="btn btn-primary" id="btnApplySubmit" onclick="submitApply()">신청 완료</button>
+                    <button type="button" class="btn btn-primary" id="btnApplySubmit" onclick="submitApply()">매치 신청</button>
                 </c:if>
             </div>
         </div>
@@ -290,13 +290,11 @@
 	</script>
 	
 	<script type="text/javascript">
+	
 		function apply(){
 			let myTeamCode = "${sessionScope.member_team.team_code}";
 			
-			
-			
 			if(${empty myTeams}){
-				
 				if(confirm("소속된 팀이 없습니다. 팀을 생성하거나 가입하시겠습니까?")){
 					location.href="${pageContext.request.contextPath}/team/list";
 				}
@@ -329,16 +327,20 @@
 			let teamCode = selectedInput.val();
 			let teamName = selectedInput.attr("data-name");
 			
-			if(!confirm("['"+teamName+"']으로 매치를 신청하시겠습니까?")){
+			if(!confirm("["+teamName+"]팀으로 매치를 신청하시겠습니까?")){
 				return;
 			}
 			
 			let url = '${pageContext.request.contextPath}/match/insertApply';
 			let params = {match_code:${dto.match_code},team_code:teamCode}
 			
-			ajaxRequest(url,'post',params,'text',function(data){
-				alert('매치신청이 완료되었습니다.');
-				location.reload();
+			ajaxRequest(url,'post',params,'json',function(data){
+				if(data.state=="true"){
+					alert('매치신청이 완료되었습니다.');
+					location.reload();
+				}else {
+					alert('신청에 실패했습니다.(이미 신청했거나 오류 발생)');
+				}
 			});
 			
 		}
@@ -352,8 +354,9 @@
 			let params = {match_code:${dto.match_code}, team_code:applyTeamCode}
 			
 			ajaxRequest(url,'post',params,'json',function(data){
-				if(data.state=='true'){
+				if(data.state==='true'){
 					alert('매치가 수락되었습니다!');
+					loaction.reload();
 				}else{
 					alert('매치가 실패했습니다.');
 				}
