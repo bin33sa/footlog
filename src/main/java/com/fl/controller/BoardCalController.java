@@ -46,11 +46,18 @@ public class BoardCalController {
 	public ModelAndView load(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 	    String start = req.getParameter("start");
 	    String end = req.getParameter("end");
-
+	    
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+	    
 	    Map<String, Object> map = new HashMap<>();
 	    map.put("start", start);
 	    map.put("end", end);
-
+	    
+	    if (info != null) {
+	        map.put("member_code", info.getMember_code());
+	    }
+	    
 	    List<BoardCalDTO> list = service.listCalendar(map);
 
 	    // [중요] 반드시 ModelAndView를 리턴해야 에러가 나지 않습니다.
