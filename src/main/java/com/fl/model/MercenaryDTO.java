@@ -8,9 +8,11 @@ public class MercenaryDTO {
     private String created_at;
     private String status;       
     private String title;
+    private String category;
+    
     private String content;
     private int view_count;
-
+    
     private String team_name;
     private String emblem_image;
     private String region;        
@@ -139,6 +141,14 @@ public class MercenaryDTO {
 
 	public void setMatch_date(String match_date) {
 		this.match_date = match_date;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
     
     

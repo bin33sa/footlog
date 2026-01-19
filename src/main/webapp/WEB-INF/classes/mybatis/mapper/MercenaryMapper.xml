@@ -5,35 +5,54 @@
 	
 
     <select id="listMercenary" parameterType="map" resultType="com.fl.model.MercenaryDTO">
-    	SELECT p.recruit_id, p.title, p.member_code, p.created_at, p.view_count,
-           m.member_name, m.role_level  FROM MERCENARY_POST p
-    	JOIN MEMBER m ON p.member_code = m.member_code
-    <where>
-        <if test="category != null and category != ''">
-            AND m.role_level = #{category}  </if>
-        <if test="kwd != null and kwd != ''">
-            AND p.title LIKE '%' || #{kwd} || '%'
-        </if>
-    </where>
-    	ORDER BY p.recruit_id DESC
-    	OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    SELECT * FROM (
+        SELECT ROWNUM rnum, tb.* FROM (
+            SELECT p.recruit_id, p.team_code, p.member_code, p.category, p.title, 
+                   p.view_count, p.created_at, p.status, m.member_name,
+                   t.team_name, mt.role_level
+            FROM MERCENARY_POST p
+            JOIN MEMBER m ON p.member_code = m.member_code
+            LEFT JOIN TEAM t ON p.team_code = t.team_code
+            LEFT JOIN member_team mt ON p.member_code = mt.member_code AND p.team_code = mt.team_code
+            <where>
+                <if test="category != null and category != ''">
+                    AND p.category = #{category}
+                </if>
+                <if test="kwd != null and kwd != ''">
+                    <choose>
+                        <when test="schType == 'all'">
+                            AND (INSTR(p.title, #{kwd}) &gt; 0 OR INSTR(p.content, #{kwd}) &gt; 0)
+                        </when>
+                        <otherwise>
+                            AND (INSTR(p.${schType}, #{kwd}) &gt; 0)
+                        </otherwise>
+                    </choose>
+                </if>
+            </where>
+            ORDER BY p.recruit_id DESC
+        ) tb WHERE ROWNUM &lt;= #{offset} + #{size}
+    ) WHERE rnum &gt; #{offset}
 </select>
     
     <insert id="insertMercenary" parameterType="com.fl.model.MercenaryDTO">
         INSERT INTO MERCENARY_POST (
             recruit_id, team_code, match_code, member_code, 
-               created_at, status, title, content, view_count
+            category, created_at, status, title, content, view_count
         ) VALUES (
-            SEQ_MERCENARY_POST.NEXTVAL, #{team_code}, #{match_code, jdbcType=BIGINT}, #{member_code},
+            SEQ_MERCENARY_POST.NEXTVAL, 
+            #{team_code, jdbcType=BIGINT}, 
+            #{match_code, jdbcType=BIGINT}, 
+            #{member_code},
+            #{category}, 
             SYSDATE, 'RECRUITING', #{title}, #{content}, 0
         )
     </insert>
 
     <select id="listTeam" parameterType="map" resultType="com.fl.model.MercenaryDTO">
-		select t.team_code, team_name
-		from team t 
-		join member_team m on t.team_code = m.team_code
-		where m.member_code = #{member_code}
+		SELECT t.team_code, t.team_name
+		FROM team t 
+		JOIN member_team m ON t.team_code = m.team_code
+		WHERE m.member_code = #{member_code}
     </select>
 	
 	<update id="updateMercenary" parameterType="com.fl.model.MercenaryDTO">
@@ -45,10 +64,10 @@
 	</update>
     
     <select id="findById" parameterType="long" resultType="com.fl.model.MercenaryDTO">
-        SELECT recruit_id, team_code, match_code, member_code, 
+        SELECT recruit_id, team_code, match_code, member_code, category,
                created_at, status, title, content, view_count
-    	FROM mercenary_post
-    	WHERE recruit_id = #{recruit_id}
+        FROM mercenary_post
+        WHERE recruit_id = #{recruit_id}
     </select>
     
     <delete id="deleteMercenary" parameterType="map">
@@ -57,17 +76,17 @@
 	</delete>
     
     <select id="dataCount" parameterType="map" resultType="int">
-    SELECT COUNT(*) 
-    FROM MERCENARY_POST p
-    JOIN MEMBER m ON p.member_code = m.member_code
-    <where>
-        <if test="category != null and category != ''">
-            AND m.role_level = #{category}  </if>
-        <if test="kwd != null and kwd != ''">
-            AND p.title LIKE '%' || #{kwd} || '%'
-        </if>
-    </where>   
-</select>
+        SELECT COUNT(*) 
+        FROM MERCENARY_POST p
+        <where>
+            <if test="category != null and category != ''">
+                AND p.category = #{category}
+            </if>
+            <if test="kwd != null and kwd != ''">
+                AND p.title LIKE '%' || #{kwd} || '%'
+            </if>
+        </where>   
+    </select>
 
 	<insert id="insertReply" parameterType="com.fl.model.MercenaryReplyDTO">
         INSERT INTO comment_mercenary (
@@ -120,5 +139,11 @@
     SET view_count = view_count + 1 
     WHERE recruit_id = #{recruit_id}
 	</update>
+    
+    <select id="getUserTeamLevel" parameterType="map" resultType="int">
+    SELECT NVL(role_level, 1)
+    FROM member_team
+    WHERE member_code = #{member_code} AND team_code = #{team_code}
+</select>
     
 </mapper>

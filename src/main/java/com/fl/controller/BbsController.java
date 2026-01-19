@@ -125,12 +125,31 @@ public class BbsController {
         return mav;
     }
 
+    
+    // 파일 이름을 추출하기 위한 보조 메서드
+    private String getOriginalFilename(jakarta.servlet.http.Part part) {
+        String contentDisposition = part.getHeader("content-disposition");
+        String[] elements = contentDisposition.split(";");
+        for (String element : elements) {
+            if (element.trim().startsWith("filename")) {
+                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
+            }
+        }
+        return null;
+    }
+    
     @PostMapping("write")
     public ModelAndView writeSubmit(HttpServletRequest req, HttpServletResponse resp) {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
 
         String category = req.getParameter("category");
+        
+        if (info == null) return new ModelAndView("redirect:/member/login");
+        
+        if (category != null && category.equals("1") && info.getRole_level() < 51) {
+            return new ModelAndView("redirect:/bbs/list?category=1");
+        }
         
         try {
             BoardDTO dto = new BoardDTO();
@@ -181,34 +200,28 @@ public class BbsController {
         return new ModelAndView("redirect:/bbs/list?category=" + category);
     }
 
-    // 파일 이름을 추출하기 위한 보조 메서드
-    private String getOriginalFilename(jakarta.servlet.http.Part part) {
-        String contentDisposition = part.getHeader("content-disposition");
-        String[] elements = contentDisposition.split(";");
-        for (String element : elements) {
-            if (element.trim().startsWith("filename")) {
-                return element.substring(element.indexOf('=') + 1).trim().replace("\"", "");
-            }
-        }
-        return null;
-    }
     
     @GetMapping("write")
     public ModelAndView writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // 세션 확인 (로그인 여부 체크)
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
         if (info == null) {
             return new ModelAndView("redirect:/member/login");
         }
 
-        ModelAndView mav = new ModelAndView("bbs/write");
-        
         String category = req.getParameter("category");
         if (category == null || category.isEmpty()) {
-            category = "2"; // 기본값 자유게시판
+            category = "2"; 
         }
 
+        // [추가] 공지사항(1)은 관리자만 작성 가능
+        if (category.equals("1") && info.getRole_level() < 51) {
+            // 관리자가 아니면 자유게시판으로 튕겨내거나 에러 페이지로 이동
+            return new ModelAndView("redirect:/bbs/list?category=1");
+        }
+
+        ModelAndView mav = new ModelAndView("bbs/write");
         mav.addObject("category", category);
         mav.addObject("mode", "write");
         return mav;

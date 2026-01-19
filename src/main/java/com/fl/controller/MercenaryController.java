@@ -148,30 +148,48 @@ public class MercenaryController {
 
     @PostMapping("write")
     public ModelAndView writeSubmit(HttpServletRequest req, HttpServletResponse resp) {
-    	
-    	HttpSession session = req.getSession();
+        HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
- 
+
+        if (info == null) return new ModelAndView("redirect:/member/login");
+
         try {
-        	MercenaryDTO dto = new MercenaryDTO();
-        	
-			dto.setTitle(req.getParameter("title"));
-			dto.setTeam_code(Long.parseLong(req.getParameter("team_code")));
+            MercenaryDTO dto = new MercenaryDTO();
+            dto.setTitle(req.getParameter("title"));
             dto.setContent(req.getParameter("content"));
-        	dto.setMember_code(info.getMember_code()); 
+            dto.setMember_code(info.getMember_code());
             
+            String teamStr = req.getParameter("team_code");
+            if(teamStr != null && !teamStr.isEmpty()) {
+                long team_code = Long.parseLong(teamStr);
+                dto.setTeam_code(team_code);
+
+                // [핵심 로직] 해당 팀에서의 역할 레벨 조회
+                Map<String, Object> map = new HashMap<>();
+                map.put("member_code", info.getMember_code());
+                map.put("team_code", team_code);
+                
+                // service에 해당 유저의 팀내 레벨을 가져오는 메서드 호출 (아래 2번 참고)
+                int teamLevel = service.getUserTeamLevel(map);
+
+                // 이미지 기준: 매니저(10) 이상이면 RECRUIT(구인), 아니면 SEEK(구직)
+                if (teamLevel >= 10) {
+                    dto.setCategory("RECRUIT"); 
+                } else {
+                    dto.setCategory("SEEK");    
+                }
+            } else {
+                // 팀 선택 없이 개인으로 글을 쓸 경우 기본적으로 SEEK(구직) 처리
+                dto.setCategory("SEEK");
+            }
 
             service.insertMercenary(dto);
-            
-            
-            
         } catch (Exception e) {
-            e.printStackTrace();                       
-            
+            e.printStackTrace();
         }
         return new ModelAndView("redirect:/mercenary/list");
     }
-
+    
     // ==========================================
     // 3. 게시글 상세보기 관련
     // ==========================================

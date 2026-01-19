@@ -25,5 +25,6 @@ public interface MercenaryMapper {
     public List<MercenaryReplyDTO> listReply(Map<String, Object> map);
     public void deleteReply(Map<String, Object> map) throws Exception;
     public List<MercenaryReplyDTO> listReplyAnswer(Map<String, Object> map);
-
+    
+    public int getUserTeamLevel(Map<String, Object> map) throws Exception;
 }

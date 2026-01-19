@@ -134,4 +134,15 @@ public class MercenaryServiceImpl implements MercenaryService {
         return mapper.listReplyAnswer(map);
     }
 
-}
+	@Override
+	public int getUserTeamLevel(Map<String, Object> map) throws Exception {
+		int level = 1; // 기본값 (일반회원)
+        try {
+            level = mapper.getUserTeamLevel(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return level;
+    }
+	}
+
