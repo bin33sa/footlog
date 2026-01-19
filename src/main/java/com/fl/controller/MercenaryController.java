@@ -45,7 +45,10 @@ public class MercenaryController {
         
         
         try {
-           
+        	
+        	List<MercenaryDTO> topList = service.listTop3();
+            mav.addObject("topList", topList);
+        	
             String page = req.getParameter("page");
             int current_page = (page == null) ? 1 : Integer.parseInt(page);
             

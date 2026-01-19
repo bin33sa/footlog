@@ -145,5 +145,15 @@
     FROM member_team
     WHERE member_code = #{member_code} AND team_code = #{team_code}
 </select>
+
+<select id="listTop3" resultType="com.fl.model.MercenaryDTO">
+    SELECT * FROM (
+        SELECT p.recruit_id, p.title, p.view_count, p.category, 
+               TO_CHAR(p.created_at, 'YYYY-MM-DD') created_at, m.member_name
+        FROM MERCENARY_POST p
+        JOIN MEMBER m ON p.member_code = m.member_code
+        ORDER BY p.view_count DESC
+    ) WHERE ROWNUM &lt;= 3
+</select>
     
 </mapper>

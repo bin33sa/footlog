@@ -12,6 +12,7 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
 :root {
@@ -50,6 +51,19 @@
    white-space: nowrap;
    overflow: hidden;
    text-overflow: ellipsis;
+}
+
+/* 인기글 강조 스타일 */
+.top-rank-row {
+   background-color: rgba(212, 246, 63, 0.08) !important;
+   border-left: 4px solid #D4F63F;
+}
+
+.badge-hot {
+   background-color: #ff4757;
+   color: white;
+   font-size: 0.7rem;
+   padding: 4px 8px;
 }
 
 #mercenary-wrapper .neon-search-box {
@@ -113,9 +127,8 @@
     color: #D4F63F !important;
 }
 
-/* 카테고리 배지 스타일 커스텀 */
-.badge-recruit { background-color: #0d6efd; color: white; } /* 구인: 파랑 */
-.badge-seek { background-color: #198754; color: white; }    /* 구직: 초록 */
+.badge-recruit { background-color: #0d6efd; color: white; }
+.badge-seek { background-color: #198754; color: white; }
 </style>
 </head>
 <body>
@@ -186,6 +199,31 @@
                         </tr>
                      </thead>
                      <tbody>
+                        <c:if test="${empty category and empty kwd}">
+                           <c:forEach var="tdto" items="${topList}">
+                              <tr class="top-rank-row" onclick="location.href='${pageContext.request.contextPath}/mercenary/article?recruit_id=${tdto.recruit_id}&page=${page}';">
+                                 <td class="text-center">
+                                    <span class="badge rounded-pill badge-hot">HOT</span>
+                                 </td>
+                                 <td class="fw-bold ps-3">
+                                    <i class="bi bi-fire text-danger me-1"></i>
+                                    <c:choose>
+                                       <c:when test="${tdto.category == 'RECRUIT'}"><span class="text-primary small">[구인]</span></c:when>
+                                       <c:otherwise><span class="text-success small">[구직]</span></c:otherwise>
+                                    </c:choose>
+                                    ${tdto.title}
+                                 </td>
+                                 <td class="text-center text-muted">${tdto.created_at}</td>
+                                 <td class="text-center">
+                                    <span class="fw-bold text-danger">${tdto.view_count}</span>
+                                 </td>
+                              </tr>
+                           </c:forEach>
+                           <c:if test="${not empty topList}">
+                              <tr style="height: 10px; background-color: #f8f9fa;"><td colspan="4"></td></tr>
+                           </c:if>
+                        </c:if>
+
                         <c:forEach var="dto" items="${list}">
                            <tr onclick="location.href='${pageContext.request.contextPath}/mercenary/article?recruit_id=${dto.recruit_id}&page=${page}${not empty category ? '&category='.concat(category) : ''}';">
                               <td class="text-center">${dto.recruit_id}</td>
@@ -206,7 +244,8 @@
                               </td>
                            </tr>
                         </c:forEach>
-                        <c:if test="${empty list}">
+
+                        <c:if test="${empty list and empty topList}">
                            <tr>
                               <td colspan="4" class="py-5 text-center text-muted">등록된 게시글이 없습니다.</td>
                            </tr>

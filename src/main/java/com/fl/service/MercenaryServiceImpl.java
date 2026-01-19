@@ -144,5 +144,17 @@ public class MercenaryServiceImpl implements MercenaryService {
         }
         return level;
     }
+
+	@Override
+	public List<MercenaryDTO> listTop3() {
+		List<MercenaryDTO> list = null;
+	    try {
+	        // 매퍼 인터페이스나 DAO의 메서드를 호출
+	        list = mapper.listTop3(); 
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return list;
+	}
 	}
 

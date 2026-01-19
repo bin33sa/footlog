@@ -25,4 +25,6 @@ public interface MercenaryService {
     public List<MercenaryReplyDTO> listReplyAnswer(Map<String, Object> map);
     
     public int getUserTeamLevel(Map<String, Object> map) throws Exception;
+    
+    public List<MercenaryDTO> listTop3();
 }
