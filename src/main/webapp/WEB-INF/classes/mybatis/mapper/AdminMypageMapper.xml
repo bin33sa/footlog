@@ -39,14 +39,36 @@
 			FROM stadium
 		</select>
 		
+		<!-- 구장 관리 구장 조회 -->
+		<select id="ListStadiumAll"
+			resultType="com.fl.model.StadiumDTO">
+			SELECT
+			stadium_name AS stadiumName,
+			region,
+			description,
+			rating,
+			price
+			FROM stadium
+		</select>
+		
 		<!-- 멤버 전체 조회 -->
 		<select id="CountMemberAll"
 			resultType="com.fl.model.MemberDTO">
-
 			SELECT
 			*
 			FROM member
 		</select>
-
+		
+		<!-- 멤버 관리 멤버 조회 -->
+		<select id="ListMemberAll"
+			resultType="com.fl.model.MemberDTO">
+			SELECT
+			member_id AS member_id,
+			member_name AS member_name,
+			phone_number AS phone_number,
+			email AS email,
+			is_deleted AS is_deleted
+			FROM member
+		</select>
 
 </mapper>

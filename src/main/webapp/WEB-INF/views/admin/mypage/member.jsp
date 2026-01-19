@@ -18,66 +18,24 @@
         <table class="table align-middle table-hover mb-0">
             <thead class="table-light border-bottom">
                 <tr>
-                    <th style="width: 8%">번호</th>
-                    <th>구단명</th>
-                    <th style="width: 20%">지역</th>
-                    <th style="width: 15%">등급</th>
-                    <th style="width: 20%">관리</th>
+                    <th style="width: 15%">아이디</th>
+                    <th>회원명</th>
+                    <th style="width: 25%">이메일</th>
+                    <th style="width: 25%">전화번호</th>
+                    <th style="width: 10%">탈퇴여부</th>
                 </tr>
             </thead>
 
             <tbody>
-                <!-- 더미 데이터 -->
-                <tr>
-                    <td>1</td>
-                    <td class="fw-bold">Footlog FC</td>
-                    <td>서울</td>
-                    <td>
-                        <span class="badge bg-success">활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
-
-                <tr class="table-light">
-                    <td>2</td>
-                    <td class="fw-bold">Night Wolves</td>
-                    <td>경기</td>
-                    <td>
-                        <span class="badge bg-secondary">비활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>3</td>
-                    <td class="fw-bold">Red Tigers</td>
-                    <td>부산</td>
-                    <td>
-                        <span class="badge bg-success">활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
+				<c:forEach var="member" items="${memberList}">
+	                <tr>
+	                    <td>${member.member_id}</td>
+	                    <td class="fw-bold">${member.member_name}</td>
+	                    <td>${member.email}</td>
+	                    <td>${member.phone_number}</td>
+	                    <td>${member.is_deleted == 0 ? '이용 회원':'탈퇴 회원'}</td>
+	                </tr>
+				</c:forEach>
             </tbody>
         </table>
     </div>

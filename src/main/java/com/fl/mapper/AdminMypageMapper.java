@@ -12,7 +12,10 @@ public interface AdminMypageMapper {
 	public List<TeamDTO> ListTeamAll();
 	
 	public List<StadiumDTO> CountStadiumAll();
+	public List<StadiumDTO> ListStadiumAll();
+	
 	public List<MemberDTO> CountMemberAll();
+	public List<MemberDTO> ListMemberAll();
 	 
 	
 	

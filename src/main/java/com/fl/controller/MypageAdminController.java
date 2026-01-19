@@ -47,6 +47,7 @@ public class MypageAdminController {
 		
 		ModelAndView mav = new ModelAndView("admin/mypage");
 		
+		//마이페이지
 		try {
 			if(info != null) {
 				MemberDTO myInfo = myPageService.readMember(info.getMember_code());
@@ -57,11 +58,17 @@ public class MypageAdminController {
 			List<TeamDTO> teamList = AdminService.ListTeamAll();
 			
 			List<StadiumDTO> stadium = AdminService.CountStadiumAll();
+			List<StadiumDTO> stadiumList = AdminService.ListStadiumAll();
+			
 			List<MemberDTO> member = AdminService.CountMemberAll();
+			List<MemberDTO> memberList = AdminService.ListMemberAll();
 			mav.addObject("team", team);
 			mav.addObject("stadium", stadium);
 			mav.addObject("member", member);
+			
 			mav.addObject("teamList", teamList);
+			mav.addObject("stadiumList", stadiumList);
+			mav.addObject("memberList", memberList);
 			
 		} catch (Exception e) {
 			e.printStackTrace();

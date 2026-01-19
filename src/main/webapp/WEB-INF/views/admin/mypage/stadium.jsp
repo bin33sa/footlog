@@ -9,7 +9,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h5 class="fw-bold mb-0">🏟️ 구장 관리</h5>
         <button class="btn btn-sm btn-dark rounded-pill px-3">
-            + 구단 등록
+            + 구장 등록
         </button>
     </div>
 
@@ -18,67 +18,39 @@
         <table class="table align-middle table-hover mb-0">
             <thead class="table-light border-bottom">
                 <tr>
-                    <th style="width: 8%">번호</th>
-                    <th>구단명</th>
-                    <th style="width: 20%">지역</th>
-                    <th style="width: 15%">등급</th>
-                    <th style="width: 20%">관리</th>
+                    <th style="width: 10%">지역</th>
+                    <th>구장명</th>
+                    <th style="width: 10%">평점</th>
+                    <th style="width: 20%">가격</th>
+                    <th style="width: 15%">예약 관리</th>
+                    <th style="width: 15%">구장 관리</th>
                 </tr>
             </thead>
 
             <tbody>
-                <!-- 더미 데이터 -->
-                <tr>
-                    <td>1</td>
-                    <td class="fw-bold">Footlog FC</td>
-                    <td>서울</td>
-                    <td>
-                        <span class="badge bg-success">활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
-
-                <tr class="table-light">
-                    <td>2</td>
-                    <td class="fw-bold">Night Wolves</td>
-                    <td>경기</td>
-                    <td>
-                        <span class="badge bg-secondary">비활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td>3</td>
-                    <td class="fw-bold">${stadium.size()}</td>
-                    <td>부산</td>
-                    <td>
-                        <span class="badge bg-success">활성</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-                            수정
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-                            삭제
-                        </button>
-                    </td>
-                </tr>
+				<c:forEach var="list" items="${stadiumList}">
+	                <tr>
+	                    <td>${list.region}</td>
+	                    <td class="fw-bold">${list.stadiumName}</td>
+	                    <td>${list.rating}</td>
+	                    <td>${list.price}</td>
+	                    <td>
+	                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
+	                            수정
+	                        </button>
+	                    </td>
+	                    <td>
+	                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
+	                            수정
+	                        </button>
+	                        <button class="btn btn-sm btn-outline-danger rounded-pill">
+	                            삭제
+	                        </button>
+	                    </td>
+	                </tr>
+				</c:forEach>
             </tbody>
+            
         </table>
     </div>
 </div>

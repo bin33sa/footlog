@@ -48,6 +48,18 @@ public class AdminMypageServiceImpl implements AdminMypageService {
 		return list;
 	}
 	
+	public List<StadiumDTO> ListStadiumAll() {
+		List<StadiumDTO> list = mapper.ListStadiumAll();
+		
+		return list;
+	}
+	
+	public List<MemberDTO> ListMemberAll() {
+		List<MemberDTO> list = mapper.ListMemberAll();
+		
+		return list;
+	}
+	
 	
 	
 	//문의 게시판 조회
