@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fl.mapper.BoardFaqMapper">
+
+    <insert id="insertFaq" parameterType="com.fl.model.BoardFaqDTO">
+        INSERT INTO board_faq (
+            board_faq_code, 
+            member_code, 
+            title, 
+            content, 
+            category
+        ) VALUES (
+            board_faq_seq.NEXTVAL, 
+            #{member_code}, 
+            #{title}, 
+            #{content}, 
+            #{category}
+        )
+    </insert>
+
+    <select id="listFaq" parameterType="Integer" resultType="com.fl.model.BoardFaqDTO">
+        SELECT 
+            board_faq_code, 
+            member_code, 
+            title, 
+            content, 
+            category
+        FROM board_faq
+        <where>
+            <if test="category != 0">
+                category = #{category}
+            </if>
+        </where>
+        ORDER BY board_faq_code DESC
+    </select>
+
+    <delete id="deleteFaq" parameterType="Long">
+        DELETE FROM board_faq 
+        WHERE board_faq_code = #{board_faq_code}
+    </delete>
+
+    <select id="findByCode" parameterType="Long" resultType="com.fl.model.BoardFaqDTO">
+        SELECT 
+            board_faq_code, 
+            member_code, 
+            title, 
+            content, 
+            category
+        FROM board_faq
+        WHERE board_faq_code = #{board_faq_code}
+    </select>
+
+    <update id="updateFaq" parameterType="com.fl.model.BoardFaqDTO">
+        UPDATE board_faq SET
+            title = #{title},
+            content = #{content},
+            category = #{category}
+        WHERE board_faq_code = #{board_faq_code}
+    </update>
+
+</mapper>
