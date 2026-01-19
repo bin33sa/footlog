@@ -86,12 +86,6 @@
                         </div>
                     </div>
 
-                    <div class="btn-group shadow-sm rounded-pill" role="group">
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" checked> 
-                        <label class="btn btn-outline-dark border-0 rounded-start-pill px-3" for="btnradio1">최신순</label>
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off"> 
-                        <label class="btn btn-outline-dark border-0 rounded-end-pill px-3" for="btnradio2">임박순</label>
-                    </div>
                 </div>
                 
                 <div class="list-content" data-pageNo="0" data-totalPage="0"></div>
@@ -156,7 +150,6 @@
             
             let schType = 'all';
             let kwd = keyword;
-            
             
             let params = {page:page, schType:'all', kwd:kwd, region:regionVal, matchDate:dateVal};
             

@@ -8,6 +8,7 @@ public class MatchApplyDTO {
     private String status;
     private String team_level;
     private String team_name;
+    private Long member_code; 
     
     
     public long getApply_code() {
@@ -52,5 +53,12 @@ public class MatchApplyDTO {
 	public void setTeam_level(String team_level) {
 		this.team_level = team_level;
 	}
+	public Long getMember_code() {
+		return member_code;
+	}
+	public void setMember_code(Long member_code) {
+		this.member_code = member_code;
+	}
+	
 
 }

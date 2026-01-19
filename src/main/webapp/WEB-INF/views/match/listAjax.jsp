@@ -52,7 +52,7 @@
             <button class="btn btn-sm ${dto.status == '모집중' ? 'btn-outline-dark' : 'btn-secondary'} rounded-pill px-3"
                     ${dto.status != '모집중' ? 'disabled' : ''} 
                     onclick="event.stopPropagation(); location.href='${pageContext.request.contextPath}/match/article';">
-                ${dto.status == '모집중' ? '신청가능' : '마감됨'}
+                ${dto.status == '모집중' ? '신청하기' : '마감됨'}
             </button>
         </div>
     </div>

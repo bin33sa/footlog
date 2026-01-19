@@ -80,8 +80,13 @@
 								<td class="fw-bold fs-5">${dto.match_date}</td>
 							</tr>
 							<tr>
-								<td class="text-muted">구장</td>
-								<td class="fw-bold">${dto.stadiumName}<a href="#" class="text-primary small ms-2 text-decoration-underline">지도보기</a></td>
+							    <td class="text-muted">구장</td>
+							    <td class="fw-bold">
+							        <a href="${pageContext.request.contextPath}/field/view?stadiumCode=${dto.stadium_code}" 
+							           class="text-primary text-decoration-underline">
+							            ${dto.stadiumName}
+							        </a>
+							    </td>
 							</tr>
 							<tr>
 								<td class="text-muted">진행방식</td>
@@ -127,7 +132,15 @@
 
 							<c:if test="${sessionScope.member.member_code != dto.member_code}">
 								<button type="button" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm hover-scale"
-									onclick="apply()"> 매치 신청하기 <i class="bi bi-check-lg ms-1"></i>
+									onclick="apply()" ${dto.status=='모집완료'||dto.status=='매칭완료'? 'disabled':''}>
+									<c:choose>
+        								<c:when test="${dto.status == '모집완료' || dto.status == '매칭완료'}">
+								            마감된 매치 <i class="bi bi-lock-fill ms-1"></i>
+								        </c:when>
+								        <c:otherwise>
+								            매치 신청하기 <i class="bi bi-check-lg ms-1"></i>
+								        </c:otherwise>
+								    </c:choose>
 								</button>
 							</c:if>
 						</div>
@@ -156,8 +169,11 @@
 					                            <i class="bi bi-shield-shaded text-secondary fs-5"></i>
 					                        </div>
 					                        <div>
-					                            <span class="fw-bold d-block">${apply.team_name}</span>
-					                            <span class="small text-muted">실력: ${apply.team_level}</span>
+					                            <a href="${pageContext.request.contextPath}/team/view?team_code=${apply.team_code}" 
+  												 class="fw-bold d-block text-decoration-none link-dark">
+												    ${apply.team_name}
+												</a>
+					                            
 					                        </div>
 					                    </div>
 					                    
@@ -173,7 +189,6 @@
 						                        
 						                        <c:otherwise>
 						                        	 <c:if test="${apply.status == '수락'}"> 
-						                        	
 						                            <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" disabled>
 						                                매칭완료 <i class="bi bi-check-all"></i>
 						                            </button>
@@ -271,24 +286,8 @@
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-	<script type="text/javascript"
-		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=키넣을곳"></script>
-		
-	<script>
-		var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
-		mapOption = {
-			center : new kakao.maps.LatLng(37.571679, 126.898320), // 지도의 중심좌표
-			level : 3
-		};
 
-		var map = new kakao.maps.Map(mapContainer, mapOption);
-		var markerPosition = new kakao.maps.LatLng(37.571679, 126.898320);
-		var marker = new kakao.maps.Marker({
-			position : markerPosition
-		});
-		marker.setMap(map);
-	</script>
-	
+	<script src="${pageContext.request.contextPath}/dist/api/map.js"></script>
 	<script type="text/javascript">
 	
 		function apply(){
@@ -331,18 +330,22 @@
 				return;
 			}
 			
+			
+			
 			let url = '${pageContext.request.contextPath}/match/insertApply';
 			let params = {match_code:${dto.match_code},team_code:teamCode}
 			
 			ajaxRequest(url,'post',params,'json',function(data){
-				if(data.state=="true"){
+				if(data.state==="true"){
 					alert('매치신청이 완료되었습니다.');
 					location.reload();
-				}else {
-					alert('신청에 실패했습니다.(이미 신청했거나 오류 발생)');
+				}else if(data.state==="duplicated"){
+					alert('매치신청내역이 존재합니다.')
+				}
+				else {
+					alert('신청에 실패했습니다.(이미 신청한 내역이 있거나 오류 발생)');
 				}
 			});
-			
 		}
 		
 		function confirmMatch(applyTeamCode,applyTeamName){
@@ -356,13 +359,12 @@
 			ajaxRequest(url,'post',params,'json',function(data){
 				if(data.state==='true'){
 					alert('매치가 수락되었습니다!');
-					loaction.reload();
+					location.reload();
 				}else{
 					alert('매치가 실패했습니다.');
 				}
 			})
 		}
-	
 	</script>
 	
 		<c:if test="${sessionScope.member.member_code == dto.member_code || sessionScope.member_team.role_level>=10 }">

@@ -3,11 +3,12 @@
 <mapper namespace="com.fl.mapper.MatchMapper">
 	
 	<sql id="where-list">
+		AND m.match_date >=TRUNC(SYSDATE)
 	    <if test="region != null and region != '' and region != 'all'">
 	        AND s.region = #{region}
 	    </if>
-    	 <if test="matchDate!=null and matchDate!=''">
-                AND TO_CHAR(m.match_date, 'YYYY-MM-DD') = #{matchDate}
+    	 <if test="match_date!=null and match_date!=''">
+                AND TO_CHAR(m.match_date, 'YYYY-MM-DD') = #{match_date}
          </if>
          
    		 <if test="kwd != null and kwd != ''">
@@ -30,8 +31,8 @@
 	
 	<!-- 매치신청 등록 -->
 	<insert id="insertMatchApply" parameterType="com.fl.model.MatchApplyDTO">
-		INSERT INTO match_apply(apply_code,match_code,team_code,apply_date,status)
-		VALUES (seq_match_apply.NEXTVAL, #{match_code},#{team_code},SYSDATE,'매칭대기')
+		INSERT INTO match_apply(apply_code,match_code,team_code,apply_date)
+		VALUES (seq_match_apply.NEXTVAL, #{match_code},#{team_code},SYSDATE)
 	</insert>
 	
 	<!-- 글 수정 -->
@@ -47,13 +48,25 @@
 			CASE
 			 WHEN team_code=#{team_code} THEN '수락'
 			 ELSE '마감' END
-		WHERE apply_code=#{apply_code} AND match_code=#{match_code}
+		WHERE match_code=#{match_code}
 	</update>
 	
 	<!-- 매치 성사되었을 때 상태 변경 -->
 	<update id="updateMatchStatus" parameterType="com.fl.model.MatchDTO">
 		UPDATE match_post SET status=#{post_status}, away_code=#{away_code}
 		WHERE match_code=#{match_code}
+	</update>
+	
+	<!-- 조회수 -->
+	<update id="updateHitCount" parameterType="Long">
+		UPDATE match_post SET VIEW_COUNT = VIEW_COUNT + 1
+		WHERE match_code = #{match_code}
+	</update>
+	
+	<!-- 매치 날짜 지난 게시글 status 변경 -->
+	<update id="updateExpiredMatchStatus" >
+		UPDATE match_post SET status='마감'
+		WHERE match_date &lt; SYSDATE AND status='모집중'
 	</update>
 	
 	<!-- 글 삭제 -->
@@ -92,7 +105,7 @@
         at.team_name AS away_team_name,
         TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
         m.status, m.title, m.content, m.view_count,  m.matchType,  m.gender,  m.fee, m.member_code,
-        s.stadium_name AS stadiumName, s.region AS region, m.matchLevel,   m.stadium_code AS stadium_code
+        s.stadium_name AS stadiumName, s.region AS region, m.matchLevel,   m.stadium_code AS stadium_code, m.view_count
     FROM match_post m
     JOIN team ht ON ht.team_code = m.home_code
     JOIN stadium s ON s.stadium_code = m.stadium_code
@@ -100,14 +113,14 @@
     <where>
         <include refid="where-list"/>
     </where>
+    	
 	    ORDER BY m.match_date
 	    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>
 
 	<!-- 매치 신청 리스트 -->
 	<select id="listApplicant" parameterType="map" resultType="com.fl.model.MatchApplyDTO">
-		SELECT a.apply_code, a.match_code, a.team_code, TO_CHAR(a.apply_date,'YYYY-MM-DD HH24:MI') as apply_date, a.status,
-		 		t.team_name
+		SELECT a.apply_code, a.match_code, a.team_code, TO_CHAR(a.apply_date,'YYYY-MM-DD HH24:MI') as apply_date, a.status,t.team_name
 		FROM match_apply a
 		JOIN team t ON t.team_code = a.team_code
 		WHERE a.match_code = #{match_code}
@@ -117,12 +130,14 @@
 	<!-- 코드로 정보갖고오기 -->
 	<select id="findById" parameterType="Long" resultType="com.fl.model.MatchDTO">
 		SELECT m.match_code,ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, m.status,m.title, 
-		m.content, m.fee,s.stadium_name AS stadiumName, s.region AS region, matchType, gender, matchLevel, m.stadium_code, home_code,m.member_code
+		m.content, m.fee,s.stadium_name AS stadiumName, s.region AS region, matchType, gender, matchLevel, m.stadium_code, home_code,m.member_code, view_count,
+		at.team_name AS away_team_name, NVL(r.away_score,0) AS away_score, NVL(r.home_score,0) AS home_score, m.away_code
 		FROM match_post m
 		JOIN team ht ON ht.team_code = m.home_code
 		JOIN stadium s ON s.stadium_code = m.stadium_code
 		LEFT JOIN team at ON at.team_code = m.away_code
-		WHERE m.match_code = ${match_code}
+		LEFT JOIN match_result r ON m.match_code = r.match_code 
+		WHERE m.match_code = #{match_code}
 	</select>
 	
 	<!-- 내 팀 매치 리스트 -->
@@ -145,5 +160,16 @@
     	FROM member_team
     	WHERE member_code = #{member_code} AND team_code=#{team_code}
     </select>
+    
+    <select id="countMatchApply" parameterType="map" resultType="int">
+    	SELECT COUNT(*)
+    	FROM match_apply
+    	WHERE match_code = #{match_code} AND team_code = #{team_code}
+    </select>
+    
+    <update id="saveScore" parameterType="com.fl.model.MatchDTO">
+    	
+    
+    </update>
 	
 </mapper>

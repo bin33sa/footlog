@@ -65,13 +65,15 @@ public class MatchController {
 			String schType = req.getParameter("schType");
 			String kwd = req.getParameter("kwd");
 			String region = req.getParameter("region");
-			String match_date = req.getParameter("match_date");
+			String match_date = req.getParameter("matchDate");
 			
 			if(schType == null) {
 				schType = "";
 				kwd = "";
 			}
 			kwd = util.decodeUrl(kwd);
+			
+			service.updateExpiredMatchStatus();
 			
 			int size = 6;
 			int total_page = 0;
@@ -167,8 +169,6 @@ public class MatchController {
 			
 			List<MatchApplyDTO> applicantList = service.listApplicant(map);
 			
-			MatchDTO prevDto = service.findByPrev(map);
-			MatchDTO nextDto = service.findByNext(map);
 			
 			ModelAndView mav = new ModelAndView("match/article");
 			
@@ -193,8 +193,6 @@ public class MatchController {
 			mav.addObject("dto", dto);
 			mav.addObject("page", page);
 			mav.addObject("query", query);
-			mav.addObject("prevDto", prevDto);
-			mav.addObject("nextDto", nextDto);
 			mav.addObject("applicantList", applicantList);
 			mav.addObject("myTeamRole", myTeamRole);
 			
@@ -336,7 +334,7 @@ public class MatchController {
 			MatchDTO dto = service.findById(match_code);
 			
 			long member_code = info.getMember_code();
-			List<TeamDTO> myTeamList = service.listUserTeams(member_code);
+			List<TeamDTO> myTeams = service.listUserTeams(member_code);
 			List<StadiumDTO> list = stadiumservice.listStadiumAll();
 			
 			ModelAndView mav = new ModelAndView("match/write");
@@ -345,7 +343,7 @@ public class MatchController {
 			mav.addObject("dto", dto);
 			mav.addObject("mode", "update");
 			mav.addObject("stadiumList", list);
-			mav.addObject("myTeamList", myTeamList);
+			mav.addObject("myTeams", myTeams);
 			
 			return mav;
 		} catch (Exception e) {
@@ -388,9 +386,10 @@ public class MatchController {
 	
 	@ResponseBody
 	@PostMapping("insertApply")
-	public void insertApply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+	public Map<String, Object> insertApply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		Map<String, Object> model = new HashMap<String, Object>();
 		
 		try {
 			MatchApplyDTO dto = new MatchApplyDTO();
@@ -401,13 +400,27 @@ public class MatchController {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("match_code", match_code);
 			map.put("team_code", team_code);
-			map.put("member_code", info.getMember_code());
+			
+			int count = service.countMatchApply(map);
+			
+			if(count>0) {
+				model.put("state", "duplicated");
+				return model;
+			}
+			
+			dto.setMatch_code(match_code);
+			dto.setTeam_code(team_code);
+			dto.setMember_code(info.getMember_code());
+			
 			
 			service.insertMatchApply(dto);
+			
+			model.put("state", "true");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return model;
 	}
 	
 	@ResponseBody
@@ -430,7 +443,7 @@ public class MatchController {
 			map.put("match_code", match_code);
 			map.put("away_code", team_code);
 			map.put("team_code", team_code);
-			map.put("post_status", "매칭성공");
+			map.put("post_status", "매칭완료");
 		
 		    service.updateMatchStatus(map);
 			

@@ -26,12 +26,9 @@ public interface MatchMapper {
 	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws SQLException;
 	
-	public void insertNoticeFile(MatchDTO dto) throws SQLException;
-	public void deleteNoticeFile(Map<String, Object> map) throws SQLException;
-	public List<MatchDTO> listNoticeFile(long num);
-	public MatchDTO findByFileId(long fileNum);
-	
 	public void insertMatchApply(MatchApplyDTO dto) throws SQLException;
-	public void updateApplyStatus(Map<String, Object> map) throws Exception;
-	public void deleteMatchApply(MatchApplyDTO dto) throws Exception;
+	public void updateApplyStatus(Map<String, Object> map) throws SQLException;
+	public void deleteMatchApply(MatchApplyDTO dto) throws SQLException;
+	public int countMatchApply(Map<String, Object> map);
+	public void updateExpiredMatchStatus() throws SQLException;
 }

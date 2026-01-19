@@ -99,46 +99,14 @@ public class MatchServiceImpl implements MatchService{
 		return dto;
 	}
 	
-	@Override
-	public MatchDTO findByPrev(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public MatchDTO findByNext(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public void updateHitCount(long num) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void insertNoticeFile(MatchDTO dto) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void deleteNoticeFile(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public List<MatchDTO> listNoticeFile(long num) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public MatchDTO findByFileId(long fileNum) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			mapper.updateHitCount(num);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -175,7 +143,6 @@ public class MatchServiceImpl implements MatchService{
 	}
 
 	
-
 	@Override
 	public void deleteMatchApply(MatchApplyDTO dto) throws Exception {
 		try {
@@ -183,6 +150,28 @@ public class MatchServiceImpl implements MatchService{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public int countMatchApply(Map<String, Object> map) {
+		int count=0;
+		try {
+			count = mapper.countMatchApply(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		}
+		return count;
+	}
+
+	@Override
+	public void updateExpiredMatchStatus() throws Exception {
+		try {
+			mapper.updateExpiredMatchStatus();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 }

@@ -19,16 +19,10 @@ public interface MatchService {
 	public MatchDTO findById(long num);
 	public List<TeamDTO> listUserTeams(long member_code);
 	public int getUserTeamRole(Map<String, Object> map);
-	public MatchDTO findByPrev(Map<String, Object> map);
-	public MatchDTO findByNext(Map<String, Object> map);
 	public void updateHitCount(long num) throws Exception;
-	public void insertNoticeFile(MatchDTO dto) throws Exception;
-	public void deleteNoticeFile(Map<String, Object> map) throws Exception;
-	public List<MatchDTO> listNoticeFile(long num);
-	public MatchDTO findByFileId(long fileNum);
-	
 	
 	public void insertMatchApply(MatchApplyDTO dto) throws Exception;
 	public void deleteMatchApply(MatchApplyDTO dto) throws Exception;
-	
+	public int countMatchApply(Map<String, Object> map);
+	public void updateExpiredMatchStatus() throws Exception;
 }
