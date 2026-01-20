@@ -64,7 +64,15 @@
 						
 						<h2 class="fw-bold mb-1">${dto.title}</h2>
 						<div class="d-flex align-items-center text-muted gap-2">
-							<span><i class="bi bi-eye me-1"></i> ${dto.view_count}</span> <span>•</span> <span>주최팀: ${dto.home_team_name}</span>
+							<span><i class="bi bi-eye me-1"></i> ${dto.view_count}</span> 
+							<span>•</span> 
+							
+							<span>주최팀: 
+								<a href="${pageContext.request.contextPath}/team/view?team_code=${dto.home_code}" 
+								   class="text-decoration-none fw-bold text-muted hover-underline">
+									${dto.home_team_name}
+								</a>
+							</span>
 						</div>
 					</div>
 					<button class="btn btn-light rounded-circle">
@@ -82,7 +90,7 @@
 							<tr>
 							    <td class="text-muted">구장</td>
 							    <td class="fw-bold">
-							        <a href="${pageContext.request.contextPath}/field/view?stadiumCode=${dto.stadium_code}" 
+							    	<a href="${pageContext.request.contextPath}/field/view?stadiumCode=${dto.stadium_code}" 
 							           class="text-primary text-decoration-underline">
 							            ${dto.stadiumName}
 							        </a>
@@ -146,6 +154,7 @@
 						</div>
 					</div>
 				</div> 
+				
 				<c:if test="${sessionScope.member.member_code == dto.member_code}">
 					<div class="card border-0 shadow-sm mt-4">
 						<div class="card-header bg-white border-bottom fw-bold py-3">
@@ -169,17 +178,15 @@
 					                            <i class="bi bi-shield-shaded text-secondary fs-5"></i>
 					                        </div>
 					                        <div>
-					                            <a href="${pageContext.request.contextPath}/team/view?team_code=${apply.team_code}" 
-  												 class="fw-bold d-block text-decoration-none link-dark">
+					                        	<a href="${pageContext.request.contextPath}/team/view?team_code=${apply.team_code}" 
+  												 class="fw-bold d-block text-decoration-none link-dark hover-underline">
 												    ${apply.team_name}
 												</a>
-					                            
 					                        </div>
 					                    </div>
 					                    
 					                  <div class="ms-auto"> 
 						                    <c:choose>
-						                        <%-- 1. 모집중일 때: 수락 가능 (파란 버튼) --%>
 						                        <c:when test="${dto.status == '모집중'}">
 						                            <button type="button" class="btn btn-primary btn-sm px-3 rounded-pill" 
 						                                    onclick="confirmMatch('${apply.team_code}', '${apply.team_name}');">
@@ -192,7 +199,6 @@
 						                            <button type="button" class="btn btn-secondary btn-sm px-3 rounded-pill" disabled>
 						                                매칭완료 <i class="bi bi-check-all"></i>
 						                            </button>
-						                            
 						                            </c:if>
 						                        </c:otherwise>
 						                    </c:choose>
@@ -203,93 +209,84 @@
 					    </div>
 					</div>
 				</c:if>
-				</div>
+			</div>
 		</div>
 	</div>
+
 	<div class="modal fade" id="teamSelectModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">매치 신청 팀 선택</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            
-            <div class="modal-body">
-                <p class="text-muted small mb-3">신청할 팀을 선택해주세요. (팀 운영진만 신청 가능)</p>
-                
-                <div class="list-group">
-                    <c:choose>
-                        <c:when test="${not empty myTeams}">
-                            
-                            <c:set var="canApplyCount" value="0" />
-
-                            <c:forEach var="team" items="${myTeams}">
-                                <c:choose>
-                                    <c:when test="${team.role_level >= 10}">
-                                        <c:set var="canApplyCount" value="${canApplyCount + 1}" />
-                                        
-                                        <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer list-group-item-action">
-                                            <input class="form-check-input flex-shrink-0" type="radio" name="selectedTeam" 
-                                                   value="${team.team_code}" data-name="${team.team_name}" style="font-size: 1.2em;">
-                                            <span class="fw-bold text-dark">${team.team_name}</span>
-                                            <span class="badge bg-primary ms-auto">신청가능</span>
-                                        </label>
-                                    </c:when>
-                                    
-                                    <c:otherwise>
-                                        <label class="list-group-item d-flex gap-3 align-items-center bg-light text-muted" style="cursor: not-allowed; opacity: 0.6;">
-                                            <input class="form-check-input flex-shrink-0" type="radio" disabled>
-                                            <span class="fw-bold text-decoration-line-through">${team.team_name}</span>
-                                            <span class="badge bg-secondary ms-auto">권한부족</span>
-                                        </label>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:forEach>
-                            
-                            <c:if test="${canApplyCount == 0}">
-                                 <div class="alert alert-warning text-center mt-3 p-2 small">
-                                    <i class="bi bi-exclamation-triangle-fill"></i><br>
-                                    매치 신청은 <b>팀 운영진(매니저 이상)</b>만 가능합니다.<br>
-                                    소속된 팀에서 권한을 확인해주세요.
-                                 </div>
-                                 <script>$(function(){ $('#btnApplySubmit').hide(); });</script>
-                            </c:if>
-
-                        </c:when>
-                        
-                        <c:otherwise>
-                            <div class="text-center py-3">
-                                <p>소속된 팀이 없습니다.</p>
-                                <a href="${pageContext.request.contextPath}/team/write" class="btn btn-sm btn-outline-primary">팀 생성하러 가기</a>
-                            </div>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                <c:if test="${not empty myTeams}">
-                    <button type="button" class="btn btn-primary" id="btnApplySubmit" onclick="submitApply()">매치 신청</button>
-                </c:if>
-            </div>
-        </div>
-    </div>
-</div>
+	    <div class="modal-dialog modal-dialog-centered">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title fw-bold">매치 신청 팀 선택</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	            </div>
+	            
+	            <div class="modal-body">
+	                <p class="text-muted small mb-3">신청할 팀을 선택해주세요. (팀 운영진만 신청 가능)</p>
+	                
+	                <div class="list-group">
+	                    <c:choose>
+	                        <c:when test="${not empty myTeams}">
+	                            <c:set var="canApplyCount" value="0" />
+	                            <c:forEach var="team" items="${myTeams}">
+	                                <c:choose>
+	                                    <c:when test="${team.role_level >= 10}">
+	                                        <c:set var="canApplyCount" value="${canApplyCount + 1}" />
+	                                        <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer list-group-item-action">
+	                                            <input class="form-check-input flex-shrink-0" type="radio" name="selectedTeam" 
+	                                                   value="${team.team_code}" data-name="${team.team_name}" style="font-size: 1.2em;">
+	                                            <span class="fw-bold text-dark">${team.team_name}</span>
+	                                            <span class="badge bg-primary ms-auto">신청가능</span>
+	                                        </label>
+	                                    </c:when>
+	                                    <c:otherwise>
+	                                        <label class="list-group-item d-flex gap-3 align-items-center bg-light text-muted" style="cursor: not-allowed; opacity: 0.6;">
+	                                            <input class="form-check-input flex-shrink-0" type="radio" disabled>
+	                                            <span class="fw-bold text-decoration-line-through">${team.team_name}</span>
+	                                            <span class="badge bg-secondary ms-auto">권한부족</span>
+	                                        </label>
+	                                    </c:otherwise>
+	                                </c:choose>
+	                            </c:forEach>
+	                            
+	                            <c:if test="${canApplyCount == 0}">
+	                                 <div class="alert alert-warning text-center mt-3 p-2 small">
+	                                    <i class="bi bi-exclamation-triangle-fill"></i><br>
+	                                    매치 신청은 <b>팀 운영진(매니저 이상)</b>만 가능합니다.<br>
+	                                    소속된 팀에서 권한을 확인해주세요.
+	                                 </div>
+	                                 <script>$(function(){ $('#btnApplySubmit').hide(); });</script>
+	                            </c:if>
+	                        </c:when>
+	                        <c:otherwise>
+	                            <div class="text-center py-3">
+	                                <p>소속된 팀이 없습니다.</p>
+	                                <a href="${pageContext.request.contextPath}/team/write" class="btn btn-sm btn-outline-primary">팀 생성하러 가기</a>
+	                            </div>
+	                        </c:otherwise>
+	                    </c:choose>
+	                </div>
+	            </div>
+	            
+	            <div class="modal-footer">
+	                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+	                <c:if test="${not empty myTeams}">
+	                    <button type="button" class="btn btn-primary" id="btnApplySubmit" onclick="submitApply()">매치 신청</button>
+	                </c:if>
+	            </div>
+	        </div>
+	    </div>
+	</div>
 	
 	<footer>
 		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
 	</footer>
 
 	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
-
-	<script
-		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="${pageContext.request.contextPath}/dist/api/map.js"></script>
-	<script type="text/javascript">
 	
+	<script type="text/javascript">
 		function apply(){
 			let myTeamCode = "${sessionScope.member_team.team_code}";
 			
@@ -330,8 +327,6 @@
 				return;
 			}
 			
-			
-			
 			let url = '${pageContext.request.contextPath}/match/insertApply';
 			let params = {match_code:${dto.match_code},team_code:teamCode}
 			
@@ -349,7 +344,7 @@
 		}
 		
 		function confirmMatch(applyTeamCode,applyTeamName){
-			if(!confirm("['" + applyTeamName + "'] 팀과의 매치를 수락하시겠습니까?\n수락 시 모집이 마감됩니다.")) {
+			if(!confirm("[" + applyTeamName + "] 팀과의 매치를 수락하시겠습니까?\n수락 시 모집이 마감됩니다.")) {
                 return;
             }
 			
@@ -367,18 +362,17 @@
 		}
 	</script>
 	
-		<c:if test="${sessionScope.member.member_code == dto.member_code || sessionScope.member_team.role_level>=10 }">
-			<script type="text/javascript">
-				function deleteOk(){
-					if(confirm('매치 게시글을 삭제하시겠습니까?')){
-						let params = 'match_code=${dto.match_code}&${query}';
-						let url = '${pageContext.request.contextPath}/match/delete?'+params;
-						location.href=url;
-					}
+	<c:if test="${sessionScope.member.member_code == dto.member_code || sessionScope.member_team.role_level>=10 }">
+		<script type="text/javascript">
+			function deleteOk(){
+				if(confirm('매치 게시글을 삭제하시겠습니까?')){
+					let params = 'match_code=${dto.match_code}&${query}';
+					let url = '${pageContext.request.contextPath}/match/delete?'+params;
+					location.href=url;
 				}
-			</script>
-		</c:if>
+			}
+		</script>
+	</c:if>
 
-	
 </body>
 </html>

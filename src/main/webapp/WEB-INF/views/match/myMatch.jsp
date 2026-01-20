@@ -45,9 +45,8 @@
                     <div class="mb-4">
                         <p class="sidebar-title">매치</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action ">내 매치 일정</a>
-                            <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action  active-menu">전체 매치 리스트</a>
-                            
+                            <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action active-menu">내 매치 일정</a>
+                            <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action  ">전체 매치 리스트</a>
                             <c:if test="${canCreate}">
                                 <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action ">매치 개설하기</a>
                             </c:if>
@@ -121,6 +120,9 @@
                                         <c:when test="${dto.status == '매칭완료'}">
                                             <span class="badge bg-success text-white rounded-pill">매칭완료</span>
                                         </c:when>
+                                        <c:when test="${tab=='past' &&  (empty dto.away_code ||dto.away_code==0)}">
+                                        	<span class="badge bg-secondary text-white rounded-pill">매칭실패</span>
+                                        </c:when>
                                         <c:otherwise>
                                             <span class="badge bg-secondary text-white rounded-pill">${dto.status}</span>
                                         </c:otherwise>
@@ -147,13 +149,16 @@
                                         </c:if>
                                     </c:when>
 
-                                    <c:when test="${tab == 'past'}">
+                                    <c:when test="${tab == 'past' &&(not empty dto.away_code && dto.away_code!=0)}">
                                         <div class="mb-2">
                                             <span class="badge bg-dark fs-6 px-3 py-1">${dto.home_score} : ${dto.away_score}</span>
                                         </div>
                                         <button class="btn btn-sm btn-dark rounded-pill px-3 fw-bold"
-                                                onclick="event.stopPropagation(); location.href='${pageContext.request.contextPath}/match/article?match_code=${dto.match_code}&page=1';">결과 입력</button>
+										    onclick="event.stopPropagation(); openScoreModal('${dto.match_code}', '${dto.home_score}', '${dto.away_score}', '${dto.home_team_name}', '${dto.away_team_name}');">
+										    결과 입력
+										</button>
                                     </c:when>
+                                   
                                 </c:choose>
                             </div>
                         </div>
@@ -164,9 +169,44 @@
         </div>
     </div>
 
-    <footer>
+   <footer>
         <jsp:include page="/WEB-INF/views/layout/footer.jsp" />
     </footer>
+
+    <div class="modal fade" id="scoreModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">경기 결과 입력</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form action="${ pageContext.request.contextPath}/match/updateScore" method="post">
+                    <div class="modal-body text-center p-4">
+                        <input type="hidden" name="match_code" id="modalMatchCode">
+                        
+                        <div class="d-flex justify-content-center align-items-center gap-3">
+                            <div class="text-center">
+                                <label class="form-label fw-bold d-block text-truncate" style="max-width: 100px;" id="modalHomeName">HOME</label>
+                                <input type="number" name="home_score" id="modalHomeScore" class="form-control text-center fs-3 fw-bold" style="width: 80px;" min="0" value="0">
+                            </div>
+                            
+                            <span class="fs-3 fw-bold text-muted px-2">:</span>
+                            
+                            <div class="text-center">
+                                <label class="form-label fw-bold d-block text-truncate" style="max-width: 100px;" id="modalAwayName">AWAY</label>
+                                <input type="number" name="away_score" id="modalAwayScore" class="form-control text-center fs-3 fw-bold" style="width: 80px;" min="0" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 justify-content-center pb-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn btn-dark rounded-pill px-4" onclick="submitScore()">결과 저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -177,6 +217,38 @@
                 location.href = "${pageContext.request.contextPath}/match/delete?match_code=" + matchCode;
             }
         }
+
+        function openScoreModal(matchCode, homeScore, awayScore, homeName, awayName) {
+            $("#modalMatchCode").val(matchCode);
+            $("#modalHomeScore").val(homeScore);
+            $("#modalAwayScore").val(awayScore);
+            $("#modalHomeName").text(homeName);
+            $("#modalAwayName").text(awayName);
+
+            var myModal = new bootstrap.Modal(document.getElementById('scoreModal'));
+            myModal.show();
+        }
+        
+        function submitScore(){
+        	let home = $("#modalHomeScore").val();
+        	let away = $("#modalAwayScore").val();
+        	
+        	if(home===""||away===""||parseInt(home)<0 || parseInt(away)<0){
+        		alert('점수를 올바르게 입력해주세요. ');
+        		return;
+        	}
+        	
+        	if(!confirm("경기 결과를["+home+":"+away+"] 로 저장하시겠습니까?")){
+        		return;
+        	}
+        	
+        	
+        	$("#scoreModal form").submit();
+        	
+        	
+        	
+        }
     </script>
+    
 </body>
 </html>
