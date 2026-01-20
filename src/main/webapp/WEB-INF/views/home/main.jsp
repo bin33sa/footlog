@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css" />
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     <style>
-        /* 일정 텍스트 스타일 */
+        /* 일정 텍스트 스타일 */ 
         .small-title:hover { text-decoration: underline; color: #0056b3 !important; }
         .calendar-day.active { background-color: #111111 !important; border: 2px solid #333; border-radius: 12px; }
         .calendar-day { min-height: 100px; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fff; }
