@@ -4,28 +4,30 @@
 
 	<select id="listMyMatch" parameterType="Long" resultType="com.fl.model.MatchDTO">
 		SELECT 
-            m.match_code, 
-            TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
-            m.status, 
-            m.title, 
-            m.home_code, 
-            m.away_code, 
-            ht.team_name AS home_team_name, 
-            ht.region AS region,
-            ht.emblem_image AS home_team_emblem,  at.team_name AS away_team_name,
-            at.emblem_image AS away_team_emblem,  NVL(r.home_score, 0) AS home_score, 
-            NVL(r.away_score, 0) AS away_score
-		FROM match_post m
-		JOIN team ht ON m.home_code = ht.team_code
+			m.match_code, 
+			TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
+			m.status, 
+			m.title, 
+			m.home_code, 
+			m.away_code, 
+			ht.team_name AS home_team_name, 
+			ht.region AS region, 
+			ht.emblem_image AS home_team_emblem, 
+			at.team_name AS away_team_name, 
+			at.emblem_image AS away_team_emblem, 
+			NVL(r.home_score, 0) AS home_score, 
+			NVL(r.away_score, 0) AS away_score 
+		FROM match_post m 
+		JOIN team ht ON m.home_code = ht.team_code 
 		LEFT JOIN team at ON m.away_code = at.team_code 
-		LEFT JOIN match_result r ON m.match_code = r.match_code
-		WHERE (
-            m.home_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code}) 
-            OR 
-            m.away_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
-        )
-		AND m.status IN ('확정', '완료', 'END', '매칭완료') 
-		ORDER BY m.match_date DESC
+		LEFT JOIN match_result r ON m.match_code = r.match_code 
+		WHERE ( 
+			m.home_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code}) 
+			OR 
+			m.away_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code}) 
+		) 
+		AND m.status = '매칭완료' 
+		ORDER BY m.match_date ASC
 	</select>
     
     <select id="readMember" parameterType="Long" resultType="com.fl.model.MemberDTO">
@@ -36,50 +38,75 @@
 	</select>
 	
 	<select id="listMatchApply" parameterType="Long" resultType="com.fl.model.MatchHistoryDTO">
-	    SELECT 
-            ma.apply_code,      
-            ma.status,                 -- 상태: '매칭대기', '수락'
-            ma.match_code,
-            t.team_name AS opponent_name,
-            t.emblem_image AS opponent_emblem,  -- 상대팀(홈팀) 엠블럼
-            
-            my_t.team_name AS team_name,
-            my_t.emblem_image AS team_emblem,   -- 내 팀(신청팀) 엠블럼
-            
-            TO_CHAR(mp.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
-            t.region,
-            ma.apply_date AS sort_date
-        FROM match_apply ma
-        JOIN match_post mp ON ma.match_code = mp.match_code
-        JOIN team t ON mp.home_code = t.team_code       -- 게시글 올린 팀(상대)
-        JOIN team my_t ON ma.team_code = my_t.team_code -- 내가 신청한 팀
-        WHERE ma.team_code IN (
-            SELECT team_code FROM member_team WHERE member_code = #{member_code}
-        )
-
-        UNION ALL
-
-        SELECT 
-            0 AS apply_code,
-            mp.status,                 -- 상태: '모집중', '매칭완료'
-            mp.match_code,
-            NVL(t.team_name, '상대 미정') AS opponent_name,
-            t.emblem_image AS opponent_emblem, -- 상대팀(원정팀) 엠블럼 (없으면 null)
-            
-            my_t.team_name AS team_name,
-            my_t.emblem_image AS team_emblem,  -- 내 팀(홈팀) 엠블럼
-            
-            TO_CHAR(mp.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
-            my_t.region AS region,
-            mp.created_at AS sort_date
-        FROM match_post mp
-        JOIN team my_t ON mp.home_code = my_t.team_code -- 내 팀
-        LEFT JOIN team t ON mp.away_code = t.team_code  -- 매칭된 상대팀
-        WHERE mp.home_code IN (
-            SELECT team_code FROM member_team WHERE member_code = #{member_code}
-        )
-        
-        ORDER BY sort_date DESC
+		SELECT * FROM (
+		
+			SELECT 
+				ma.apply_code, 
+				ma.status,        
+				mp.match_code, 
+				t.team_name AS opponent_name, 
+				t.emblem_image AS opponent_emblem, 
+				my_t.team_name AS team_name, 
+				my_t.emblem_image AS team_emblem, 
+				TO_CHAR(mp.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
+				t.region, 
+				ma.apply_date AS sort_date 
+			FROM match_apply ma 
+			JOIN match_post mp ON ma.match_code = mp.match_code 
+			JOIN team t ON mp.home_code = t.team_code      
+			JOIN team my_t ON ma.team_code = my_t.team_code 
+			WHERE ma.team_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
+	
+			UNION ALL
+	
+			SELECT 
+				0 AS apply_code, 
+				mp.status, 
+				mp.match_code, 
+				NVL(t.team_name, '상대 미정') AS opponent_name, 
+				t.emblem_image AS opponent_emblem, 
+				my_t.team_name AS team_name, 
+				my_t.emblem_image AS team_emblem, 
+				TO_CHAR(mp.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
+				my_t.region AS region, 
+				mp.created_at AS sort_date 
+			FROM match_post mp 
+			JOIN team my_t ON mp.home_code = my_t.team_code 
+			LEFT JOIN team t ON mp.away_code = t.team_code  
+			WHERE mp.home_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
+	
+			UNION ALL
+	
+			SELECT 
+				0 AS apply_code,
+				mp.status,
+				mp.match_code,
+				ht.team_name AS opponent_name,   
+				ht.emblem_image AS opponent_emblem,
+				at.team_name AS team_name,       
+				at.emblem_image AS team_emblem,
+				TO_CHAR(mp.match_date, 'YYYY-MM-DD HH24:MI') AS match_date,
+				ht.region AS region,
+				mp.created_at AS sort_date
+			FROM match_post mp
+			JOIN team ht ON mp.home_code = ht.team_code   
+			JOIN team at ON mp.away_code = at.team_code   
+			WHERE at.team_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
+			  AND mp.status = '매칭완료'  AND mp.match_code NOT IN (
+				  SELECT ma.match_code 
+				  FROM match_apply ma 
+				  WHERE ma.team_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
+			  )
+		)
+		ORDER BY 
+			-- 1순위: 상태별 정렬 (대기 -> 확정 -> 마감)
+			CASE 
+				WHEN status IN ('매칭대기', '모집중') THEN 1     
+				WHEN status IN ('수락', '매칭완료', '확정') THEN 2 
+				ELSE 3                                         
+			END ASC,
+			-- 2순위: 경기 날짜 가까운 순 (오름차순)
+			match_date ASC
 	</select>
 	
 	<select id="listMercenaryApply" parameterType="Long" resultType="com.fl.model.MatchHistoryDTO">

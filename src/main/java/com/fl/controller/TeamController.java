@@ -256,13 +256,28 @@ public class TeamController {
     public ModelAndView delete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
         long team_code = Long.parseLong(req.getParameter("team_code"));
         
+        ModelAndView mav = new ModelAndView("member/delete_complete");
+
+        // 권한 체크 
         if(info != null && service.isLeader(team_code, info.getMember_code())) {
+            
+            // 구단 삭제(비활성화) 실행
             service.deleteTeam(team_code);
+            
+            // 성공 메시지와 이동할 경로 설정
+            mav.addObject("message", "구단 삭제가 완료되었습니다.");
+            mav.addObject("url", req.getContextPath() + "/team/list");
+            
+        } else {
+            // 권한이 없을 경우
+            mav.addObject("message", "삭제 권한이 없습니다.");
+            mav.addObject("url", req.getContextPath() + "/team/list");
         }
         
-        return new ModelAndView("redirect:/team/list");
+        return mav;
     }
     
     // 좋아요 처리

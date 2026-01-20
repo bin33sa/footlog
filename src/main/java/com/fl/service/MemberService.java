@@ -16,6 +16,9 @@ public interface MemberService {
 	public void deleteProfilePhoto(Map<String, Object> map) throws Exception;
 	public void deleteMember(Map<String, Object> map) throws Exception;
 	
+	// 내가 구단장인 팀 개수 확인 (경고창용)
+    public int countLeaderTeam(long member_code);
+	
 	public MemberDTO findId(Map<String, Object> map); // 아이디 찾기
 	public MemberDTO findById(String userId); // 아이디 중복 확인 
 	public List<Map<String, Object>> listAgeSection();

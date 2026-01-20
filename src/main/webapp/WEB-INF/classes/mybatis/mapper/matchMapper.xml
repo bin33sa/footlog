@@ -113,7 +113,6 @@
     <where>
         <include refid="where-list"/>
     </where>
-    	
 	    ORDER BY m.match_date
 	    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>
@@ -124,7 +123,7 @@
 		FROM match_apply a
 		JOIN team t ON t.team_code = a.team_code
 		WHERE a.match_code = #{match_code}
-		ORDER BY a.apply_code 
+		ORDER BY a.apply_code
 	</select>
 	
 	<!-- 코드로 정보갖고오기 -->
@@ -136,23 +135,23 @@
 		JOIN team ht ON ht.team_code = m.home_code
 		JOIN stadium s ON s.stadium_code = m.stadium_code
 		LEFT JOIN team at ON at.team_code = m.away_code
-		LEFT JOIN match_result r ON m.match_code = r.match_code 
+		LEFT JOIN match_result r ON m.match_code = r.match_code
 		WHERE m.match_code = #{match_code}
 	</select>
 	
-	<!-- 내 팀 매치 리스트 -->
+	<!-- 내 팀 매치 리스트 
 	<select id="listMyMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
 		SELECT m.match_code,home_code,away_code,match_date,status,title,content,view_count,matchType,gender,fee,m.member_code
 		FROM match_post m
 		JOIN team t ON t.team_code =(m.home_code || m.away_code)
 		WHERE m.member_code = #{member_code}
-	</select>
+	</select>-->
 	
 	<select id="listUserTeams" parameterType="Long" resultType="com.fl.model.TeamDTO">
 	    SELECT t.team_code, t.team_name, mt.role_level
 	    FROM team t
-	    JOIN member_team mt ON t.team_code = mt.team_code 
-	    WHERE mt.member_code = #{member_code}
+	    JOIN member_team mt ON t.team_code = mt.team_code
+	    WHERE mt.member_code = #{member_code} AND t.status!=0
     </select>
     
     <select id="getUserTeamRole" parameterType="map" resultType="int">
@@ -167,9 +166,41 @@
     	WHERE match_code = #{match_code} AND team_code = #{team_code}
     </select>
     
-    <update id="saveScore" parameterType="com.fl.model.MatchDTO">
-    	
-    
-    </update>
+    <!-- 경기결과 등록되어 있는지 -->
+    <select id="countMatchResult" parameterType="Long" resultType="int">
+    	SELECT COUNT(*)
+    	FROM match_result
+    	WHERE match_code=#{match_code}
+    </select>
 	
+	<!-- 경기 결과 등록 -->
+	<insert id="insertMatchResult" parameterType="com.fl.model.MatchDTO">
+		INSERT INTO match_result(match_code,home_score,away_code)
+			VALUES(#{match_code},#{home_score},#{away_code})
+	</insert>
+	
+	<!-- 경기 결과 수정 -->
+	<update id="updateMatchResult" parameterType="com.fl.model.MatchDTO">
+		UPDATE match_result SET home_code=#{home_code}, away_code=#{away_code}
+		WHERE match_code=#{match_code}
+	</update>
+	
+	<!-- 내 매치 리스트 -->
+	<select id="listMyMatch" parameterType="Long" resultType="com.fl.model.MatchDTO">
+		SELECT m.match_code, ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
+        m.status, m.title, m.content, m.fee, s.stadium_name AS stadiumName, 
+        s.region AS region, m.matchType, m.gender, m.matchLevel, m.stadium_code, 
+        m.home_code, m.member_code, m.view_count, at.team_name AS away_team_name, 
+        NVL(r.away_score, 0) AS away_score, NVL(r.home_score, 0) AS home_score, m.away_code
+		FROM match_post m
+		JOIN team ht ON ht.team_code = m.home_code
+		JOIN stadium s ON s.stadium_code = m.stadium_code
+		LEFT JOIN team at ON at.team_code = m.away_code
+		LEFT JOIN match_result r ON m.match_code = r.match_code 
+		WHERE m.home_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})
+			OR
+			  m.away_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})
+		ORDER BY m.match_date DESC
+	
+	</select>
 </mapper>

@@ -173,5 +173,49 @@ public class MatchServiceImpl implements MatchService{
 		}
 		
 	}
+
+	@Override
+	public int countMatchResult(long match_code) {
+		int result=0;
+		try {
+			result = mapper.countMatchResult(match_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public int insertMatchResult(MatchDTO dto) {
+		int result=0;
+		try {
+			result=mapper.insertMatchResult(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public int updateMatchResult(MatchDTO dto) {
+		int result=0;
+		try {
+			result = mapper.updateMatchResult(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public List<MatchDTO> listMyMatch(long member_code) {
+		List<MatchDTO> list = null;
+		try {
+			list = mapper.listMyMatch(member_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
+	}
 	
 }

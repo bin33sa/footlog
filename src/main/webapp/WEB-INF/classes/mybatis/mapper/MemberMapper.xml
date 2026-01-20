@@ -4,8 +4,8 @@
 <mapper namespace="com.fl.mapper.MemberMapper">
 	<!-- 로그인 -->
 	<select id="loginMember" parameterType="map" resultType="com.fl.model.MemberDTO">
-    	SELECT 
-        	member_code,
+	    SELECT 
+	        member_code,
 	        member_id,
 	        password,
 	        member_name,
@@ -17,11 +17,10 @@
 	        role_level,
 	        is_deleted,
 	        deleted_at
-    	FROM member
-    	WHERE member_id = #{userId} 
-          AND password = #{password} 
-          AND is_deleted = 0
-	</select>
+	    FROM member
+	    WHERE member_id = #{userId} 
+	      AND password = #{password} 
+      </select>
 	
 	<!-- 회원가입 -->
 	<!-- role_level(권한레벨): 0이면 일반회원, 99이면 관리자 -->
@@ -60,7 +59,7 @@
 	<update id="updateMember" parameterType="com.fl.model.MemberDTO">
 		UPDATE member SET password = #{password}, member_name = #{member_name}, 
 			phone_number = #{phone_number}, email = #{email}, region = #{region}, profile_image = #{profile_image},
-			preferred_position = #{preferred_position}
+			preferred_position = #{preferred_position, jdbcType=VARCHAR}
 		WHERE member_id = #{member_id}
 	</update>
 
@@ -80,7 +79,7 @@
 	<!-- role_level(권한레벨): 0이면 일반회원, 99이면 관리자 -->
 	<!-- is_deleted(탈퇴여부): 0이면 탈퇴X, 1이면 탈퇴O -->
 	<update id="deleteMember" parameterType="map">
-		UPDATE member SET is_deleted = 1, role_level = 0
+		UPDATE member SET is_deleted = 1, deleted_at = SYSDATE
 		WHERE member_id = #{member_id} 
 	</update>
 	

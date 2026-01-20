@@ -31,4 +31,9 @@ public interface MatchMapper {
 	public void deleteMatchApply(MatchApplyDTO dto) throws SQLException;
 	public int countMatchApply(Map<String, Object> map);
 	public void updateExpiredMatchStatus() throws SQLException;
+	
+	public int countMatchResult(long match_code);
+	public int insertMatchResult(MatchDTO dto);
+	public int updateMatchResult(MatchDTO dto);
+	public List<MatchDTO> listMyMatch(long member_code);
 }
