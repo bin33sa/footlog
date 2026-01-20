@@ -11,8 +11,29 @@ public class BoardCalDTO {
     private String content;       // 내용
     private String created_at;    // 작성일
     
+    private String match_title;    // 매치 게시판 제목
+    private String stadium_name;   // 경기장 이름
+    private String status;
     
-    // FullCalendar 라이브러리가 인식하는 기본 필드명 추가 (편의성)
+    public String getMatch_title() {
+		return match_title;
+	}
+	public void setMatch_title(String match_title) {
+		this.match_title = match_title;
+	}
+	public String getStadium_name() {
+		return stadium_name;
+	}
+	public void setStadium_name(String stadium_name) {
+		this.stadium_name = stadium_name;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	// FullCalendar 라이브러리가 인식하는 기본 필드명 추가 (편의성)
     private String start;         // start_date 대용
     private String end;           // end_date 대용
     

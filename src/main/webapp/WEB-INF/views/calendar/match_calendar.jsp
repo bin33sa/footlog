@@ -28,9 +28,9 @@
         .date-num { font-size: 1.1rem; font-weight: 700; color: #333; margin-bottom: 8px; }
         .day-cell.today { background-color: #111; border: 1px solid #111; color: #fff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
         .day-cell.today .date-num { color: #D4F63F; font-size: 1.4rem; font-weight: 900; }
-        .event-badge { display: block; font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; margin-bottom: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; cursor: pointer; }
-        .badge-match { background-color: #f1f3f5; color: #333; border-left: 3px solid #333; }
-        .badge-recruit { background-color: #e7f5ff; color: #1971c2; border-left: 3px solid #1971c2; }
+        .event-badge { display: block; font-size: 0.75rem; padding: 5px 8px; border-radius: 6px; margin-bottom: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; cursor: pointer; border-left: 4px solid #333; }
+        .badge-match { background-color: #e7f5ff; color: #1971c2; border-color: #1971c2; } /* 매치 일정 컬러 강조 */
+        .badge-recruit { background-color: #f1f3f5; color: #333; border-color: #333; }
     </style>
 </head>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
@@ -41,10 +41,10 @@
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
                 <h2 class="fw-bold m-0">MATCH SCHEDULE</h2>
-                <p class="text-muted small mb-0 mt-1">Footlog 공식 매치 및 일정 관리</p>
+                <p class="text-muted small mb-0 mt-1">Footlog 공식 매치 및 개인 일정 관리</p>
             </div>
             <div>
-                <button class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" onclick="openAddModal('')">+ 일정 등록</button>
+                <button class="btn btn-dark rounded-pill px-4 fw-bold shadow-sm" onclick="openAddModal('')" style="color: #D4F63F;">+ 일정 등록</button>
             </div>
         </div>
 
@@ -94,10 +94,14 @@
                             <textarea name="content" class="form-control" rows="3" placeholder="일정 상세 내용을 입력하세요"></textarea>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 pb-4 px-4">
-                        <button type="button" class="btn btn-danger rounded-pill px-4 me-auto" id="btnDelete" onclick="deleteCalendar()" style="display: none;">삭제하기</button>
-                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">취소</button>
-                        <button type="button" class="btn btn-dark rounded-pill px-4" id="btnSave" onclick="saveCalendar()">저장하기</button>
+                    <div class="modal-footer border-0 pb-4 px-4 d-flex justify-content-between">
+                        <div>
+                            <button type="button" class="btn btn-danger rounded-pill px-4" id="btnDelete" onclick="deleteCalendar()" style="display: none;">삭제</button>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-primary rounded-pill px-4" id="btnGoMatch" style="display: none; background-color: #D4F63F; border: none; color: #111; font-weight: bold;">매치 상세보기</button>
+                            <button type="button" class="btn btn-dark rounded-pill px-4" id="btnSave" onclick="saveCalendar()">저장하기</button>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -109,10 +113,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // 1. 중복 선언 및 유틸리티 에러 방지 구문
-        if (!$.fn.center) { $.fn.center = function () { return this; }; }
-        
-        // contextPath가 이미 상위 레이아웃에서 선언되었을 수 있으므로 체크 후 var 사용
         if (typeof contextPath === "undefined") {
             var contextPath = "${pageContext.request.contextPath}";
         }
@@ -128,6 +128,7 @@
 
         function loadEvents(year, month) {
             const lastDay = new Date(year, month + 1, 0).getDate();
+            // MyBatis 쿼리 대응을 위한 T 형식 포맷
             const start = year + "-" + String(month + 1).padStart(2, '0') + "-01T00:00:00";
             const end = year + "-" + String(month + 1).padStart(2, '0') + "-" + String(lastDay).padStart(2, '0') + "T23:59:59";
 
@@ -177,10 +178,11 @@
                 let eventHtml = "";
                 if (serverEvents[dateKey]) {
                     serverEvents[dateKey].forEach((event, index) => {
+                        // match_code가 있으면 강조된 뱃지 사용
                         let badgeClass = (event.match_code > 0) ? "badge-match" : "badge-recruit";
                         eventHtml += '<span class="event-badge ' + badgeClass + '" ' +
                                      'onclick="openDetailModal(event, \'' + dateKey + '\', ' + index + ')">' + 
-                                     event.title + '</span>';
+                                     (event.match_code > 0 ? "⚽ " : "") + event.title + '</span>';
                     });
                 }
 
@@ -204,12 +206,12 @@
             $("#calendarForm")[0].reset();
             $("#btnSave").text("저장하기");
             $("#btnDelete").hide();
+            $("#btnGoMatch").hide(); // 등록 시엔 매치 버튼 숨김
             
             if(date) {
                 $("#modal_start_date").val(date);
                 $("#modal_end_date").val(date);
             }
-            
             new bootstrap.Modal(document.getElementById('calendarModal')).show();
         }
 
@@ -227,6 +229,16 @@
             $("#btnSave").text("수정하기");
             $("#btnDelete").show();
 
+            // [발표 핵심 포인트] 매치 코드가 있으면 상세 페이지 버튼 노출
+            if(event.match_code > 0) {
+    $("#btnGoMatch").show().off('click').on('click', function() {
+        // 따옴표와 + 연산자를 사용하여 JSP의 EL 표현식과 분리합니다.
+        location.href = contextPath + "/match/article?match_code=" + event.match_code;
+    });
+            } else {
+                $("#btnGoMatch").hide();
+            }
+
             new bootstrap.Modal(document.getElementById('calendarModal')).show();
         }
 
@@ -235,11 +247,13 @@
             if(!f.title.value) return alert("제목을 입력하세요.");
 
             const url = currentEditId ? contextPath + "/calendar/update" : contextPath + "/calendar/insert";
+            
+            
             const formData = {
                 title: f.title.value,
                 content: f.content.value,
-                start_date: f.start_date.value + " 00:00:00",
-                end_date: f.end_date.value + " 23:59:59"
+                start_date: f.start_date.value + "T00:00:00",
+                end_date: f.end_date.value + "T23:59:59"
             };
 
             if(currentEditId) formData.id = currentEditId;
@@ -294,6 +308,13 @@
             currentYear = now.getFullYear();
             currentMonth = now.getMonth();
             loadEvents(currentYear, currentMonth);
+        }
+        
+        $.fn.center = function () {
+            this.css("position", "absolute");
+            this.css("top", Math.max(0, (($(window).height() - $(this).outerHeight()) / 2) + $(window).scrollTop()) + "px");
+            this.css("left", Math.max(0, (($(window).width() - $(this).outerWidth()) / 2) + $(window).scrollLeft()) + "px");
+            return this;
         }
     </script>
 </body>

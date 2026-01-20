@@ -3,25 +3,23 @@
 
 <mapper namespace="com.fl.mapper.BoardCalMapper">
 
-	<select id="listCalendar" parameterType="map"
-		resultType="com.fl.model.BoardCalDTO">
-		SELECT board_cal_code, member_code, team_code, match_code, title, content,
-		TO_CHAR(start_date, 'YYYY-MM-DD"T"HH24:MI:SS') as start_date,
-		TO_CHAR(end_date, 'YYYY-MM-DD"T"HH24:MI:SS') as end_date,
-		created_at
-		FROM board_cal
-		WHERE member_code = #{member_code}
-		AND (
-		(start_date &gt;= TO_DATE(REPLACE(#{start}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')
-		AND start_date &lt;= TO_DATE(REPLACE(#{end}, 'T', ' '), 'YYYY-MM-DD
-		HH24:MI:SS'))
-		OR
-		(end_date &gt;= TO_DATE(REPLACE(#{start}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')
-		AND end_date &lt;= TO_DATE(REPLACE(#{end}, 'T', ' '), 'YYYY-MM-DD
-		HH24:MI:SS'))
-		)
-		ORDER BY start_date ASC
-	</select>
+	<select id="listCalendar" parameterType="map" resultType="com.fl.model.BoardCalDTO">
+    SELECT 
+        c.board_cal_code, c.member_code, c.team_code, c.match_code, c.title, c.content,
+        TO_CHAR(c.start_date, 'YYYY-MM-DD"T"HH24:MI:SS') as start_date,
+        TO_CHAR(c.end_date, 'YYYY-MM-DD"T"HH24:MI:SS') as end_date,
+        c.start_date as "start", c.end_date as "end",     c.created_at
+    FROM board_cal c
+    WHERE c.member_code = #{member_code}
+    AND (
+        (c.start_date &gt;= TO_DATE(REPLACE(#{start}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')
+         AND c.start_date &lt;= TO_DATE(REPLACE(#{end}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS'))
+        OR
+        (c.end_date &gt;= TO_DATE(REPLACE(#{start}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS')
+         AND c.end_date &lt;= TO_DATE(REPLACE(#{end}, 'T', ' '), 'YYYY-MM-DD HH24:MI:SS'))
+    )
+    ORDER BY c.start_date ASC
+</select>
 
 
 	<insert id="insertCalendar"
