@@ -175,13 +175,13 @@
 	
 	<!-- 경기 결과 등록 -->
 	<insert id="insertMatchResult" parameterType="com.fl.model.MatchDTO">
-		INSERT INTO match_result(match_code,home_score,away_code)
-			VALUES(#{match_code},#{home_score},#{away_code})
+		INSERT INTO match_result(match_code,home_score,away_score)
+			VALUES(#{match_code},#{home_score},#{away_score})
 	</insert>
 	
 	<!-- 경기 결과 수정 -->
 	<update id="updateMatchResult" parameterType="com.fl.model.MatchDTO">
-		UPDATE match_result SET home_code=#{home_code}, away_code=#{away_code}
+		UPDATE match_result SET home_score=#{home_score}, away_score=#{away_score}
 		WHERE match_code=#{match_code}
 	</update>
 	

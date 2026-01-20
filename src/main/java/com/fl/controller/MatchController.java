@@ -491,6 +491,7 @@ public class MatchController {
 			}
 			mav.addObject("tab", tab);
 			mav.addObject("list", resultList);
+			mav.addObject("mode", "update");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -500,7 +501,7 @@ public class MatchController {
 	}
 	
 	@ResponseBody
-	@PostMapping("myMatch")
+	@PostMapping("updateScore")
 	public ModelAndView updateScore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
 		ModelAndView mav = new ModelAndView("match/myMatch");
 		HttpSession session = req.getSession();
@@ -516,7 +517,9 @@ public class MatchController {
 			dto.setHome_score(Integer.parseInt(req.getParameter("home_score")));
 			dto.setAway_score(Integer.parseInt(req.getParameter("away_score")));
 			
+			
 			int result = service.updateMatchResult(dto); 
+			
 			if(result ==0) {
 				service.insertMatchResult(dto);
 			}

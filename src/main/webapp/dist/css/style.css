@@ -1244,3 +1244,5 @@ a { text-decoration: none; color: inherit; }
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
         /* 카드 등 나머지 스타일은 로딩되는 조각 JSP에 있거나 공통 CSS에 있어야 함 */
+        
+        
