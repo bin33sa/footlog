@@ -169,7 +169,7 @@
                                                                 <span class="status-badge status-ok">매치 확정</span>
                                                             </c:when>
                                                             <c:when test="${item.status eq '마감'}">
-                                                                <span class="status-badge status-no">마감됨</span>
+                                                                <span class="status-badge status-no">마감</span>
                                                             </c:when>
                                                             <c:otherwise><span class="status-badge status-wait">${item.status}</span></c:otherwise>
                                                         </c:choose>
@@ -184,9 +184,9 @@
                                                             </c:when>
                                                             <c:when test="${item.status eq '수락'}">
                                                                 <span class="status-badge status-ok">매치 성사</span>
-                                                            </c:when>
-                                                            <c:when test="${item.status eq '거절'}">
-                                                                <span class="status-badge status-no">거절됨</span>
+                                                            </c:when>                                                
+                                                            <c:when test="${item.status eq '마감'}">
+                                                                <span class="status-badge status-no">마감</span>
                                                             </c:when>
                                                             <c:otherwise><span class="status-badge status-no">${item.status}</span></c:otherwise>
                                                         </c:choose>
@@ -245,8 +245,7 @@
                                                     <c:when test="${item.apply_code == 0}">
                                                         <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" class="btn-arrow-go" title="게시글로 이동"><i class="bi bi-arrow-right fs-5"></i></a>
                                                     </c:when>
-                                                    
-                                                    <%-- [수정] 대기중일 때도 '게시글 보기' 버튼으로 변경 --%>
+                                                 
                                                     <c:when test="${item.status eq '매칭대기'}">
                                                         <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">게시글 보기</a>
                                                     </c:when>
