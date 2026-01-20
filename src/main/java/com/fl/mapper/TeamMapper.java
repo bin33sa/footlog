@@ -29,6 +29,12 @@ public interface TeamMapper {
     // 구단 삭제(비활성화)
     public void deleteTeam(long team_code) throws Exception;
     
+    // 내가 구단장인 팀 개수 확인 (경고창용)
+    public int countLeaderTeam(long member_code);
+
+    // 내가 구단장인 팀 일괄 삭제 (회원탈퇴 시 자동처리용)
+    public void deleteTeamsByLeader(long member_code) throws Exception;
+    
     
 	// 구단 가입 신청서 등록
     public void insertJoinRequest(Map<String, Object> map) throws Exception;

@@ -20,6 +20,7 @@ import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
+import com.fl.mvc.annotation.ResponseBody;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.MemberService;
 import com.fl.service.MemberServiceImpl;
@@ -47,7 +48,7 @@ public class MemberController {
 	
 
 	// ==========================================
-	// 1. 로그인 및 로그아웃 관련
+	// 1. 로그인 및 로그아웃, 탈퇴 관련
 	// ==========================================
 
 	@GetMapping("login")
@@ -69,9 +70,15 @@ public class MemberController {
 			
 			MemberDTO dto = service.loginMember(map);
 			
-			if(dto == null) {
+			// dto가 없거나 is_deleted가 1(탈퇴)이면 로그인 실패 처리 
+			if(dto == null || dto.getIs_deleted() == 1) {
 				ModelAndView mav = new ModelAndView("member/login");
-				mav.addObject("message", "아이디 또는 패스워드가 일치하지 않습니다.");
+				
+				if(dto != null && dto.getIs_deleted() == 1) {
+					mav.addObject("message", "탈퇴한 회원입니다.\n복구를 원하시면 관리자에게 문의하세요.");	
+				} else {
+					mav.addObject("message", "아이디 또는 패스워드가 일치하지 않습니다.");
+				}
 				return mav;
 			}
 			
@@ -114,6 +121,65 @@ public class MemberController {
 		}
 		return new ModelAndView("redirect:/main");
 	}
+	
+	
+	// 탈퇴 실행
+	@GetMapping("delete")
+	public ModelAndView deleteDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+	    try {
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("member_id", info.getMember_id());
+	        map.put("member_code", info.getMember_code()); // DB 삭제 로직에 필요
+
+	        // 서비스 호출 (구단삭제 -> 회원탈퇴)
+	        service.deleteMember(map);
+
+	        // 로그아웃
+	        session.removeAttribute("member");
+	        session.invalidate();
+
+	        // 완료 알림 페이지로 이동
+	        ModelAndView mav = new ModelAndView("member/delete_complete");
+	        mav.addObject("message", "회원탈퇴가 완료되었습니다.");
+	        mav.addObject("url", req.getContextPath() + "/main");
+	        
+	        return mav;
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        // 에러 나면 다시 마이페이지
+	        return new ModelAndView("redirect:/member/mypage");
+	    }
+	}
+	
+	
+	// 탈퇴 버튼 누를 때 구단장인지 확인 (ajax)
+	@ResponseBody
+	@PostMapping("checkLeader")
+	public Map<String, Object> checkLeader(HttpServletRequest req, HttpServletResponse resp) {
+	   
+	    HttpSession session = req.getSession();
+	    
+	    Map<String, Object> model = new HashMap<>();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+	    
+	    if (info == null) {
+	        model.put("isLogin", false);
+	        return model;
+	    }
+
+	    // 서비스 호출
+	    int leaderCount = service.countLeaderTeam(info.getMember_code());
+	    
+	    model.put("isLogin", true);
+	    model.put("leaderCount", leaderCount);
+	    
+	    return model;
+	}
+	
 
 	// ==========================================
 	// 2. 아이디 / 비밀번호 찾기

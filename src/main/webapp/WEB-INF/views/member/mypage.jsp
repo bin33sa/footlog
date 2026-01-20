@@ -24,7 +24,7 @@
             overflow: hidden;
         }
 
-        /* [NEW] 가로형 매치 카드 디자인 */
+        /* 매치 카드 디자인 */
         .match-card {
             background: #fff;
             border-radius: 16px;
@@ -48,7 +48,7 @@
             border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         
-        /* [NEW] 매치 리스트용 작은 엠블럼 */
+        /* 매치 리스트용 작은 엠블럼 */
         .match-emblem {
             width: 32px; height: 32px; 
             border-radius: 50%; 
@@ -92,10 +92,14 @@
                     <a href="#" class="list-group-item list-group-item-action py-3 border-0" onclick="openMyPageTeamModal(event)"><i class="bi bi-shield-shaded me-2"></i> 내 구단 이동</a>
                     <a href="${pageContext.request.contextPath}/member/history" class="list-group-item list-group-item-action py-3 border-0"><i class="bi bi-clock-history me-2"></i> 신청 내역</a>
                     <a href="${pageContext.request.contextPath}/calendar/match_calendar" class="list-group-item list-group-item-action py-3 border-0"><i class="bi bi-calendar-week me-2"></i> 매치 캘린더</a>
-                    <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action py-3 border-0 text-danger fw-bold"><i class="bi bi-box-arrow-right me-2"></i> 로그아웃</a>
+                    
+                    <a href="${pageContext.request.contextPath}/member/logout" class="list-group-item list-group-item-action py-3 border-0 text-dark fw-bold"><i class="bi bi-box-arrow-right me-2"></i> 로그아웃</a>
+                    
+                    <a href="javascript:deleteMember();" class="list-group-item list-group-item-action py-3 border-0 text-danger fw-bold">
+                        <i class="bi bi-person-slash me-2"></i> 회원탈퇴
+                    </a>
                 </div>
-            </div>
-
+            </div> 
             <div class="col-lg-9">
                 
                 <div class="row g-3 mb-4">
@@ -202,11 +206,7 @@
                     </c:otherwise>
                 </c:choose>
 
-            </div>
-        </div> 
-    </div> 
-            
-    <footer><jsp:include page="/WEB-INF/views/layout/footer.jsp"/></footer>
+            </div> </div> </div> <footer><jsp:include page="/WEB-INF/views/layout/footer.jsp"/></footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <div class="modal fade" id="myPageTeamModal" tabindex="-1" aria-hidden="true">
@@ -222,6 +222,48 @@
     </div>
 
     <script>
+    // 회원 탈퇴 확인 창 
+    function deleteMember() {
+	    // 구단장 여부 확인
+	    $.ajax({
+	        url: "${pageContext.request.contextPath}/member/checkLeader",
+	        type: "post",
+	        dataType: "json",
+	        success: function(data) {
+	            if(!data.isLogin) {
+	                alert("로그인이 필요합니다.");
+	                location.href = "${pageContext.request.contextPath}/member/login";
+	                return;
+	            }
+	
+	            let msg = "";
+	
+	            // 구단장일 경우 경고 메시지
+	            if(data.leaderCount > 0) {
+	                msg = "⚠️ [경고] 현재 운영 중인 구단이 " + data.leaderCount + "개 있습니다.\n\n"
+	                    + "회원 탈퇴 시, 회원님이 구단장으로 있는\n"
+	                    + "모든 구단이 자동으로 삭제 됩니다.\n\n"
+	                    + "이 작업은 되돌릴 수 없습니다.\n"
+	                    + "정말로 탈퇴하시겠습니까?";
+	            } else {
+	                // 일반 회원일 경우 메시지
+	                msg = "정말 탈퇴하시겠습니까?\n\n"
+	                    + "탈퇴 시 해당 아이디로 로그인이 불가능합니다.";
+	            }
+	
+	            // 확인 누르면 탈퇴 URL로 이동
+	            if(confirm(msg)) {
+	                location.href = "${pageContext.request.contextPath}/member/delete";
+	            }
+	        },
+	        error: function(e) {
+	            console.log(e);
+	            alert("서버 통신 오류가 발생했습니다.");
+	        }
+	    });
+	}
+    
+    // 내 구단 가기 모달 창 
     function openMyPageTeamModal(e) {
         e.preventDefault();
         const modalEl = document.getElementById('myPageTeamModal');

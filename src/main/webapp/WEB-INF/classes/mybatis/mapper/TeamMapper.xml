@@ -15,20 +15,27 @@
   
   	<!-- 팀 기본정보, 멤버수, 좋아요수, 구단장 이름 조회 -->
     <sql id="commonSelect">
-        SELECT 
-            t.team_code, 
-            t.team_name, 
-            t.region, 
-            t.emblem_image, 
-            TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at,
-            (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) AS member_count,
-            (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) AS like_count,
-            (SELECT m.member_name 
-             FROM member m 
-             JOIN member_team mt ON m.member_code = mt.member_code 
-             WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name      
-        FROM team t
-        WHERE t.status = 1
+	        SELECT 
+	        t.team_code, 
+	        t.team_name, 
+	        t.region, 
+	        t.emblem_image, 
+	        TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at,
+	        
+	        (SELECT COUNT(*) 
+	         FROM member_team mt 
+	         JOIN member m ON mt.member_code = m.member_code
+	         WHERE mt.team_code = t.team_code 
+	           AND m.is_deleted = 0) AS member_count,
+	
+	        (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) AS like_count,
+	        
+	        (SELECT m.member_name 
+	         FROM member m 
+	         JOIN member_team mt ON m.member_code = mt.member_code 
+	         WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name      
+	    FROM team t
+	    WHERE t.status = 1
     </sql>
 
 	<!-- 구단 리스트 조회(기본:최신순 정렬) -->
@@ -41,14 +48,18 @@
     
     <!-- 구단 리스트 조회(멤버 수 많은 순 정렬) -->
     <select id="findByMember" parameterType="map" resultType="com.fl.model.TeamDTO">
-        <include refid="commonSelect"/>
-        <include refid="searchData"/>
-        ORDER BY 
-            (SELECT COUNT(*) FROM member_team mt WHERE mt.team_code = t.team_code) DESC, 
-            t.created_at DESC, 
-            t.team_code DESC
-        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
-    </select>
+	    <include refid="commonSelect"/>
+	    <include refid="searchData"/>
+	    ORDER BY 
+	        (SELECT COUNT(*) 
+	         FROM member_team mt 
+	         JOIN member m ON mt.member_code = m.member_code
+	         WHERE mt.team_code = t.team_code 
+	           AND m.is_deleted = 0) DESC, 
+	        t.created_at DESC, 
+	        t.team_code DESC
+	    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
     
     <!-- 구단 리스트 조회(좋아요 수 많은 순 정렬) -->
     <select id="findByLike" parameterType="map" resultType="com.fl.model.TeamDTO">
@@ -78,9 +89,17 @@
 	        t.contact_number, 
 	        t.intro_video_url,
 	        t.emblem_image, 
-	        t.status,  TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at, 
-	        (SELECT COUNT(*) FROM member_team WHERE team_code = t.team_code) AS member_count,
+	        t.status,  
+	        TO_CHAR(t.created_at, 'YYYY-MM-DD') AS created_at, 
+	        
+	        (SELECT COUNT(*) 
+	         FROM member_team mt
+	         JOIN member m ON mt.member_code = m.member_code
+	         WHERE mt.team_code = t.team_code 
+	           AND m.is_deleted = 0) AS member_count,
+
 	        (SELECT COUNT(*) FROM like_team WHERE team_code = t.team_code) AS like_count,
+	        
 	        (SELECT m.member_name 
 	         FROM member m 
 	         JOIN member_team mt ON m.member_code = mt.member_code 
@@ -150,6 +169,26 @@
 	    SET 
 	        status = 0, <!-- status(상태):0 이면 숨김처리 -->
 	        deleted_at = SYSDATE  WHERE team_code = #{team_code}
+	</update>
+	
+	<!-- 구단장이 소유한 모든 팀(status = 1(활성화)인 팀만 세기) -->
+	<select id="countLeaderTeam" parameterType="Long" resultType="Integer">
+	    SELECT COUNT(*) 
+	    FROM member_team mt
+	    JOIN team t ON mt.team_code = t.team_code
+	    WHERE mt.member_code = #{member_code} 
+	      AND mt.role_level = 10
+	      AND t.status = 1
+	</select>
+	
+	<!-- 구단장이 탈퇴할 때, 그 사람이 소유한 모든 구단 비활성환 -->
+	<update id="deleteTeamsByLeader" parameterType="Long">
+	    UPDATE team
+	    SET status = 0, deleted_at = SYSDATE
+	    WHERE team_code IN (
+	        SELECT team_code FROM member_team 
+	        WHERE member_code = #{member_code} AND role_level = 10
+	    )
 	</update>
 	
 	<!-- 내 가입 상태 확인(15:이미 가입된 멤버, 1:가입 승인 대기중, 0:가입 안함 -->

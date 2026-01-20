@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.mapper.MemberMapper;
+import com.fl.mapper.TeamMapper;
 import com.fl.model.MemberDTO;
 import com.fl.mybatis.support.MapperContainer;
 import com.fl.mybatis.support.SqlSessionManager;
 
 public class MemberServiceImpl implements MemberService {
 	private MemberMapper mapper = MapperContainer.get(MemberMapper.class);
+	private TeamMapper teamMapper = MapperContainer.get(TeamMapper.class);
 
 	@Override
 	public MemberDTO loginMember(Map<String, Object> map) {
@@ -66,9 +68,30 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	public void deleteMember(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		
+		try {
+			long memberCode = (Long) map.get("member_code"); 
+			
+	        teamMapper.deleteTeamsByLeader(memberCode);
+	        
+	        mapper.deleteMember(map);
+	        
+		} catch (Exception e) {
+			SqlSessionManager.setRollbackOnly();
+	        throw e;
+		}
 	}
+	
+	@Override
+	public int countLeaderTeam(long memberCode) {
+	    int count = 0;
+	    try {
+	        count = teamMapper.countLeaderTeam(memberCode);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return count;
+	}
+	
 
 	@Override
 	public MemberDTO findById(String member_id) {
