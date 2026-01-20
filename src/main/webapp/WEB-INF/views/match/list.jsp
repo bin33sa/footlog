@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
 </head>
-    <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
+<jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <body>
 
     <header>
@@ -63,8 +63,9 @@
                  </c:if>
 
                 <div class="d-flex flex-wrap gap-2 mb-4 justify-content-between align-items-center">
-                    <div class="d-flex gap-2 flex-grow-1">
+                    <div class="d-flex gap-2 flex-grow-1 align-items-center">
                         <input type="date" id="searchDate" class="form-control rounded-pill border-0 shadow-sm" style="max-width: 160px;"> 
+                        
                         <select name="region" class="form-select rounded-pill border-0 shadow-sm" style="max-width: 120px;">
                             <option value="" ${schType=="all"? "selected":"" }>지역 전체</option>
                             <option value="서울" ${schType=="서울"? "selected":"" }>서울</option>
@@ -79,13 +80,19 @@
                              <option value="경남" ${schType=="경남"? "selected":"" }>경남</option>
                              <option value="제주" ${schType=="제주"? "selected":"" }>제주</option>
                         </select>
+                        
                         <div class="position-relative flex-grow-1">
                             <input type="text" id="keyword" class="form-control rounded-pill ps-5 border-0 shadow-sm" placeholder="구장명, 팀명 검색"> 
                             <input type="hidden" id="searchKeyword" value="">
                             <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                         </div>
-                    </div>
+                        
+                        <button type="button" id="btnReset" class="btn btn-white bg-white border-0 shadow-sm rounded-circle d-flex justify-content-center align-items-center" 
+                                style="width: 40px; height: 40px;" title="검색 조건 초기화">
+                            <i class="bi bi-arrow-counterclockwise fs-5 text-secondary"></i>
+                        </button>
 
+                    </div>
                 </div>
                 
                 <div class="list-content" data-pageNo="0" data-totalPage="0"></div>
@@ -108,7 +115,6 @@
 
     <script type="text/javascript">
     $(function(){
-        // 기존 스크립트 유지...
         $('div.list-footer').hide();
         loadContent(1);
         
@@ -116,15 +122,25 @@
             if(e.key == 13||e.key=='Enter'){
                 e.preventDefault();
                 searchStart();
-                }
+            }
         });
+
         $('#searchDate').change(function(){
             searchStart();
         });
         
         $('select[name=region]').change(function(){
             searchStart();
-        })
+        });
+
+        $('#btnReset').click(function(){
+            $('#searchDate').val('');       
+            $('select[name=region]').val(''); 
+            $('#keyword').val('');    
+            $('#searchKeyword').val(''); 
+            
+            searchStart();
+        });
         
         function searchStart(){
             $('div.list-content').empty();
@@ -168,7 +184,6 @@
                 }
                 
                 $('.list-content').append(data);
-                // $('.list-content').attr('data-pageNo',page);
                 
                 let pageNo = Number($('.list-content').attr('data-pageNo')) || 0;
                 let totalPage = Number($('.list-content').attr('data-totalPage')) || 0;
@@ -183,8 +198,6 @@
             ajaxRequest(url, 'get', params, 'text', fn);
         }
     });
-        
     </script>
 </body>
-
 </html>

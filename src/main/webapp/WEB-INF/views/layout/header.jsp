@@ -1,65 +1,15 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="canCreate" value="false"/>
+	<c:if test="${not empty myTeams}">
+	    <c:forEach var="team" items="${myTeams}">
+	        <c:if test="${team.role_level >= 10}">
+	            <c:set var="canCreate" value="true"/>
+	        </c:if>
+	    </c:forEach>
+	</c:if>
 
-<style>
-  
-    @media (min-width: 992px) {
-        .dropdown:hover .dropdown-menu {
-            display: block;
-            margin-top: 0;
-            animation: fadeInDown 0.3s ease;
-        }
-    }
-
-    /* 애니메이션 */
-    @keyframes fadeInDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* 드롭다운 메뉴 디자인 */
-    .dropdown-menu {
-        background-color: #111;
-        border: 1px solid #333;
-        border-radius: 15px;
-        padding: 10px 0;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    
-    .dropdown-item {
-        color: #fff;
-        font-weight: 500;
-        padding: 10px 20px;
-        transition: 0.2s;
-    }
-    .dropdown-item:hover {
-        background-color: transparent;
-        color: var(--primary-color, #D4F63F);
-        padding-left: 25px;
-    }
-
-    /* [모바일] 991px 이하: 디자인 조정 */
-    @media (max-width: 991px) {
-        .dropdown-menu {
-            position: static !important;
-            float: none;
-            width: auto;
-            margin-top: 0;
-            background-color: #f8f9fa; 
-            border: none;
-            box-shadow: none;
-            padding-left: 20px;
-            display: none; 
-        }
-        .dropdown-item {
-            color: #333 !important;
-        }
-        .dropdown-item:hover {
-            color: #000 !important;
-            font-weight: 700;
-        }
-    }
-</style>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
 
 <header id="header" class="site-header bg-white sticky-top border-bottom">
     <nav id="header-nav" class="navbar navbar-expand-lg py-3">
@@ -89,7 +39,9 @@
                             <li><a class="dropdown-item" href="#" onclick="openHeaderMyTeamModal(); return false;">내 구단으로 이동</a></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/team/list">전체 구단 리스트</a></li>
                             <li><hr class="dropdown-divider bg-secondary opacity-25"></li>
-                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/team/write">구단 생성하기</a></li>
+                            <c:if test="${canCreate}">
+                           	 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/team/write">구단 생성하기</a></li>
+                            </c:if>
                         </ul>
                     </li>
 
