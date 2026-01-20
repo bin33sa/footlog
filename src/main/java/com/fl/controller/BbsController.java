@@ -42,18 +42,22 @@ public class BbsController {
             String page = req.getParameter("page");
             int current_page = (page == null) ? 1 : Integer.parseInt(page);
 
-            // 2. 카테고리 설정 (기본값: 2 - 자유게시판)
+            // 2. 카테고리 설정
             String category = req.getParameter("category");
             if (category == null || category.isEmpty()) {
                 category = "2"; 
             }
             int categoryNum = Integer.parseInt(category);
 
-            // 3. 게시판 이름 및 설명 동적 설정
+            // [추가] 3. 정렬 조건 설정 (sortType)
+            String sortType = req.getParameter("sortType");
+            if (sortType == null || sortType.isEmpty()) {
+                sortType = "new"; // 기본값은 최신순
+            }
+
+            // 4. 게시판 이름 및 설명 설정 (기본 유지)
             String boardName = "";
-            String boardDesc = ""; // 서브 타이틀 추가
-            
-            // 갤러리는 한 페이지에 9개(3x3), 나머지는 10개씩 출력
+            String boardDesc = "";
             int size = 10; 
 
             if (category.equals("1")) {
@@ -68,12 +72,10 @@ public class BbsController {
             } else if (category.equals("4")) {
                 boardName = "GALLERY";
                 boardDesc = "활동 사진을 공유하고 추억을 남겨보세요.";
-                size = 9; // 갤러리는 가로 3개씩 배치를 위해 9개로 설정
-            } else {
-                boardName = "BOARD";
+                size = 9; 
             }
 
-            // 4. 검색 조건 설정
+            // 5. 검색 조건 설정
             String schType = req.getParameter("schType");
             String kwd = req.getParameter("kwd");
             if (schType == null) {
@@ -82,13 +84,14 @@ public class BbsController {
             }
             kwd = util.decodeUrl(kwd);
 
-            // 5. DB 조회를 위한 Map 세팅
+            // 6. DB 조회를 위한 Map 세팅
             Map<String, Object> map = new HashMap<>();
             map.put("category", categoryNum);
             map.put("schType", schType);
             map.put("kwd", kwd);
-            
-            // 6. 페이징 로직
+            map.put("sortType", sortType); // [추가] 정렬 타입 전달
+
+            // 7. 페이징 로직
             int dataCount = service.dataCount(map);
             int total_page = util.pageCount(dataCount, size);
             if (current_page > total_page) current_page = total_page;
@@ -97,11 +100,12 @@ public class BbsController {
             map.put("offset", Math.max(offset, 0));
             map.put("size", size);
 
-            // 7. 게시글 리스트 조회
+            // 8. 게시글 리스트 조회
             List<BoardDTO> list = service.listBoard(map);
 
-            // 8. 쿼리 스트링 구성
+            // [수정] 9. 쿼리 스트링 구성 (sortType 유지)
             String query = "category=" + category;
+            query += "&sortType=" + sortType; // 정렬 상태 유지
             if (!kwd.isBlank()) {
                 query += "&schType=" + schType + "&kwd=" + util.encodeUrl(kwd);
             }
@@ -109,15 +113,18 @@ public class BbsController {
             String listUrl = cp + "/bbs/list?" + query;
             String paging = util.paging(current_page, total_page, listUrl);
 
-            // 9. 결과 데이터 전달
+            // 10. 결과 데이터 전달
             mav.addObject("list", list);
             mav.addObject("dataCount", dataCount);
             mav.addObject("page", current_page);
             mav.addObject("total_page", total_page);
             mav.addObject("paging", paging);
             mav.addObject("category", category);
+            mav.addObject("sortType", sortType); // [추가] JSP 버튼 활성화용
             mav.addObject("boardName", boardName); 
-            mav.addObject("boardDesc", boardDesc); // 추가된 설명문
+            mav.addObject("boardDesc", boardDesc);
+            mav.addObject("schType", schType);
+            mav.addObject("kwd", kwd);
 
         } catch (Exception e) {
             e.printStackTrace();
