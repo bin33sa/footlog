@@ -1,6 +1,9 @@
 package com.fl.controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -458,7 +461,69 @@ public class MatchController {
 		return result;
 	}
 	
+	@GetMapping("myMatch")
+	public ModelAndView myMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+		ModelAndView mav = new ModelAndView("match/myMatch");
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		if (info == null) {
+	        return new ModelAndView("redirect:/member/login");
+	    }
+		try {
+			String tab = req.getParameter("tab");
+			if(tab==null || tab.isBlank()) {
+				tab="future";
+			}
+			
+			List<MatchDTO> allList = service.listMyMatch(info.getMember_code());
+			List<MatchDTO> resultList = new ArrayList<MatchDTO>();
+			
+			String nowStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+			
+			for(MatchDTO dto : allList) {
+				int compareResult = dto.getMatch_date().compareTo(nowStr);
+				
+				if("future".equals(tab)) {
+					if(compareResult>0) resultList.add(dto);
+				}else {
+					if(compareResult<=0) resultList.add(dto);
+				}
+			}
+			mav.addObject("tab", tab);
+			mav.addObject("list", resultList);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return mav;
+	}
 	
-	
-	
+	@ResponseBody
+	@PostMapping("myMatch")
+	public ModelAndView updateScore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+		ModelAndView mav = new ModelAndView("match/myMatch");
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		if (info == null) {
+	        return new ModelAndView("redirect:/member/login");
+	    }
+		
+		try {
+			MatchDTO dto = new MatchDTO();
+			
+			dto.setMatch_code(Long.parseLong(req.getParameter("match_code")));
+			dto.setHome_score(Integer.parseInt(req.getParameter("home_score")));
+			dto.setAway_score(Integer.parseInt(req.getParameter("away_score")));
+			
+			int result = service.updateMatchResult(dto); 
+			if(result ==0) {
+				service.insertMatchResult(dto);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return new ModelAndView("redirect:/match/myMatch?tab=past");
+	}
 }

@@ -25,4 +25,8 @@ public interface MatchService {
 	public void deleteMatchApply(MatchApplyDTO dto) throws Exception;
 	public int countMatchApply(Map<String, Object> map);
 	public void updateExpiredMatchStatus() throws Exception;
+	public int countMatchResult(long match_code);
+	public int insertMatchResult(MatchDTO dto);
+	public int updateMatchResult(MatchDTO dto);
+	public List<MatchDTO> listMyMatch(long member_code);
 }
