@@ -72,7 +72,7 @@ public class BbsController {
             } else if (category.equals("4")) {
                 boardName = "GALLERY";
                 boardDesc = "활동 사진을 공유하고 추억을 남겨보세요.";
-                size = 9; 
+                size = 8; 
             }
 
             // 5. 검색 조건 설정
