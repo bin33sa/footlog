@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <title>Footlog - My Team Dashboard</title>
     <meta charset="utf-8">

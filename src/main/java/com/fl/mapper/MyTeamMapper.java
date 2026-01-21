@@ -16,7 +16,6 @@ import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
 import com.fl.model.TeamMemberDTO;
 import com.fl.model.VoteDTO;
-import com.fl.model.VoteOptionDTO;
 
 @Mapper
 public interface MyTeamMapper {
@@ -55,28 +54,33 @@ public interface MyTeamMapper {
 
 	public void deleteJoinRequest(Map<String, Object> map);
 
-	public List<ScheduleDTO> listMonthSchedule(Map<String, Object> map);
+	public void insertSchedule(ScheduleDTO dto) throws SQLException;
+	
+	public void updateSchedule(ScheduleDTO dto) throws SQLException;
+	
+    public List<ScheduleDTO> listSchedule(Map<String, Object> map);
 
-	public void insertSchedule(ScheduleDTO dto);
-
-	public void updateSchedule(ScheduleDTO dto);
-
-	public void deleteSchedule(long schedule_code);
+    public void deleteSchedule(Map<String, Object> map) throws SQLException;
 
 	public void insertVote(VoteDTO dto);
 
-	public void insertVoteOption(VoteOptionDTO dto);
 
 	public List<VoteDTO> listVote(Map<String, Object> map);
 
 	public VoteDTO readVote(Map<String, Object> map);
 
-	public List<VoteOptionDTO> listVoteOptions(Map<String, Object> map);
-
 	public int checkVoteHistory(Map<String, Object> map);
 
 	public void insertVoteHistory(Map<String, Object> map);
-
+	
+	public void deleteVote(Map<String, Object> map) throws SQLException;
+	
+	public void deleteMemberVoteAll(Map<String, Object> map) throws Exception;
+	
+	public void deleteScheduleByVote(Map<String, Object> map) throws Exception;
+	
+	public Integer readMemberVoteState(Map<String, Object> map);
+	
 	public void insertTeamBoard(TeamBoardDTO dto) throws Exception;
 	
 	public List<TeamBoardDTO> listTeamBoard(Map<String, Object> map);

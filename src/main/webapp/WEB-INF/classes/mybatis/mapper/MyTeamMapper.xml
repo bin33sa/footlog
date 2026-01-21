@@ -167,89 +167,156 @@
 
 
 	<insert id="insertSchedule" parameterType="com.fl.model.ScheduleDTO">
-		INSERT INTO team_schedule(schedule_code, team_code, member_code, subject, start_date, end_date, color, place, memo, reg_date)
-		VALUES (team_schedule_seq.NEXTVAL, #{team_code}, #{member_code}, #{subject}, #{start_date}, #{end_date}, #{color}, #{place}, #{memo}, SYSDATE)
-	</insert>
+        INSERT INTO schedule_team (
+            board_cal_code, 
+            member_code, 
+            team_code, 
+            match_code, 
+            title, 
+            content, 
+            start_date, 
+            end_date
+        ) VALUES (
+            schedule_team_seq.NEXTVAL, 
+            #{member_code}, 
+            #{team_code}, 
+            
+            <choose>
+                <when test="match_code != null and match_code != 0">
+                    #{match_code}
+                </when>
+                <otherwise>
+                    NULL
+                </otherwise>
+            </choose>,
+            
+            #{title}, 
+            #{content}, 
+            TO_DATE(#{start_date}, 'YYYY-MM-DD HH24:MI:SS'), 
+            TO_DATE(#{end_date}, 'YYYY-MM-DD HH24:MI:SS')
+        )
+    </insert>
 
-	<select id="listMonthSchedule" parameterType="map" resultType="com.fl.model.ScheduleDTO">
-		SELECT schedule_code, subject, start_date, end_date, color, place
-		FROM team_schedule
-		WHERE team_code = #{team_code}
-		  AND start_date &gt;= #{startStr} AND start_date &lt;= #{endStr}
-	</select>
+    <select id="listSchedule" parameterType="map" resultType="com.fl.model.ScheduleDTO">
+        SELECT 
+            board_cal_code, 
+            member_code, 
+            team_code, 
+            match_code, 
+            title, 
+            content,
+            TO_CHAR(start_date, 'YYYY-MM-DD"T"HH24:MI:SS') AS start_date,
+            TO_CHAR(end_date, 'YYYY-MM-DD"T"HH24:MI:SS') AS end_date
+        FROM schedule_team
+        WHERE team_code = #{team_code}
+          AND start_date &gt;= TO_DATE(#{start}, 'YYYY-MM-DD"T"HH24:MI:SS')
+          AND end_date &lt;= TO_DATE(#{end}, 'YYYY-MM-DD"T"HH24:MI:SS')
+        ORDER BY start_date ASC
+    </select>
 	
 	<update id="updateSchedule" parameterType="com.fl.model.ScheduleDTO">
-		UPDATE team_schedule
-		SET subject=#{subject}, start_date=#{start_date}, end_date=#{end_date}, color=#{color}, place=#{place}, memo=#{memo}
-		WHERE schedule_code=#{schedule_code}
-	</update>
-
-	<delete id="deleteSchedule" parameterType="Long">
-		DELETE FROM team_schedule WHERE schedule_code = #{schedule_code}
-	</delete>
-
+        UPDATE schedule_team
+        SET title = #{title}, 
+            content = #{content},
+            start_date = TO_DATE(#{start_date}, 'YYYY-MM-DD HH24:MI:SS'),
+            end_date = TO_DATE(#{end_date}, 'YYYY-MM-DD HH24:MI:SS')
+        WHERE board_cal_code = #{board_cal_code} 
+          AND team_code = #{team_code} 
+          AND member_code = #{member_code} 
+    </update>
+	
+    <delete id="deleteSchedule" parameterType="map">
+        DELETE FROM schedule_team 
+        WHERE board_cal_code = #{board_cal_code} 
+          AND team_code = #{team_code}
+    </delete>
 
 	<insert id="insertVote" parameterType="com.fl.model.VoteDTO">
-		<selectKey keyProperty="board_vote_code" resultType="Long" order="BEFORE">
-			SELECT team_vote_seq.NEXTVAL FROM DUAL
-		</selectKey>
-		INSERT INTO team_vote(board_vote_code, team_code, member_code, title, content, start_date, end_date, status, view_count, created_at)
-		VALUES (#{board_vote_code}, #{team_code}, #{member_code}, #{title}, #{content}, #{start_date}, #{end_date}, 0, 0, SYSDATE)
+	    INSERT INTO board_vote (
+	        board_vote_code, member_code, team_code, 
+	        title, content, status, view_count,
+	        start_date, end_date, event_date, created_at
+	    ) VALUES (
+	        board_vote_seq.NEXTVAL, #{memberCode}, #{teamCode}, 
+	        #{title}, #{content}, 0, 0,
+	        TO_DATE(#{startDate, jdbcType=VARCHAR}, 'YYYY-MM-DD HH24:MI:SS'), 
+	        TO_DATE(#{endDate, jdbcType=VARCHAR}, 'YYYY-MM-DD HH24:MI:SS'),
+	        TO_DATE(#{eventDate, jdbcType=VARCHAR}, 'YYYY-MM-DD HH24:MI:SS'), 
+	        SYSDATE
+	    )
 	</insert>
 
-	<insert id="insertVoteOption" parameterType="com.fl.model.VoteOptionDTO">
-		INSERT INTO team_vote_option(option_code, board_vote_code, content)
-		VALUES (team_vote_option_seq.NEXTVAL, #{board_vote_code}, #{content})
-	</insert>
+    <select id="readVote" parameterType="map" resultType="com.fl.model.VoteDTO">
+        SELECT 
+            v.board_vote_code AS boardVoteCode,   v.team_code AS teamCode,
+            v.member_code AS memberCode,
+            v.title, 
+            v.content, 
+            v.status, 
+            v.view_count AS viewCount,
+            TO_CHAR(v.start_date, 'YYYY-MM-DD HH24:MI') AS startDate,
+            TO_CHAR(v.end_date, 'YYYY-MM-DD HH24:MI') AS endDate,
+            TO_CHAR(v.event_date, 'YYYY-MM-DD HH24:MI') AS eventDate,
+            v.created_at AS createdAt,
+            m.member_name AS writerName,          NVL((SELECT status FROM member_vote 
+                 WHERE board_vote_code = v.board_vote_code 
+                 AND member_code = #{member_code}), 0) AS myVoteStatus,
+                 
+            (SELECT COUNT(*) FROM member_vote WHERE board_vote_code = v.board_vote_code AND status = 1) AS voteCount
+        FROM board_vote v
+        JOIN member m ON v.member_code = m.member_code
+        WHERE v.board_vote_code = #{board_vote_code}
+    </select>
 
-	<select id="listVote" parameterType="map" resultType="com.fl.model.VoteDTO">
-		SELECT v.board_vote_code, v.title, v.end_date, v.status, v.view_count,
-		       m.user_name AS writer_name,
-		       TO_CHAR(v.created_at, 'YYYY-MM-DD') AS created_at,
-		       /* 참여자 수 */
-		       (SELECT COUNT(DISTINCT member_code) FROM team_vote_history WHERE board_vote_code = v.board_vote_code) AS vote_count,
-		       /* 내 투표 여부 */
-		       NVL((SELECT 1 FROM team_vote_history 
-		            WHERE board_vote_code = v.board_vote_code AND member_code = #{member_code} AND ROWNUM = 1), 0) AS my_vote_status
-		FROM team_vote v
-		JOIN member m ON v.member_code = m.member_code
-		WHERE v.team_code = #{team_code}
-		ORDER BY v.status ASC, v.end_date ASC
+    <delete id="deleteVote" parameterType="map">
+	    DELETE FROM board_vote 
+	    WHERE board_vote_code = #{board_vote_code}
+	</delete>
+
+    <select id="readMemberVoteState" parameterType="map" resultType="Integer">
+        SELECT status 
+        FROM member_vote
+        WHERE board_vote_code = #{board_vote_code} 
+          AND member_code = #{member_code}
+    </select>
+
+    <update id="insertVoteHistory" parameterType="map">
+        MERGE INTO member_vote mv
+        USING DUAL
+        ON (mv.board_vote_code = #{board_vote_code} AND mv.member_code = #{member_code})
+        WHEN MATCHED THEN
+            UPDATE SET status = #{status}
+        WHEN NOT MATCHED THEN
+            INSERT (board_vote_code, member_code, status)
+            VALUES (#{board_vote_code}, #{member_code}, #{status})
+    </update>
+
+    <select id="listVote" parameterType="map" resultType="com.fl.model.VoteDTO">
+	    SELECT 
+	        v.board_vote_code AS boardVoteCode,   v.title, 
+            v.status,
+	        TO_CHAR(v.end_date, 'YYYY-MM-DD') AS endDate,
+            TO_CHAR(v.event_date, 'YYYY-MM-DD HH24:MI') AS eventDate,
+	        m.member_name AS writerName,
+            (SELECT COUNT(*) FROM member_vote WHERE board_vote_code = v.board_vote_code AND status = 1) AS voteCount
+	    FROM board_vote v
+	    JOIN member m ON v.member_code = m.member_code
+	    WHERE v.team_code = #{team_code}
+	    ORDER BY v.board_vote_code DESC
 	</select>
 
-	<select id="readVote" parameterType="map" resultType="com.fl.model.VoteDTO">
-		SELECT v.board_vote_code, v.title, v.content, v.view_count,
-		       TO_CHAR(v.start_date, 'YYYY-MM-DD HH24:MI') as start_date,
-		       TO_CHAR(v.end_date, 'YYYY-MM-DD HH24:MI') as end_date,
-		       m.user_name AS writer_name,
-		       NVL((SELECT 1 FROM team_vote_history WHERE board_vote_code = v.board_vote_code AND member_code = #{member_code} AND ROWNUM = 1), 0) AS my_vote_status
-		FROM team_vote v
-		JOIN member m ON v.member_code = m.member_code
-		WHERE v.board_vote_code = #{board_vote_code}
-	</select>
-
-	<select id="listVoteOptions" parameterType="map" resultType="com.fl.model.VoteOptionDTO">
-		SELECT option_code, board_vote_code, content,
-		       /* 이 옵션의 득표수 */
-		       (SELECT COUNT(*) FROM team_vote_history WHERE option_code = o.option_code) AS option_count,
-		       /* 내가 체크했는지 여부 */
-		       NVL((SELECT 1 FROM team_vote_history WHERE option_code = o.option_code AND member_code = #{member_code}), 0) AS is_checked
-		FROM team_vote_option o
-		WHERE board_vote_code = #{board_vote_code}
-		ORDER BY option_code ASC
-	</select>
-
-	<insert id="insertVoteHistory" parameterType="map">
-		INSERT INTO team_vote_history(history_code, board_vote_code, option_code, member_code)
-		VALUES (team_vote_history_seq.NEXTVAL, #{board_vote_code}, #{option_code}, #{member_code})
-	</insert>
+	<delete id="deleteMemberVoteAll" parameterType="map">
+	    DELETE FROM member_vote 
+	    WHERE board_vote_code = #{board_vote_code}
+	</delete>
 	
-	<select id="checkVoteHistory" parameterType="map" resultType="Integer">
-		SELECT COUNT(*) FROM team_vote_history 
-		WHERE board_vote_code = #{board_vote_code} AND member_code = #{member_code}
-	</select>
-
-
+	<delete id="deleteScheduleByVote" parameterType="map">
+	    DELETE FROM schedule_team 
+	    WHERE team_code = #{team_code} 
+	      AND title = '[투표] ' || #{title}
+	      AND start_date = TO_DATE(#{event_date, jdbcType=VARCHAR}, 'YYYY-MM-DD HH24:MI:SS')
+	</delete>
+	
 	<insert id="insertTeamBoard" parameterType="com.fl.model.TeamBoardDTO">
         INSERT INTO board_team(
             board_team_code, team_code, member_code, title, content, 

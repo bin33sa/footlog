@@ -20,9 +20,7 @@
 	href="${pageContext.request.contextPath}/dist/css/style.css">
 </head>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
-<body>
-
-	<header>
+<body class="bg-light"> <header>
 		<jsp:include page="/WEB-INF/views/layout/header.jsp" />
 	</header>
 
@@ -64,8 +62,7 @@
 						
 						<h2 class="fw-bold mb-1">${dto.title}</h2>
 						<div class="d-flex align-items-center text-muted gap-2">
-							<span><i class="bi bi-eye me-1"></i> ${dto.view_count}</span> 
-							<span>•</span> 
+							<span><i class="bi bi-eye me-1"></i> ${dto.view_count}</span> <span>•</span> 
 							
 							<span>주최팀: 
 								<a href="${pageContext.request.contextPath}/team/view?team_code=${dto.home_code}" 
@@ -80,7 +77,7 @@
 					</button>
 				</div>
 
-				<div class="modern-card p-4 mb-4">
+                <div class="card border-0 shadow-sm p-4 mb-4 bg-white">
 					<table class="table table-borderless match-info-table mb-0">
 						<tbody>
 							<tr>
@@ -112,7 +109,7 @@
 					</table>
 				</div>
 
-				<div class="modern-card p-5" style="min-height: 300px;">
+                <div class="card border-0 shadow-sm p-5 bg-white" style="min-height: 300px;">
 
 					<h5 class="fw-bold mb-3">매치 소개</h5>
 					<p class="text-muted mb-5" style="line-height: 1.8;">
@@ -156,7 +153,7 @@
 				</div> 
 				
 				<c:if test="${sessionScope.member.member_code == dto.member_code}">
-					<div class="card border-0 shadow-sm mt-4">
+					<div class="card border-0 shadow-sm mt-4 bg-white">
 						<div class="card-header bg-white border-bottom fw-bold py-3">
 					        <i class="bi bi-people-fill me-2"></i>매치 신청 현황
 					    </div>

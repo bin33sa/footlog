@@ -15,10 +15,12 @@ import com.fl.model.BoardReplyDTO;
 import com.fl.model.FileDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
+import com.fl.model.ScheduleDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
 import com.fl.model.TeamMemberDTO;
+import com.fl.model.VoteDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
@@ -1379,5 +1381,337 @@ public class MyTeamController {
 
         return new ModelAndView("redirect:/myteam/board?teamCode=" + teamCode + "&page=" + page);
     }
+
+    @GetMapping("schedule")
+    public ModelAndView schedule(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        ModelAndView mav = new ModelAndView("myteam/schedule");
+        HttpSession session = req.getSession();
+        
+        long teamCode = setTeamInfoAndRole(req, session, mav);
+        if (teamCode == -1) return new ModelAndView("redirect:/myteam/main");
+        
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        mav.addObject("myMemberCode", info.getMember_code());
+        
+        return mav;
+    }
+
+    @ResponseBody
+    @GetMapping("schedule_load")
+    public Map<String, Object> scheduleLoad(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        try {
+            String teamCodeStr = req.getParameter("teamCode");
+            String start = req.getParameter("start");
+            String end = req.getParameter("end");
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("team_code", Long.parseLong(teamCodeStr));
+            map.put("start", start); 
+            map.put("end", end);
+            
+            List<ScheduleDTO> list = service.listSchedule(map);
+            
+            model.put("list", list);
+            model.put("state", "true");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("schedule_insert")
+    public Map<String, Object> scheduleInsert(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if (info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+
+        try {
+            ScheduleDTO dto = new ScheduleDTO();
+            
+            dto.setMember_code(info.getMember_code());
+            dto.setTeam_code(Long.parseLong(req.getParameter("team_code")));
+            dto.setTitle(req.getParameter("title"));
+            dto.setContent(req.getParameter("content"));
+            dto.setStart_date(req.getParameter("start_date"));
+            dto.setEnd_date(req.getParameter("end_date"));
+            
+            service.insertSchedule(dto);
+            model.put("state", "true");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("schedule_update")
+    public Map<String, Object> scheduleUpdate(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        
+        if (info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+
+        try {
+            ScheduleDTO dto = new ScheduleDTO();
+            
+            String boardCalCodeStr = req.getParameter("board_cal_code");
+            if(boardCalCodeStr == null || boardCalCodeStr.isEmpty()) {
+                model.put("state", "false");
+                return model;
+            }
+            
+            dto.setBoard_cal_code(Long.parseLong(boardCalCodeStr));
+            dto.setMember_code(info.getMember_code());
+            dto.setTeam_code(Long.parseLong(req.getParameter("team_code")));
+            dto.setTitle(req.getParameter("title"));
+            dto.setContent(req.getParameter("content"));
+            dto.setStart_date(req.getParameter("start_date"));
+            dto.setEnd_date(req.getParameter("end_date"));
+            
+            service.updateSchedule(dto);
+            model.put("state", "true");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("schedule_delete")
+    public Map<String, Object> scheduleDelete(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        if (info == null) {
+            model.put("state", "login_required");
+            return model;
+        }
+
+        try {
+            long board_cal_code = Long.parseLong(req.getParameter("board_cal_code"));
+            long team_code = Long.parseLong(req.getParameter("team_code"));
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_cal_code", board_cal_code);
+            map.put("team_code", team_code);
+            
+            service.deleteSchedule(map);
+            model.put("state", "true");
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        
+        return model;
+    }
     
+    @GetMapping("attendance")
+    public ModelAndView attendanceMain(HttpServletRequest req, HttpServletResponse resp) {
+        ModelAndView mav = new ModelAndView("myteam/attendance"); 
+        HttpSession session = req.getSession();
+        
+        long teamCode = setTeamInfoAndRole(req, session, mav);
+        
+        if (teamCode == -1) {
+            return new ModelAndView("redirect:/member/login");
+        }    
+        return mav;
+    }
+
+    @ResponseBody
+    @GetMapping("vote_list")
+    public Map<String, Object> listVote(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        
+        try {
+            String teamCodeStr = req.getParameter("teamCode");
+            if(teamCodeStr == null || teamCodeStr.isEmpty()) {
+                teamCodeStr = req.getParameter("team_code"); 
+            }
+            
+            long teamCode = Long.parseLong(teamCodeStr);
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("team_code", teamCode); 
+
+            List<VoteDTO> list = service.listVote(map);
+
+            model.put("list", list);
+            model.put("state", "true");
+            
+        } catch (Exception e) {
+            model.put("state", "false");
+            e.printStackTrace();
+        }
+        
+        return model;
+    }
+
+    @ResponseBody
+    @GetMapping("vote_read")
+    public Map<String, Object> readVote(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        try {
+            String codeParam = req.getParameter("board_vote_code");
+            if(codeParam == null || info == null) {
+                model.put("state", "false");
+                return model;
+            }
+
+            long board_vote_code = Long.parseLong(codeParam);
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_vote_code", board_vote_code);
+            map.put("member_code", info.getMember_code());
+
+            VoteDTO dto = service.readVote(map);
+
+            if (dto != null) {
+                Map<String, Object> dtoData = new HashMap<>();
+                dtoData.put("boardVoteCode", dto.getBoardVoteCode());
+                dtoData.put("title", dto.getTitle());
+                dtoData.put("content", dto.getContent());
+                dtoData.put("eventDate", dto.getEventDate());
+                dtoData.put("writerName", dto.getWriterName());
+                dtoData.put("voteCount", dto.getVoteCount());
+                dtoData.put("myVoteStatus", dto.getMyVoteStatus());
+
+                model.put("dto", dtoData);
+                model.put("state", "true");
+            } else {
+                model.put("state", "false");
+            }
+
+        } catch (Exception e) {
+            model.put("state", "false");
+        }
+
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("vote_insert")
+    public Map<String, Object> insertVote(HttpServletRequest req, HttpServletResponse resp) {
+    	ModelAndView mav = new ModelAndView("my_team/vote_insert");
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        try {
+            long currentTeamCode = setTeamInfoAndRole(req, session, mav);
+            
+            if (info == null || currentTeamCode == -1) {
+                model.put("state", "false");
+                return model;
+            }
+
+            VoteDTO dto = new VoteDTO();
+            dto.setMemberCode(info.getMember_code());
+            dto.setTeamCode(currentTeamCode);
+            dto.setTitle(req.getParameter("title"));
+            dto.setContent(req.getParameter("content"));
+            
+            String eventDate = req.getParameter("event_date");
+            if (eventDate != null && !eventDate.isEmpty()) {
+                eventDate = eventDate.replace("T", " ");
+                if(eventDate.length() == 16) eventDate += ":00";
+            }
+            dto.setEventDate(eventDate);
+            service.insertVote(dto);
+            model.put("state", "true");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        return model;
+    }
+    
+    @ResponseBody
+    @PostMapping("vote_do")
+    public Map<String, Object> doVote(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        try {
+            long board_vote_code = Long.parseLong(req.getParameter("board_vote_code"));
+            int status = Integer.parseInt(req.getParameter("status"));
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_vote_code", board_vote_code);
+            map.put("member_code", info.getMember_code());
+            map.put("status", status);
+
+            service.vote(map);
+
+            model.put("state", "true");
+
+        } catch (Exception e) {
+            model.put("state", "false");
+            e.printStackTrace();
+        }
+
+        return model;
+    }
+
+    @ResponseBody
+    @PostMapping("vote_delete")
+    public Map<String, Object> deleteVote(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        ModelAndView mav = new ModelAndView("myteam/vote_delete");
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+        try {
+            long currentTeamCode = setTeamInfoAndRole(req, session, mav);
+            
+            String boardVoteCode = req.getParameter("board_vote_code");
+            
+            if (boardVoteCode == null || currentTeamCode == -1 || info == null) {
+                model.put("state", "false");
+                return model;
+            }
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("board_vote_code", boardVoteCode);
+            map.put("team_code", currentTeamCode);
+            map.put("member_code", info.getMember_code());
+
+            service.deleteVote(map);
+            
+            model.put("state", "true");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+
+        return model;
+    }
 }

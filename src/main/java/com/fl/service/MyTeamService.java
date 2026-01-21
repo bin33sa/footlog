@@ -11,7 +11,6 @@ import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
 import com.fl.model.TeamMemberDTO;
 import com.fl.model.VoteDTO;
-import com.fl.model.VoteOptionDTO;
 
 public interface MyTeamService {
 	
@@ -57,33 +56,28 @@ public interface MyTeamService {
 	// ==========================================
 	// 4. [일정 관리]
 	// ==========================================
-	public List<ScheduleDTO> listMonthSchedule(Map<String, Object> map);
-	
-	public void insertSchedule(ScheduleDTO dto) throws Exception;
-	
-	public void updateSchedule(ScheduleDTO dto) throws Exception;
-	
-	public void deleteSchedule(long schedule_code) throws Exception;
+	public List<ScheduleDTO> listSchedule(Map<String, Object> map);
 
-	
+    public void insertSchedule(ScheduleDTO dto) throws Exception;
+    
+    public void deleteSchedule(Map<String, Object> map) throws Exception;
+
+    public void updateSchedule(ScheduleDTO dto) throws Exception;
+    
 	// ==========================================
 	// 5. [투표 관리]
 	// ==========================================
 	public void insertVote(VoteDTO dto) throws Exception;
-	
-	public void insertVoteOption(VoteOptionDTO dto) throws Exception;
 
 	public List<VoteDTO> listVote(Map<String, Object> map);
 	
 	public VoteDTO readVote(Map<String, Object> map);
-	
-	public List<VoteOptionDTO> listVoteOptions(Map<String, Object> map);
-	
+
 	public int checkVoteHistory(Map<String, Object> map);
 	
 	public void vote(Map<String, Object> map) throws Exception;
 
-	
+	public void deleteVote(Map<String, Object> map) throws Exception;
 	// ==========================================
 	// 6. [게시판]
 	// ==========================================

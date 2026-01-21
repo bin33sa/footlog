@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <title>Footlog - 구단 정보 수정</title>
     <meta charset="utf-8">
