@@ -27,6 +27,7 @@
             border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
+        /* 탭 버튼 스타일 */
         .nav-pills .nav-link {
             color: #555; background-color: #fff; border-radius: 50px; padding: 10px 24px;
             margin-right: 10px; font-weight: 600; font-size: 0.95rem; border: 1px solid #eee; transition: all 0.2s;
@@ -43,16 +44,15 @@
         }
         .history-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #e0e0e0; }
 
-        /* --- 배지 스타일 (status-badge) --- */
+        /* --- 배지 스타일 --- */
         .status-badge { 
-            font-size: 0.8rem; padding: 5px 12px; border-radius: 50px; /* 둥근 캡슐형 */
-            font-weight: 700; display: inline-block; margin-bottom: 6px;
-            letter-spacing: -0.5px;
+            font-size: 0.8rem; padding: 5px 12px; border-radius: 50px;
+            font-weight: 700; display: inline-block; margin-bottom: 6px; letter-spacing: -0.5px;
         }
         .status-wait { background: #fff8e1; color: #b78a00; border: 1px solid #ffeeba; }
-        .status-recruiting { background: #e7f5ff; color: #1c7ed6; border: 1px solid #d0ebff; } /* 파란색 (구인/모집중) */
-        .status-ok { background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8; } /* 초록색 (구직/완료) */
-        .status-no { background: #fff5f5; color: #fa5252; border: 1px solid #ffc9c9; } /* 빨간색 (마감/거절) */
+        .status-recruiting { background: #e7f5ff; color: #1c7ed6; border: 1px solid #d0ebff; }
+        .status-ok { background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8; }
+        .status-no { background: #fff5f5; color: #fa5252; border: 1px solid #ffc9c9; }
         
         .match-tag { font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; font-weight: 800; margin-right: 6px; vertical-align: middle; }
         .tag-home { background: #212529; color: #fff; }
@@ -74,16 +74,37 @@
 
         .btn-arrow-go {
             width: 42px; height: 42px; 
-            border-radius: 50%; 
-            background-color: #fff; 
-            border: 1px solid #e9ecef;
+            border-radius: 50%; background-color: #fff; border: 1px solid #e9ecef;
             display: flex; align-items: center; justify-content: center;
-            color: #212529; transition: all 0.2s;
-            text-decoration: none !important;
+            color: #212529; transition: all 0.2s; text-decoration: none !important;
             z-index: 10; position: relative;
         }
-        .btn-arrow-go:hover {
-            background-color: #111; color: #fff; border-color: #111;
+        .btn-arrow-go:hover { background-color: #111; color: #fff; border-color: #111; }
+
+        /* --- [중요] 페이징 스타일 수정 (MyUtil 호환) --- */
+        .page-navigation {
+            display: flex; justify-content: center; align-items: center; margin-top: 30px;
+        }
+        .page-navigation .paginate {
+            display: flex; gap: 6px;
+        }
+        .page-navigation a, .page-navigation span { 
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.9rem; font-weight: 600;
+            color: #666; background-color: #fff; border: 1px solid #eee;
+            transition: all 0.2s; cursor: pointer;
+        }
+        .page-navigation a:hover {
+            background-color: #f8f9fa; border-color: #ddd; color: #333;
+        }
+        .page-navigation span {
+            background-color: #111 !important;
+            color: #D4F63F !important;
+            border-color: #111 !important;
+            cursor: default;
         }
     </style>
 </head>
@@ -107,12 +128,8 @@
                                 <img src="${pageContext.request.contextPath}/dist/images/avatar.png" class="profile-img-lg">
                             </c:otherwise>
                         </c:choose>
-                        
-                        <span class="position-absolute bottom-0 end-0 badge bg-dark rounded-circle border border-white p-2">
-                            FW
-                        </span>
+                        <span class="position-absolute bottom-0 end-0 badge bg-dark rounded-circle border border-white p-2">FW</span>
                     </div>
-                    
                     <h5 class="fw-bold mb-1">${sessionScope.member.member_name}</h5>
                     <p class="text-secondary small mb-4"><i class="bi bi-geo-alt-fill"></i> 서울</p>
                     <a href="${pageContext.request.contextPath}/member/updateInfo" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">회원정보 수정</a>
@@ -134,16 +151,22 @@
 
                 <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
                     <li class="nav-item">
-                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-match">매치 신청 (팀)</button>
+                        <button class="nav-link ${empty param.tab || param.tab == 'match' ? 'active' : ''}" 
+                                id="pills-match-tab" 
+                                onclick="location.href='${pageContext.request.contextPath}/member/history?tab=match'"
+                                type="button">매치 신청 </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-mercenary">내 용병 활동 (작성글)</button>
+                        <button class="nav-link ${param.tab == 'mercenary' ? 'active' : ''}" 
+                                id="pills-mercenary-tab" 
+                                onclick="location.href='${pageContext.request.contextPath}/member/history?tab=mercenary'"
+                                type="button">내 용병 활동 </button>
                     </li>
                 </ul>
 
                 <div class="tab-content" id="pills-tabContent">
                     
-                    <div class="tab-pane fade show active" id="pills-match">
+                    <div class="tab-pane fade ${empty param.tab || param.tab == 'match' ? 'show active' : ''}" id="pills-match">
                          <c:choose>
                             <c:when test="${empty matchApplyList}">
                                 <div class="modern-card p-5 text-center text-muted">
@@ -153,40 +176,24 @@
                             <c:otherwise>
                                 <c:forEach var="item" items="${matchApplyList}">
                                     <div class="history-card">
-                                        
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <div>
                                                 <c:choose>
-                                                    <%-- 1. 내가 만든 경기 (HOME) --%>
                                                     <c:when test="${item.apply_code == 0}">
                                                         <span class="match-tag tag-home">HOME</span>
                                                         <c:choose>
-                                                            <c:when test="${item.status eq '모집중'}">
-                                                                <span class="status-badge status-recruiting">상대 모집중</span>
-                                                            </c:when>
-                                                            <c:when test="${item.status eq '매칭완료' or item.status eq '확정'}">
-                                                                <span class="status-badge status-ok">매치 확정</span>
-                                                            </c:when>
-                                                            <c:when test="${item.status eq '마감'}">
-                                                                <span class="status-badge status-no">마감</span>
-                                                            </c:when>
+                                                            <c:when test="${item.status eq '모집중'}"><span class="status-badge status-recruiting">상대 모집중</span></c:when>
+                                                            <c:when test="${item.status eq '매칭완료' or item.status eq '확정'}"><span class="status-badge status-ok">매치 확정</span></c:when>
+                                                            <c:when test="${item.status eq '마감'}"><span class="status-badge status-no">마감</span></c:when>
                                                             <c:otherwise><span class="status-badge status-wait">${item.status}</span></c:otherwise>
                                                         </c:choose>
                                                     </c:when>
-                                                    
-                                                    <%-- 2. 내가 신청한 경기 (AWAY) --%>
                                                     <c:otherwise>
                                                         <span class="match-tag tag-away">AWAY</span>
                                                         <c:choose>
-                                                            <c:when test="${item.status eq '매칭대기'}">
-                                                                <span class="status-badge status-wait">수락 대기중</span>
-                                                            </c:when>
-                                                            <c:when test="${item.status eq '수락'}">
-                                                                <span class="status-badge status-ok">매치 성사</span>
-                                                            </c:when>                                                
-                                                            <c:when test="${item.status eq '마감'}">
-                                                                <span class="status-badge status-no">마감</span>
-                                                            </c:when>
+                                                            <c:when test="${item.status eq '매칭대기'}"><span class="status-badge status-wait">수락 대기중</span></c:when>
+                                                            <c:when test="${item.status eq '수락'}"><span class="status-badge status-ok">매치 성사</span></c:when>                                                
+                                                            <c:when test="${item.status eq '마감'}"><span class="status-badge status-no">마감</span></c:when>
                                                             <c:otherwise><span class="status-badge status-no">${item.status}</span></c:otherwise>
                                                         </c:choose>
                                                     </c:otherwise>
@@ -205,46 +212,34 @@
                                                         <c:when test="${not empty item.team_emblem}">
                                                             <img src="${pageContext.request.contextPath}/uploads/team/${item.team_emblem}" class="team-emblem-img" onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
                                                         </c:when>
-                                                        <c:otherwise>
-                                                            <div class="team-emblem-placeholder"><i class="bi bi-shield-shaded fs-4"></i></div>
-                                                        </c:otherwise>
+                                                        <c:otherwise><div class="team-emblem-placeholder"><i class="bi bi-shield-shaded fs-4"></i></div></c:otherwise>
                                                     </c:choose>
                                                     <div class="team-name-text">${item.team_name}</div>
                                                 </div>
-                                                
                                                 <div class="vs-text">VS</div>
-                                                
                                                 <div class="team-unit">
                                                     <c:choose>
                                                         <c:when test="${item.opponent_name eq '상대 미정'}">
-                                                            <div class="team-emblem-placeholder" style="border-style: dashed;">
-                                                                <i class="bi bi-question-lg fs-4 opacity-50"></i>
-                                                            </div>
+                                                            <div class="team-emblem-placeholder" style="border-style: dashed;"><i class="bi bi-question-lg fs-4 opacity-50"></i></div>
                                                             <div class="text-secondary small fw-bold">미정</div>
                                                         </c:when>
                                                         <c:when test="${not empty item.opponent_emblem}">
                                                             <img src="${pageContext.request.contextPath}/uploads/team/${item.opponent_emblem}" class="team-emblem-img" onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
                                                             <div class="team-name-text">${item.opponent_name}</div>
                                                         </c:when>
-                                                        <c:otherwise>
-                                                            <div class="team-emblem-placeholder"><i class="bi bi-shield-fill fs-4 text-dark"></i></div>
-                                                            <div class="team-name-text">${item.opponent_name}</div>
-                                                        </c:otherwise>
+                                                        <c:otherwise><div class="team-emblem-placeholder"><i class="bi bi-shield-fill fs-4 text-dark"></i></div><div class="team-name-text">${item.opponent_name}</div></c:otherwise>
                                                     </c:choose>
                                                 </div>
                                             </div>
                                             
                                             <div>
                                                 <c:choose>
-                                                    <%-- 상태별 버튼 분기 --%>
                                                     <c:when test="${item.status eq '매칭완료' or item.status eq '수락' or item.status eq '확정'}">
                                                         <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">게시글 보기</a>
                                                     </c:when>
-                                                    
                                                     <c:when test="${item.apply_code == 0}">
                                                         <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" class="btn-arrow-go" title="게시글로 이동"><i class="bi bi-arrow-right fs-5"></i></a>
                                                     </c:when>
-                                                 
                                                     <c:when test="${item.status eq '매칭대기'}">
                                                         <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">게시글 보기</a>
                                                     </c:when>
@@ -253,46 +248,36 @@
                                         </div>
                                     </div>
                                 </c:forEach>
+                                
+                                <div class="page-navigation">
+                                    ${matchPaging}
+                                </div>
                             </c:otherwise>
                         </c:choose>
                     </div>
 
-                    <div class="tab-pane fade" id="pills-mercenary">
+                    <div class="tab-pane fade ${param.tab == 'mercenary' ? 'show active' : ''}" id="pills-mercenary">
                         <c:choose>
-                            <%-- 리스트가 비어있을 때 --%>
                             <c:when test="${empty myMercenaryList}">
                                 <div class="modern-card p-5 text-center text-muted">
                                     <i class="bi bi-pencil-square fs-1 d-block mb-3 opacity-50"></i>
-                                    <p>작성한 용병(구인/구직) 게시글이 없습니다.</p>
+                                    <p>작성한 용병 게시글이 없습니다.</p>
                                     <a href="${pageContext.request.contextPath}/mercenary/list" class="btn btn-outline-dark rounded-pill px-4 btn-sm mt-2">게시판 가기</a>
                                 </div>
                             </c:when>
-                            
-                            <%-- 리스트 출력 --%>
                             <c:otherwise>
                                 <c:forEach var="item" items="${myMercenaryList}">
                                     <div class="history-card">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
                                             <div>
-                                                <%-- 디자인 수정: status-badge 클래스 적용 --%>
                                                 <c:choose>
                                                     <c:when test="${item.category == 'RECRUIT'}">
-                                                        <%-- 구인(용병모집) -> 파란색 스타일 --%>
-                                                        <span class="status-badge status-recruiting me-2">구인 (용병모집)</span>
+                                                        <span class="status-badge status-recruiting">구인 (용병모집)</span>
                                                     </c:when>
                                                     <c:when test="${item.category == 'SEEK'}">
-                                                        <%-- 구직(용병지원) -> 초록색 스타일 --%>
-                                                        <span class="status-badge status-ok me-2">구직 (용병지원)</span>
+                                                        <span class="status-badge status-ok">구직 (용병지원)</span>
                                                     </c:when>
                                                 </c:choose>
-                                                
-                                                <%-- 모집 상태 텍스트 --%>
-                                                <span class="text-muted small fw-bold">
-                                                    <c:choose>
-                                                        <c:when test="${item.status == 'RECRUITING'}"> · 모집중</c:when>
-                                                        <c:otherwise> · ${item.status}</c:otherwise>
-                                                    </c:choose>
-                                                </span>
                                             </div>
                                             <div class="text-muted small">
                                                 <i class="bi bi-calendar me-1"></i> ${item.created_at} 
@@ -303,13 +288,54 @@
 
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div class="d-flex align-items-center">
-                                                <%-- 제목 출력 --%>
-                                                <div class="fw-bold text-dark fs-5" style="word-break: break-all;">
-                                                    ${item.title}
+                                                
+                                                <div class="me-3">
+                                                    <c:choose>
+                                                        <%-- 1. 구인 (팀 엠블럼) --%>
+                                                        <c:when test="${item.category == 'RECRUIT'}">
+                                                            <c:choose>
+                                                                <c:when test="${not empty item.emblem_image}">
+                                                                    <%-- [수정] icon.jpg -> emblem.png --%>
+                                                                    <img src="${pageContext.request.contextPath}/uploads/team/${item.emblem_image}" 
+                                                                         class="team-emblem-img" 
+                                                                         style="width: 48px; height: 48px; border: 1px solid #eee;"
+                                                                         onerror="this.src='${pageContext.request.contextPath}/dist/images/emblem.png'">
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <div class="team-emblem-placeholder" style="width: 48px; height: 48px;">
+                                                                        <i class="bi bi-shield-shaded fs-4 text-secondary"></i>
+                                                                    </div>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </c:when>
+                                                        
+                                                        <%-- 2. 구직 (사람 아이콘) --%>
+                                                        <c:otherwise>
+                                                            <div class="team-emblem-placeholder bg-light text-dark" style="width: 48px; height: 48px; border: 1px solid #eee;">
+                                                                <i class="bi bi-person-fill fs-3"></i>
+                                                            </div>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </div>
+
+                                                <div>
+                                                    <div class="fw-bold text-dark fs-5" style="word-break: break-all; line-height: 1.2;">
+                                                        ${item.title}
+                                                    </div>
+                                                    
+                                                    <div class="small text-muted mt-1">
+                                                        <c:choose>
+                                                            <c:when test="${item.category == 'RECRUIT'}">
+                                                                <i class="bi bi-shield-fill me-1"></i> ${not empty item.team_name ? item.team_name : '팀 정보 없음'}
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <i class="bi bi-person me-1"></i> 개인 용병
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </div>
                                                 </div>
                                             </div>
                                             
-                                            <%-- 버튼 영역 --%>
                                             <div>
                                                 <a href="${pageContext.request.contextPath}/mercenary/article?recruit_id=${item.recruit_id}&page=1" 
                                                    class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">
@@ -319,11 +345,20 @@
                                         </div>
                                     </div>
                                 </c:forEach>
+                                
+                                <div class="page-navigation">
+                                    ${mercenaryPaging}
+                                </div>
                             </c:otherwise>
                         </c:choose>
                     </div>
 
-                </div> </div> </div> </div> <footer><jsp:include page="/WEB-INF/views/layout/footer.jsp"/></footer>
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+            
+    <footer><jsp:include page="/WEB-INF/views/layout/footer.jsp"/></footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <div class="modal fade" id="myPageTeamModal" tabindex="-1" aria-hidden="true">
@@ -361,6 +396,7 @@
                 if (list && list.length > 0) {
                     html += '<div class="list-group list-group-flush">';
                     $.each(list, function(index, team) {
+                        
                         let imgSrc = '${pageContext.request.contextPath}/dist/images/emblem.png';
                         if(team.emblem_image) imgSrc = '${pageContext.request.contextPath}/uploads/team/' + team.emblem_image;
                         html += '<a href="${pageContext.request.contextPath}/myteam/main?teamCode=' + team.team_code + '" class="list-group-item list-group-item-action d-flex align-items-center py-3 px-2 border-0 rounded-3 mb-1" style="transition: background 0.2s;"><div class="rounded-circle border me-3 overflow-hidden bg-light d-flex justify-content-center align-items-center" style="width: 48px; height: 48px; min-width: 48px;"><img src="' + imgSrc + '" class="w-100 h-100 object-fit-cover" onerror="this.src=\'${pageContext.request.contextPath}/dist/images/emblem.png\'"></div><div><div class="fw-bold text-dark" style="font-size: 1rem;">' + team.team_name + '</div><div class="small text-secondary mt-1"><i class="bi bi-geo-alt me-1"></i>' + (team.region ? team.region : '지역미정') + '</div></div><i class="bi bi-chevron-right ms-auto text-muted opacity-50"></i></a>';

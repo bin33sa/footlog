@@ -33,6 +33,7 @@ import com.fl.service.TeamService;
 import com.fl.service.TeamServiceImpl;
 import com.fl.util.FileManager;
 import com.fl.util.MyMultipartFile;
+import com.fl.util.MyUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -451,31 +452,78 @@ public class MemberController {
       return mav;
    }
    
-   // 일단 쓸지말지 보류.. (안쓸듯)
-   @GetMapping("profile")
-   public ModelAndView profileForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-      return new ModelAndView("member/profile");
-   }
-   
+  
    // 매치/용병 신청내역 가기 
    @GetMapping("history")
    public ModelAndView match_history(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
        HttpSession session = req.getSession();
        SessionInfo info = (SessionInfo) session.getAttribute("member");
+       MyUtil util = new MyUtil();
        
        if(info == null) return new ModelAndView("redirect:/member/login");
        
        ModelAndView mav = new ModelAndView("member/match_history");
        
        try {
-           // 1. 매치 신청 내역 (기존 유지)
-           List<MatchHistoryDTO> matchApplyList = myPageService.listMatchApply(info.getMember_code());
+         
+           long size = 5; 
+           String pageStr = req.getParameter("page");
+           int current_page_int = (pageStr == null || pageStr.isEmpty()) ? 1 : Integer.parseInt(pageStr);
            
-           // 2. 내가 쓴 용병 게시글 내역 (구인/구직)
-           List<MercenaryDTO> myMercenaryList = myPageService.listMyMercenaryPosts(info.getMember_code());
+           // 현재 활성화된 탭 확인
+           String activeTab = req.getParameter("tab");
+           if(activeTab == null || activeTab.isEmpty()) activeTab = "match";
+
+           // ==========================================
+           // 1. 매치 신청 내역 (탭이 'match'일 때만 페이지 적용)
+           // ==========================================
+           int matchPage = activeTab.equals("match") ? current_page_int : 1;
+           int matchCount = myPageService.dataCountMatch(info.getMember_code());
+           int matchTotalPage = util.pageCount(matchCount, (int)size);
+           if(matchPage > matchTotalPage) matchPage = matchTotalPage;
+           
+           Map<String, Object> matchMap = new HashMap<>();
+           long matchOffset = (matchPage - 1) * size;
+           if(matchOffset < 0) matchOffset = 0;
+           
+           matchMap.put("member_code", info.getMember_code());
+           matchMap.put("offset", matchOffset); // long 타입
+           matchMap.put("size", size);          // long 타입
+           
+           List<MatchHistoryDTO> matchApplyList = myPageService.listMatchApply(matchMap);
+           
+           String matchUrl = req.getContextPath() + "/member/history?tab=match";
+           String matchPaging = util.paging(matchPage, matchTotalPage, matchUrl);
+
+           // ==========================================
+           // 2. 용병 활동 내역 (탭이 'mercenary'일 때만 페이지 적용)
+           // ==========================================
+           int mercenaryPage = activeTab.equals("mercenary") ? current_page_int : 1;
+           int mercenaryCount = myPageService.dataCountMyMercenary(info.getMember_code());
+           int mercenaryTotalPage = util.pageCount(mercenaryCount, (int)size);
+           if(mercenaryPage > mercenaryTotalPage) mercenaryPage = mercenaryTotalPage;
+           
+           Map<String, Object> mercMap = new HashMap<>();
+           long mercOffset = (mercenaryPage - 1) * size;
+           if(mercOffset < 0) mercOffset = 0;
+           
+           mercMap.put("member_code", info.getMember_code());
+           mercMap.put("offset", mercOffset); // long 타입
+           mercMap.put("size", size);         // long 타입
+           
+           List<MercenaryDTO> myMercenaryList = myPageService.listMyMercenaryPosts(mercMap);
+           
+           String mercenaryUrl = req.getContextPath() + "/member/history?tab=mercenary";
+           String mercenaryPaging = util.paging(mercenaryPage, mercenaryTotalPage, mercenaryUrl);
+           
+           // 데이터 전송
+           mav.addObject("activeTab", activeTab);
            
            mav.addObject("matchApplyList", matchApplyList);
-           mav.addObject("myMercenaryList", myMercenaryList); // 이름 변경됨
+           mav.addObject("matchPaging", matchPaging);
+           
+           mav.addObject("myMercenaryList", myMercenaryList);
+           mav.addObject("mercenaryPaging", mercenaryPaging);
            
        } catch (Exception e) {
            e.printStackTrace();
@@ -642,7 +690,7 @@ public class MemberController {
             // 3. 메일 발송 준비
             MailDTO mail = new MailDTO();
             mail.setSenderName("Footlog 관리자");
-            mail.setSenderEmail("yeonhwa7992@gmail.com"); // 성공했던 그 이메일!
+            mail.setSenderEmail("yeonhwa7992@gmail.com");
             mail.setReceiverEmail(email);
             mail.setSubject("[Footlog] 임시 비밀번호 안내입니다.");
            
