@@ -9,11 +9,15 @@
         SELECT ROWNUM rnum, tb.* FROM (
             SELECT p.recruit_id, p.team_code, p.member_code, p.category, p.title, 
                    p.view_count, p.created_at, p.status, m.member_name,
-                   t.team_name, mt.role_level
+                   t.team_name, 
+                   /* 팀이 없는 회원은 등급을 기본값 1로 표시 */
+                   NVL(mt.role_level, 1) as role_level 
             FROM MERCENARY_POST p
             JOIN MEMBER m ON p.member_code = m.member_code
             LEFT JOIN TEAM t ON p.team_code = t.team_code
-            LEFT JOIN member_team mt ON p.member_code = mt.member_code AND p.team_code = mt.team_code
+            /* 팀 코드가 있을 때만 등급 조인, 없으면 그냥 지나감 */
+            LEFT JOIN member_team mt ON p.member_code = mt.member_code 
+                                    AND (p.team_code = mt.team_code OR p.team_code IS NULL)
             <where>
                 <if test="category != null and category != ''">
                     AND p.category = #{category}
@@ -149,9 +153,11 @@
 <select id="listTop3" resultType="com.fl.model.MercenaryDTO">
     SELECT * FROM (
         SELECT p.recruit_id, p.title, p.view_count, p.category, 
-               TO_CHAR(p.created_at, 'YYYY-MM-DD') created_at, m.member_name
+               TO_CHAR(p.created_at, 'YYYY-MM-DD') created_at, 
+               m.member_name, t.team_name  -- team_name 추가
         FROM MERCENARY_POST p
         JOIN MEMBER m ON p.member_code = m.member_code
+        LEFT JOIN TEAM t ON p.team_code = t.team_code -- LEFT JOIN 추가
         ORDER BY p.view_count DESC
     ) WHERE ROWNUM &lt;= 3
 </select>

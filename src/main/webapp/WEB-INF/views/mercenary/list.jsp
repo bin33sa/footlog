@@ -187,13 +187,14 @@
                      <colgroup>
                         <col width="80">
                         <col width="*">
-                        <col width="150">
+                        <col width="180"> <col width="120">
                         <col width="80">
                      </colgroup>
                      <thead>
                         <tr>
                            <th>번호</th>
                            <th>제목</th>
+                           <th>작성자(팀)</th>
                            <th>작성일</th>
                            <th>조회수</th>
                         </tr>
@@ -205,13 +206,17 @@
                                  <td class="text-center">
                                     <span class="badge rounded-pill badge-hot">HOT</span>
                                  </td>
-                                 <td class="fw-bold ps-3">
+                                 <td class="fw-bold ps-3 text-truncate">
                                     <i class="bi bi-fire text-danger me-1"></i>
                                     <c:choose>
                                        <c:when test="${tdto.category == 'RECRUIT'}"><span class="text-primary small">[구인]</span></c:when>
                                        <c:otherwise><span class="text-success small">[구직]</span></c:otherwise>
                                     </c:choose>
                                     ${tdto.title}
+                                 </td>
+                                 <td class="text-center">
+                                    ${tdto.member_name}
+                                    <div class="small text-muted">(${not empty tdto.team_name ? tdto.team_name : '개인'})</div>
                                  </td>
                                  <td class="text-center text-muted">${tdto.created_at}</td>
                                  <td class="text-center">
@@ -220,14 +225,14 @@
                               </tr>
                            </c:forEach>
                            <c:if test="${not empty topList}">
-                              <tr style="height: 10px; background-color: #f8f9fa;"><td colspan="4"></td></tr>
+                              <tr style="height: 10px; background-color: #f8f9fa;"><td colspan="5"></td></tr>
                            </c:if>
                         </c:if>
 
                         <c:forEach var="dto" items="${list}">
                            <tr onclick="location.href='${pageContext.request.contextPath}/mercenary/article?recruit_id=${dto.recruit_id}&page=${page}${not empty category ? '&category='.concat(category) : ''}';">
                               <td class="text-center">${dto.recruit_id}</td>
-                              <td class="fw-bold ps-3">
+                              <td class="fw-bold ps-3 text-truncate">
                                  <c:choose>
                                     <c:when test="${dto.category == 'RECRUIT'}">
                                        <span class="badge badge-recruit me-1">구인</span>
@@ -238,6 +243,10 @@
                                  </c:choose>
                                  ${dto.title}
                               </td>
+                              <td class="text-center">
+                                 ${dto.member_name}
+                                 <div class="small text-muted">(${not empty dto.team_name ? dto.team_name : '개인'})</div>
+                              </td>
                               <td class="text-center text-muted">${dto.created_at}</td>
                               <td class="text-center">
                                  <span class="badge rounded-pill bg-light text-dark border">${dto.view_count}</span>
@@ -247,7 +256,7 @@
 
                         <c:if test="${empty list and empty topList}">
                            <tr>
-                              <td colspan="4" class="py-5 text-center text-muted">등록된 게시글이 없습니다.</td>
+                              <td colspan="5" class="py-5 text-center text-muted">등록된 게시글이 없습니다.</td>
                            </tr>
                         </c:if>
                      </tbody>
