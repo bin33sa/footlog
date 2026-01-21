@@ -14,7 +14,6 @@ import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
 import com.fl.model.TeamMemberDTO;
 import com.fl.model.VoteDTO;
-import com.fl.model.VoteOptionDTO;
 import com.fl.mybatis.support.MapperContainer;
 
 public class MyTeamServiceImpl implements MyTeamService {
@@ -191,13 +190,14 @@ public class MyTeamServiceImpl implements MyTeamService {
 	}
 
 	@Override
-	public List<ScheduleDTO> listMonthSchedule(Map<String, Object> map) {
+	public List<ScheduleDTO> listSchedule(Map<String, Object> map) {
+		List<ScheduleDTO> list = null;
 		try {
-			return mapper.listMonthSchedule(map);
+			list = mapper.listSchedule(map);
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw e;
 		}
+		return list;
 	}
 
 	@Override
@@ -219,11 +219,11 @@ public class MyTeamServiceImpl implements MyTeamService {
 			throw e;
 		}
 	}
-
+	
 	@Override
-	public void deleteSchedule(long schedule_code) throws Exception {
+	public void deleteSchedule(Map<String, Object> map) throws Exception {
 		try {
-			mapper.deleteSchedule(schedule_code);
+			mapper.deleteSchedule(map);
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -236,23 +236,27 @@ public class MyTeamServiceImpl implements MyTeamService {
 	// ==========================================
 	@Override
 	public void insertVote(VoteDTO dto) throws Exception {
-		try {
-			mapper.insertVote(dto);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
+	    try {
+	    	mapper.insertVote(dto);
+	        
+	        ScheduleDTO scheduleDto = new ScheduleDTO();
+	        
+	        scheduleDto.setMember_code(dto.getMemberCode());
+	        scheduleDto.setTeam_code(dto.getTeamCode());
+	        scheduleDto.setTitle("[투표] " + dto.getTitle());
+	        scheduleDto.setContent(dto.getContent());
+	        
+	        scheduleDto.setStart_date(dto.getEventDate());
+	        scheduleDto.setEnd_date(dto.getEventDate());
+	        
+	        mapper.insertSchedule(scheduleDto);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw e;
+	    }
 	}
 	
-	@Override
-	public void insertVoteOption(VoteOptionDTO dto) throws Exception {
-		try {
-			mapper.insertVoteOption(dto);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
 
 	@Override
 	public List<VoteDTO> listVote(Map<String, Object> map) {
@@ -266,24 +270,25 @@ public class MyTeamServiceImpl implements MyTeamService {
 
 	@Override
 	public VoteDTO readVote(Map<String, Object> map) {
-		try {
-			return mapper.readVote(map);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
+	    try {
+	        VoteDTO dto = mapper.readVote(map);
+	        
+	        if(dto != null) {
+	            Integer myState = mapper.readMemberVoteState(map);
+	            
+	            if(myState != null) {
+	                dto.setMyVoteStatus(myState);
+	            } else {
+	                dto.setMyVoteStatus(0);
+	            }
+	        }
+	        return dto;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw e;
+	    }
 	}
 
-	@Override
-	public List<VoteOptionDTO> listVoteOptions(Map<String, Object> map) {
-		try {
-			return mapper.listVoteOptions(map);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
-	
 	@Override
 	public int checkVoteHistory(Map<String, Object> map) {
 		try {
@@ -303,7 +308,31 @@ public class MyTeamServiceImpl implements MyTeamService {
 			throw e;
 		}
 	}
-
+	
+	@Override
+	public void deleteVote(Map<String, Object> map) throws Exception {
+	    try {
+	        VoteDTO dto = mapper.readVote(map);
+	        
+	        if (dto != null) {
+	            if (dto.getEventDate() != null && !dto.getEventDate().isEmpty()) {
+	                Map<String, Object> schMap = new HashMap<>();
+	                schMap.put("team_code", map.get("team_code"));
+	                schMap.put("title", dto.getTitle());
+	                schMap.put("event_date", dto.getEventDate());
+	                
+	                mapper.deleteScheduleByVote(schMap);
+	            }
+	        }
+	        mapper.deleteMemberVoteAll(map);
+	        mapper.deleteVote(map);
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        throw e;
+	    }
+	}
+	
 	@Override
 	public void insertTeamBoard(TeamBoardDTO dto) throws Exception {
 		try {

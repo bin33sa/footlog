@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <title>Footlog - Match Schedule</title>
     <meta charset="utf-8">
