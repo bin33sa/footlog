@@ -14,6 +14,7 @@ import com.fl.mail.MailSender;
 import com.fl.model.MatchDTO;
 import com.fl.model.MatchHistoryDTO;
 import com.fl.model.MemberDTO;
+import com.fl.model.MercenaryDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.TeamDTO;
 import com.fl.mvc.annotation.Controller;
@@ -462,12 +463,14 @@ public class MemberController {
 	    ModelAndView mav = new ModelAndView("member/match_history");
 	    
 	    try {
-	        // 하나의 DTO 클래스로 두 가지 리스트 모두 처리!
+	        // 1. 매치 신청 내역 (기존 유지)
 	        List<MatchHistoryDTO> matchApplyList = myPageService.listMatchApply(info.getMember_code());
-	        List<MatchHistoryDTO> mercenaryApplyList = myPageService.listMercenaryApply(info.getMember_code());
+	        
+	        // 2. 내가 쓴 용병 게시글 내역 (구인/구직)
+	        List<MercenaryDTO> myMercenaryList = myPageService.listMyMercenaryPosts(info.getMember_code());
 	        
 	        mav.addObject("matchApplyList", matchApplyList);
-	        mav.addObject("mercenaryApplyList", mercenaryApplyList);
+	        mav.addObject("myMercenaryList", myMercenaryList); // 이름 변경됨
 	        
 	    } catch (Exception e) {
 	        e.printStackTrace();
