@@ -11,6 +11,7 @@ import com.fl.model.BoardReplyDTO;
 import com.fl.model.FileDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
+import com.fl.model.MatchDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
@@ -156,4 +157,18 @@ public interface MyTeamMapper {
     public void deleteGalleryFiles(long gallery_code) throws Exception;
     
     public void updateBoardReply(Map<String, Object> map) throws SQLException;
+    
+    public List<MatchDTO> listMatch(Map<String, Object> map);
+
+    public int dataCountMatch(Map<String, Object> map);
+    
+    public void insertMissingAttendance(Map<String, Object> map);
+    
+    public int countMatchSchedule(Map<String, Object> map);
+    
+    public int countMatchVoteBoard(Map<String, Object> map);
+
+    public void updateMatchAttendance(Map<String, Object> map) throws SQLException;
+    
+	public void insertVoteFromMatch(VoteDTO dto) throws SQLException;
 }

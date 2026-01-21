@@ -9,6 +9,7 @@ import com.fl.model.BoardReplyDTO;
 import com.fl.model.FileDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
+import com.fl.model.MatchDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
@@ -700,4 +701,81 @@ public class MyTeamServiceImpl implements MyTeamService {
         }
         return result;
     }
+    
+    @Override
+    public List<MatchDTO> listMatch(Map<String, Object> map) {
+        List<MatchDTO> list = null;
+        try {
+            list = mapper.listMatch(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
+    @Override
+    public void insertMissingAttendance(Map<String, Object> map) throws Exception {
+        try {
+            mapper.insertMissingAttendance(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    @Override
+    public void updateMatchAttendance(Map<String, Object> map) throws Exception {
+        try {
+            mapper.updateMatchAttendance(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    
+    @Override
+    public int dataCountMatch(Map<String, Object> map) {
+        int result = 0;
+        try {
+            result = mapper.dataCountMatch(map);
+        } catch (Exception e) {
+            System.out.println("[Service] dataCountMatch Error");
+            e.printStackTrace();
+        }
+        return result;
+    }
+    
+    @Override
+	public int countMatchSchedule(Map<String, Object> map) {
+		int result = 0;
+		try {
+			result = mapper.countMatchSchedule(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public int countMatchVoteBoard(Map<String, Object> map) {
+		int result = 0;
+		try {
+			result = mapper.countMatchVoteBoard(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@Override
+	public void insertVoteFromMatch(VoteDTO dto) throws Exception {
+		try {
+			mapper.insertVoteFromMatch(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e; 
+		}
+	}
+    
+    
 }

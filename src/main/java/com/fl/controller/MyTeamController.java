@@ -15,6 +15,7 @@ import com.fl.model.BoardReplyDTO;
 import com.fl.model.FileDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
+import com.fl.model.MatchDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.TeamBoardDTO;
@@ -53,7 +54,6 @@ public class MyTeamController {
             if (info == null) return -1;
             
             long memberCode = info.getMember_code();
-
             List<TeamDTO> myTeams = service.listMyTeam(memberCode);
             if (myTeams == null || myTeams.isEmpty()) return -1;
 
@@ -78,7 +78,6 @@ public class MyTeamController {
             TeamDTO currentTeam = null;
             int currentIndex = 0;
             boolean found = false;
-
             for(int i=0; i<myTeams.size(); i++) {
                 if(myTeams.get(i).getTeam_code() == currentTeamCode) {
                     currentTeam = myTeams.get(i);
@@ -92,8 +91,11 @@ public class MyTeamController {
                 currentTeam = myTeams.get(0);
                 currentTeamCode = currentTeam.getTeam_code();
                 currentIndex = 0;
+            }         
+            if (currentTeam.getStatus() == 0) {
+                return -1; 
             }
-            
+
             session.setAttribute("currentTeamCode", currentTeamCode);
 
             long prevTeamCode = -1;
@@ -213,7 +215,154 @@ public class MyTeamController {
         
         if (myRoleLevel < 10) return new ModelAndView("redirect:/myteam/main?msg=unauthorized");
 
+        mav.addObject("teamCode", teamCode);
+
         return mav;
+    }
+    
+    @ResponseBody
+    @GetMapping("match_list")
+    public Map<String, Object> listMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            HttpSession session = req.getSession();
+            SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+            String teamCodeStr = req.getParameter("teamCode");
+            String pageStr = req.getParameter("page");
+            String sizeStr = req.getParameter("size");
+            
+            long teamCode = (teamCodeStr != null) ? Long.parseLong(teamCodeStr) : 0;
+            int current_page = (pageStr != null) ? Integer.parseInt(pageStr) : 1;
+            int size = (sizeStr != null) ? Integer.parseInt(sizeStr) : 5;
+            
+            Map<String, Object> map = new HashMap<>();
+            map.put("team_code", teamCode);
+            
+            if(info != null) {
+                map.put("member_code", info.getMember_code());
+            }
+
+            int dataCount = service.dataCountMatch(map);
+            int total_page = dataCount / size + (dataCount % size > 0 ? 1 : 0);
+            if (current_page > total_page) current_page = total_page;
+            int offset = (current_page - 1) * size;
+            if(offset < 0) offset = 0;
+            
+            map.put("offset", offset);
+            map.put("size", size);
+            
+            List<MatchDTO> list = service.listMatch(map);
+            
+            result.put("list", list);
+            result.put("state", "true");
+            result.put("dataCount", dataCount);
+            result.put("total_page", total_page);
+            result.put("page", current_page);
+            
+            try {
+                if (list != null && !list.isEmpty() && info != null) {
+                    long myTeamCode = teamCode;
+                    long memberCode = info.getMember_code();
+
+                    for (MatchDTO dto : list) {
+                        if ("모집중".equals(dto.getStatus())) {                        
+                            Map<String, Object> param = new HashMap<>();
+                            param.put("match_code", dto.getMatch_code());
+                            param.put("team_code", myTeamCode);
+                            
+                            service.insertMissingAttendance(param);
+
+                            int scheduleCount = service.countMatchSchedule(param);
+                            if (scheduleCount == 0) {
+                                ScheduleDTO sch = new ScheduleDTO();
+                                sch.setMember_code(memberCode);
+                                sch.setTeam_code(myTeamCode);
+                                sch.setMatch_code(dto.getMatch_code());
+                                
+                                String opponent = (dto.getOpponent_name() == null || "미정".equals(dto.getOpponent_name())) ? "상대 미정" : dto.getOpponent_name();
+                                sch.setTitle("[매치] vs " + opponent);
+                                sch.setContent("장소: " + dto.getStadiumName() + "\n상태: " + dto.getStatus());
+                                sch.setStart_date(dto.getMatch_date());
+                                sch.setEnd_date(dto.getMatch_date());
+                                
+                                service.insertSchedule(sch);
+                            }
+                            String opponent = (dto.getOpponent_name() == null) ? "상대 미정" : dto.getOpponent_name();
+                            
+                            Map<String, Object> voteCheckParam = new HashMap<>();
+                            voteCheckParam.put("team_code", myTeamCode);
+                            voteCheckParam.put("match_date", dto.getMatch_date());
+                            voteCheckParam.put("opponent_name", opponent);
+                            
+                            int voteExists = service.countMatchVoteBoard(voteCheckParam);
+                            
+                            if (voteExists == 0) {
+                                VoteDTO voteDto = new VoteDTO();
+                                voteDto.setMemberCode(memberCode);
+                                voteDto.setTeamCode(myTeamCode);
+                                voteDto.setTitle("[매치] vs " + opponent);
+                                
+                                String content = "경기 일시: " + dto.getMatch_date() + "<br>" +
+                                                 "경기 장소: " + dto.getStadiumName() + "<br>" +
+                                                 "많은 참석 바랍니다.";
+                                voteDto.setContent(content);
+                                voteDto.setEventDate(dto.getMatch_date());
+                                voteDto.setStartDate(dto.getMatch_date());
+                                voteDto.setEndDate(dto.getMatch_date());
+                                
+                                service.insertVoteFromMatch(voteDto);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("[Controller] 자동 생성 로직 에러 (무시됨): " + e.toString());
+            }
+           
+        } catch (Exception e) {
+            result.put("state", "false");
+            e.printStackTrace();
+        }        
+        return result;
+    }
+    
+    @ResponseBody
+    @PostMapping("vote_match")
+    public Map<String, Object> voteMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {      
+        Map<String, Object> result = new HashMap<>();
+        
+        try {
+            HttpSession session = req.getSession();
+            SessionInfo info = (SessionInfo) session.getAttribute("member");
+            
+            if (info == null) {
+                result.put("state", "false");
+                return result;
+            }
+
+            String matchCodeStr = req.getParameter("match_code");
+            String status = req.getParameter("status");
+            
+            long matchCode = Long.parseLong(matchCodeStr);
+            long memberCode = info.getMember_code();
+            Map<String, Object> map = new HashMap<>();
+            map.put("match_code", matchCode);
+            map.put("member_code", memberCode);
+            map.put("status", status);
+
+            service.updateMatchAttendance(map);
+            
+            result.put("state", "true");
+
+        } catch (Exception e) {
+            result.put("state", "false");
+            e.printStackTrace();
+        }
+        
+        return result;
     }
     
     @GetMapping("squad")
@@ -395,7 +544,7 @@ public class MyTeamController {
     }
     
     @GetMapping("selfLeave")
-    public ModelAndView selfLeave(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView selfLeave(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
         if(info == null) return new ModelAndView("redirect:/member/login");
@@ -426,7 +575,7 @@ public class MyTeamController {
     }
     
     @GetMapping("gallery")
-    public ModelAndView gallery(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView gallery(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/gallery"); 
         HttpSession session = req.getSession();
 
@@ -473,7 +622,7 @@ public class MyTeamController {
     }
     
     @GetMapping("update")
-    public ModelAndView profileUpdate(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView profileUpdate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/update");
         HttpSession session = req.getSession();
 
@@ -494,7 +643,7 @@ public class MyTeamController {
     }
 
     @PostMapping("update")
-    public ModelAndView profileUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView profileUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
         
@@ -526,7 +675,7 @@ public class MyTeamController {
     }
     
     @GetMapping("gallery_write")
-    public ModelAndView galleryWriteForm(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView galleryWriteForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/gallery_write");
         HttpSession session = req.getSession();
 
@@ -538,7 +687,7 @@ public class MyTeamController {
     }
 
     @PostMapping("gallery_write")
-    public ModelAndView galleryWriteSubmit(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView galleryWriteSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
         
@@ -587,7 +736,7 @@ public class MyTeamController {
     }
     
     @GetMapping("gallery_article")
-    public ModelAndView galleryArticle(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView galleryArticle(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/gallery_article");
         
         HttpSession session = req.getSession();
@@ -628,26 +777,29 @@ public class MyTeamController {
     }
 
     @GetMapping("galleryDelete")
-    public ModelAndView galleryDelete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView galleryDelete(HttpServletRequest req, HttpServletResponse resp) {
        
         String teamCodeStr = req.getParameter("teamCode");
         String galleryCodeStr = req.getParameter("gallery_code");
         
-        if (teamCodeStr != null && galleryCodeStr != null) {
-            long galleryCode = Long.parseLong(galleryCodeStr);
-            long teamCode = Long.parseLong(teamCodeStr);
-            
-            service.deleteGallery(galleryCode);
-            
-            return new ModelAndView("redirect:/myteam/gallery?teamCode=" + teamCode);
+        try {
+            if (teamCodeStr != null && galleryCodeStr != null) {
+                long galleryCode = Long.parseLong(galleryCodeStr);
+                long teamCode = Long.parseLong(teamCodeStr);
+                
+                service.deleteGallery(galleryCode);
+                
+                return new ModelAndView("redirect:/myteam/gallery?teamCode=" + teamCode);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        
         return new ModelAndView("redirect:/myteam/main");
     }
     
     @ResponseBody
     @PostMapping("updateGalleryLike")
-    public Map<String, Object> updateGalleryLike(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> updateGalleryLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         
         HttpSession session = req.getSession();
@@ -693,7 +845,7 @@ public class MyTeamController {
 
     @ResponseBody
     @GetMapping("listReply")
-    public Map<String, Object> listReply(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         
         HttpSession session = req.getSession();
@@ -769,7 +921,7 @@ public class MyTeamController {
     
     @ResponseBody
     @PostMapping("insertReply")
-    public Map<String, Object> insertReply(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
 
         HttpSession session = req.getSession();
@@ -802,7 +954,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("deleteReply")
-    public Map<String, Object> deleteReply(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> deleteReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         
         try {
@@ -820,7 +972,7 @@ public class MyTeamController {
     }
     
     @GetMapping("gallery_update")
-    public ModelAndView galleryUpdate(HttpServletRequest req, HttpServletResponse resp) {
+    public ModelAndView galleryUpdate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/gallery_write");
         
         HttpSession session = req.getSession();
@@ -907,7 +1059,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("updateReply") 
-    public Map<String, Object> updateReply(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> updateReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -937,7 +1089,7 @@ public class MyTeamController {
     }
     
     @GetMapping("board")
-    public ModelAndView listTeamBoard(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView listTeamBoard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/board");
         HttpSession session = req.getSession();
         
@@ -1023,7 +1175,7 @@ public class MyTeamController {
     }
 
     @GetMapping("board_write")
-    public ModelAndView boardWriteForm(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView boardWriteForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/board_write");
         HttpSession session = req.getSession();
         
@@ -1035,7 +1187,7 @@ public class MyTeamController {
     }
 
     @PostMapping("board_write")
-    public ModelAndView boardWriteSubmit(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView boardWriteSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
         
@@ -1059,7 +1211,7 @@ public class MyTeamController {
     }
 
     @GetMapping("board_article")
-    public ModelAndView boardArticle(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView boardArticle(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/board_article");
         HttpSession session = req.getSession();
         
@@ -1124,7 +1276,7 @@ public class MyTeamController {
     
     @ResponseBody
     @GetMapping("listBoardReply")
-    public Map<String, Object> listBoardReply(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> listBoardReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         
         try {
@@ -1180,7 +1332,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("insertBoardReply")
-    public Map<String, Object> insertBoardReply(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> insertBoardReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1212,7 +1364,7 @@ public class MyTeamController {
     
     @ResponseBody
     @PostMapping("updateBoardReply") 
-    public Map<String, Object> updateBoardReply(HttpServletRequest req, HttpServletResponse resp) { 
+    public Map<String, Object> updateBoardReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException { 
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1243,7 +1395,7 @@ public class MyTeamController {
     
     @ResponseBody
     @PostMapping("deleteBoardReply")
-    public Map<String, Object> deleteBoardReply(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> deleteBoardReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         
         try {
@@ -1263,7 +1415,7 @@ public class MyTeamController {
     
     @ResponseBody
     @PostMapping("updateBoardLike")
-    public Map<String, Object> updateBoardLike(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> updateBoardLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1302,7 +1454,7 @@ public class MyTeamController {
     }
     
     @GetMapping("board_update")
-    public ModelAndView boardUpdateForm(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView boardUpdateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/board_write"); 
         HttpSession session = req.getSession();
 
@@ -1334,7 +1486,7 @@ public class MyTeamController {
     }
 
     @PostMapping("board_update")
-    public ModelAndView boardUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView boardUpdateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
         
@@ -1360,7 +1512,7 @@ public class MyTeamController {
     }
 
     @GetMapping("board_delete")
-    public ModelAndView boardDelete(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+    public ModelAndView boardDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
 
@@ -1398,7 +1550,7 @@ public class MyTeamController {
 
     @ResponseBody
     @GetMapping("schedule_load")
-    public Map<String, Object> scheduleLoad(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> scheduleLoad(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         
         try {
@@ -1426,7 +1578,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("schedule_insert")
-    public Map<String, Object> scheduleInsert(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> scheduleInsert(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1459,7 +1611,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("schedule_update")
-    public Map<String, Object> scheduleUpdate(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> scheduleUpdate(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1499,7 +1651,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("schedule_delete")
-    public Map<String, Object> scheduleDelete(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> scheduleDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1529,7 +1681,7 @@ public class MyTeamController {
     }
     
     @GetMapping("attendance")
-    public ModelAndView attendanceMain(HttpServletRequest req, HttpServletResponse resp) {
+    public ModelAndView attendanceMain(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/attendance"); 
         HttpSession session = req.getSession();
         
@@ -1543,7 +1695,7 @@ public class MyTeamController {
 
     @ResponseBody
     @GetMapping("vote_list")
-    public Map<String, Object> listVote(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> listVote(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         
         try {
@@ -1572,7 +1724,7 @@ public class MyTeamController {
 
     @ResponseBody
     @GetMapping("vote_read")
-    public Map<String, Object> readVote(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> readVote(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1616,7 +1768,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("vote_insert")
-    public Map<String, Object> insertVote(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> insertVote(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     	ModelAndView mav = new ModelAndView("my_team/vote_insert");
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
@@ -1654,7 +1806,7 @@ public class MyTeamController {
     
     @ResponseBody
     @PostMapping("vote_do")
-    public Map<String, Object> doVote(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> doVote(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         HttpSession session = req.getSession();
         SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -1682,7 +1834,7 @@ public class MyTeamController {
 
     @ResponseBody
     @PostMapping("vote_delete")
-    public Map<String, Object> deleteVote(HttpServletRequest req, HttpServletResponse resp) {
+    public Map<String, Object> deleteVote(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Map<String, Object> model = new HashMap<>();
         ModelAndView mav = new ModelAndView("myteam/vote_delete");
         HttpSession session = req.getSession();
@@ -1714,4 +1866,5 @@ public class MyTeamController {
 
         return model;
     }
+
 }

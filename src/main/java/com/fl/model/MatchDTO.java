@@ -32,6 +32,17 @@ public class MatchDTO {
     private String stadiumName; 
     private String matchLevel;
     
+    private String match_month;
+    private String match_day;
+    private String match_time;
+    private String opponent_name;
+    private int vote_count; 
+    private int vote_target;
+    private int attend_count;        
+    private int total_member_count;  
+    private String my_attendance_status;
+    
+    
     public String getMatchType() {
 		return matchType;
 	}
@@ -222,6 +233,78 @@ public class MatchDTO {
 
 	public void setStadium_code(int stadium_code) {
 		this.stadium_code = stadium_code;
+	}
+
+	public String getMatch_month() {
+		return match_month;
+	}
+
+	public void setMatch_month(String match_month) {
+		this.match_month = match_month;
+	}
+
+	public String getMatch_day() {
+		return match_day;
+	}
+
+	public void setMatch_day(String match_day) {
+		this.match_day = match_day;
+	}
+
+	public String getMatch_time() {
+		return match_time;
+	}
+
+	public void setMatch_time(String match_time) {
+		this.match_time = match_time;
+	}
+
+	public String getOpponent_name() {
+		return opponent_name;
+	}
+
+	public void setOpponent_name(String opponent_name) {
+		this.opponent_name = opponent_name;
+	}
+
+	public int getVote_count() {
+		return vote_count;
+	}
+
+	public void setVote_count(int vote_count) {
+		this.vote_count = vote_count;
+	}
+
+	public int getVote_target() {
+		return vote_target;
+	}
+
+	public void setVote_target(int vote_target) {
+		this.vote_target = vote_target;
+	}
+
+	public int getAttend_count() {
+		return attend_count;
+	}
+
+	public void setAttend_count(int attend_count) {
+		this.attend_count = attend_count;
+	}
+
+	public int getTotal_member_count() {
+		return total_member_count;
+	}
+
+	public void setTotal_member_count(int total_member_count) {
+		this.total_member_count = total_member_count;
+	}
+
+	public String getMy_attendance_status() {
+		return my_attendance_status;
+	}
+
+	public void setMy_attendance_status(String my_attendance_status) {
+		this.my_attendance_status = my_attendance_status;
 	}
     
     

@@ -3,27 +3,28 @@
 <mapper namespace="com.fl.mapper.MyTeamMapper">
 
 	<select id="listMyTeam" parameterType="Long" resultType="com.fl.model.TeamDTO">
-	    SELECT t.team_code, t.team_name, t.emblem_image
-	    FROM team t
-	    JOIN member_team tm ON t.team_code = tm.team_code
-	    WHERE tm.member_code = #{member_code}
-	    ORDER BY t.team_name
-	</select>
+        SELECT t.team_code, t.team_name, t.emblem_image, t.status
+        FROM team t
+        JOIN member_team tm ON t.team_code = tm.team_code
+        WHERE tm.member_code = #{member_code}
+          AND t.status = 1  ORDER BY t.team_name
+    </select>
 
-	<select id="readTeamInfo" parameterType="Long" resultType="com.fl.model.TeamDTO">
-	    SELECT 
-	        team_code, 
-	        team_name, 
-	        team_url,
-	        contact_number,
-	        region, 
-	        description,      created_at,
-	        emblem_image,
-	        intro_video_url,
-	        member_count
-	    FROM team
-	    WHERE team_code = #{team_code}
-	</select>
+    <select id="readTeamInfo" parameterType="Long" resultType="com.fl.model.TeamDTO">
+        SELECT 
+            team_code, 
+            team_name, 
+            status,         team_url,
+            contact_number,
+            region, 
+            description,      
+            created_at,
+            emblem_image,
+            intro_video_url,
+            member_count
+        FROM team
+        WHERE team_code = #{team_code}
+    </select>
 	
 	<select id="listHomeTeamBoard" parameterType="long" resultType="com.fl.model.TeamBoardDTO">
         SELECT b.board_team_code, b.title, 
@@ -683,4 +684,105 @@
 	<delete id="deleteGalleryFiles" parameterType="Long">
         DELETE FROM team_gallery_file WHERE gallery_code = #{gallery_code}
     </delete>
+    
+   <select id="dataCountMatch" parameterType="map" resultType="Integer">
+        SELECT COUNT(*)
+        FROM match_post m
+        WHERE m.home_code = #{team_code} 
+           OR m.away_code = #{team_code}
+    </select>
+
+	<select id="listMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
+	    SELECT 
+	        m.match_code, 
+	        m.home_code, 
+	        m.away_code, 
+	        m.status,      
+	        m.stadium_code,
+	        m.MATCHTYPE AS matchType,	        
+	        s.stadium_name AS stadiumName, 
+	        TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI:SS') AS match_date,
+	        TO_CHAR(m.match_date, 'MM') AS match_month,
+	        TO_CHAR(m.match_date, 'DD') AS match_day,
+	        TO_CHAR(m.match_date, 'HH24:MI') AS match_time,       	        
+	        CASE 
+	            WHEN m.home_code = #{team_code} THEN NVL(at.team_name, '매칭 대기 중')
+	            WHEN m.away_code = #{team_code} THEN ht.team_name
+	            ELSE '미정'
+	        END AS opponent_name,
+	        (SELECT COUNT(*) 
+	         FROM match_attendance ma 
+	         WHERE ma.match_code = m.match_code 
+	           AND ma.status = '참석') AS attend_count,
+	        (SELECT COUNT(*) 
+	         FROM member_team 
+	         WHERE team_code = #{team_code}) AS total_member_count,	         
+	        (SELECT status 
+	         FROM match_attendance ma 
+	         WHERE ma.match_code = m.match_code 
+	           AND ma.member_code = #{member_code}) AS my_attendance_status       
+	    FROM match_post m
+	    LEFT JOIN team ht ON m.home_code = ht.team_code
+	    LEFT JOIN team at ON m.away_code = at.team_code
+	    LEFT JOIN stadium s ON m.stadium_code = s.stadium_code        
+	    WHERE m.home_code = #{team_code} 
+	       OR m.away_code = #{team_code}          
+	    ORDER BY m.match_date DESC
+	    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+    
+    <update id="updateMatchAttendance" parameterType="map">
+	    MERGE INTO match_attendance t
+	    USING (SELECT #{match_code} AS m_code, #{member_code} AS mem_code FROM dual) s
+	    ON (t.match_code = s.m_code AND t.member_code = s.mem_code)
+	    WHEN MATCHED THEN
+	        UPDATE SET status = #{status}
+	    WHEN NOT MATCHED THEN
+	        INSERT (match_code, member_code, status)
+	        VALUES (#{match_code}, #{member_code}, #{status})
+	</update>
+    
+    <update id="insertMissingAttendance" parameterType="map">
+	    INSERT INTO match_attendance (match_code, member_code, status)
+	    SELECT #{match_code}, member_code, '미정'
+	    FROM member_team
+	    WHERE team_code = #{team_code} 
+	      
+	      AND member_code NOT IN (
+	          SELECT member_code 
+	          FROM match_attendance 
+	          WHERE match_code = #{match_code}
+	      )
+	</update>
+    
+    <select id="countMatchSchedule" parameterType="map" resultType="Integer">
+		SELECT COUNT(*) 
+		FROM schedule_team 
+		WHERE team_code = #{team_code} 
+		  AND match_code = #{match_code}
+	</select>
+	
+    <select id="countMatchVoteBoard" parameterType="map" resultType="Integer">
+	    SELECT COUNT(*) 
+	    FROM board_vote 
+	    WHERE team_code = #{team_code} 
+	      AND TO_CHAR(event_date, 'YYYY-MM-DD HH24:MI:SS') = #{match_date}
+	      AND title LIKE '%' || #{opponent_name} || '%'
+	</select>
+	
+	<insert id="insertVoteFromMatch" parameterType="com.fl.model.VoteDTO">
+	    INSERT INTO board_vote (
+	        board_vote_code, member_code, team_code, 
+	        title, content, status, view_count,
+	        start_date, end_date, event_date, created_at
+	    ) VALUES (
+	        board_vote_seq.NEXTVAL, #{memberCode}, #{teamCode}, 
+	        #{title}, #{content}, 0, 0,
+	        TO_DATE(#{startDate}, 'YYYY-MM-DD HH24:MI:SS'), 
+	        TO_DATE(#{endDate}, 'YYYY-MM-DD HH24:MI:SS'),
+	        TO_DATE(#{eventDate}, 'YYYY-MM-DD HH24:MI:SS'), 
+	        SYSDATE
+	    )
+	</insert>
+    
 </mapper>
