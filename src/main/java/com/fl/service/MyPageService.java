@@ -4,6 +4,7 @@ import java.util.List;
 import com.fl.model.MatchDTO;
 import com.fl.model.MatchHistoryDTO;
 import com.fl.model.MemberDTO;
+import com.fl.model.MercenaryDTO;
 
 public interface MyPageService {
 	// 내 매치내역 리스트
@@ -16,5 +17,7 @@ public interface MyPageService {
     public List<MatchHistoryDTO> listMatchApply(long member_code);
     
     // 용병 신청 내역 불러오기 
-    public List<MatchHistoryDTO> listMercenaryApply(long member_code);
+    public List<MercenaryDTO> listMyMercenaryPosts(long member_code);
+
+
 }

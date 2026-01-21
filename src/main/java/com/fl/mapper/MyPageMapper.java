@@ -5,6 +5,7 @@ import java.util.List;
 import com.fl.model.MatchDTO;
 import com.fl.model.MatchHistoryDTO;
 import com.fl.model.MemberDTO;
+import com.fl.model.MercenaryDTO;
 
 public interface MyPageMapper {
 	
@@ -18,6 +19,6 @@ public interface MyPageMapper {
     public List<MatchHistoryDTO> listMatchApply(long member_code);
 
     // 용병 신청 내역 
-    public List<MatchHistoryDTO> listMercenaryApply(long member_code);
-	
+    public List<MercenaryDTO> listMyMercenaryPosts(long member_code);
+
 }

@@ -39,9 +39,7 @@
                             <li><a class="dropdown-item" href="#" onclick="openHeaderMyTeamModal(); return false;">내 구단으로 이동</a></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/team/list">전체 구단 리스트</a></li>
                             <li><hr class="dropdown-divider bg-secondary opacity-25"></li>
-                            <c:if test="${canCreate}">
                            	 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/team/write">구단 생성하기</a></li>
-                            </c:if>
                         </ul>
                     </li>
 
@@ -57,7 +55,9 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#">내 매치 일정</a></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/match/list">전체 매치 리스트</a></li>
+                            <c:if test="${canCreate }">
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/match/write">매치 개설하기</a></li>
+                            </c:if>
                             <li><hr class="dropdown-divider bg-secondary opacity-25"></li>
                             <li><a class="dropdown-item text-primary" href="${pageContext.request.contextPath}/mercenary/list">🔥 용병 모집</a></li>
                         </ul>

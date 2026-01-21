@@ -43,25 +43,20 @@
         }
         .history-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #e0e0e0; }
 
-        .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; font-weight: 700; display: inline-block; margin-bottom: 10px;}
+        /* --- 배지 스타일 (status-badge) --- */
+        .status-badge { 
+            font-size: 0.8rem; padding: 5px 12px; border-radius: 50px; /* 둥근 캡슐형 */
+            font-weight: 700; display: inline-block; margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
         .status-wait { background: #fff8e1; color: #b78a00; border: 1px solid #ffeeba; }
-        .status-recruiting { background: #e7f5ff; color: #1c7ed6; border: 1px solid #d0ebff; }
-        .status-ok { background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8; }
-        .status-no { background: #fff5f5; color: #fa5252; border: 1px solid #ffc9c9; }
+        .status-recruiting { background: #e7f5ff; color: #1c7ed6; border: 1px solid #d0ebff; } /* 파란색 (구인/모집중) */
+        .status-ok { background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8; } /* 초록색 (구직/완료) */
+        .status-no { background: #fff5f5; color: #fa5252; border: 1px solid #ffc9c9; } /* 빨간색 (마감/거절) */
         
         .match-tag { font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; font-weight: 800; margin-right: 6px; vertical-align: middle; }
         .tag-home { background: #212529; color: #fff; }
         .tag-away { background: #fff; color: #212529; border: 1px solid #dee2e6; }
-        
-        .text-undecided { 
-            color: #868e96; 
-            font-weight: 500; 
-            font-style: normal;
-            background-color: #f1f3f5;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-        }
         
         .match-versus-area { display: flex; align-items: center; justify-content: flex-start; gap: 20px; margin-top: 5px; margin-bottom: 5px;}
         .team-unit { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100px; text-align: center; }
@@ -138,8 +133,12 @@
                 </div>
 
                 <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
-                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-match">매치 신청 (팀)</button></li>
-                    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-mercenary">용병 신청 (개인)</button></li>
+                    <li class="nav-item">
+                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-match">매치 신청 (팀)</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-mercenary">내 용병 활동 (작성글)</button>
+                    </li>
                 </ul>
 
                 <div class="tab-content" id="pills-tabContent">
@@ -259,36 +258,63 @@
                     </div>
 
                     <div class="tab-pane fade" id="pills-mercenary">
-                         <c:choose>
-                            <c:when test="${empty mercenaryApplyList}">
+                        <c:choose>
+                            <%-- 리스트가 비어있을 때 --%>
+                            <c:when test="${empty myMercenaryList}">
                                 <div class="modern-card p-5 text-center text-muted">
-                                    <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i><p>신청한 용병 내역이 없습니다.</p>
+                                    <i class="bi bi-pencil-square fs-1 d-block mb-3 opacity-50"></i>
+                                    <p>작성한 용병(구인/구직) 게시글이 없습니다.</p>
+                                    <a href="${pageContext.request.contextPath}/mercenary/list" class="btn btn-outline-dark rounded-pill px-4 btn-sm mt-2">게시판 가기</a>
                                 </div>
                             </c:when>
+                            
+                            <%-- 리스트 출력 --%>
                             <c:otherwise>
-                                <c:forEach var="item" items="${mercenaryApplyList}">
+                                <c:forEach var="item" items="${myMercenaryList}">
                                     <div class="history-card">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
                                             <div>
+                                                <%-- 디자인 수정: status-badge 클래스 적용 --%>
                                                 <c:choose>
-                                                    <c:when test="${item.recruit_status == 0}"><span class="status-badge status-wait">지원 완료 (대기중)</span></c:when>
-                                                    <c:when test="${item.recruit_status == 1}"><span class="status-badge status-ok">참가 확정</span></c:when>
-                                                    <c:otherwise><span class="status-badge status-no">거절됨</span></c:otherwise>
+                                                    <c:when test="${item.category == 'RECRUIT'}">
+                                                        <%-- 구인(용병모집) -> 파란색 스타일 --%>
+                                                        <span class="status-badge status-recruiting me-2">구인 (용병모집)</span>
+                                                    </c:when>
+                                                    <c:when test="${item.category == 'SEEK'}">
+                                                        <%-- 구직(용병지원) -> 초록색 스타일 --%>
+                                                        <span class="status-badge status-ok me-2">구직 (용병지원)</span>
+                                                    </c:when>
                                                 </c:choose>
+                                                
+                                                <%-- 모집 상태 텍스트 --%>
+                                                <span class="text-muted small fw-bold">
+                                                    <c:choose>
+                                                        <c:when test="${item.status == 'RECRUITING'}"> · 모집중</c:when>
+                                                        <c:otherwise> · ${item.status}</c:otherwise>
+                                                    </c:choose>
+                                                </span>
                                             </div>
-                                            <div class="text-muted small"><i class="bi bi-calendar-check me-1"></i> 작성일: ${item.created_at}</div>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-calendar me-1"></i> ${item.created_at} 
+                                                <span class="mx-2">|</span> 
+                                                <i class="bi bi-eye me-1"></i> ${item.view_count}
+                                            </div>
                                         </div>
+
                                         <div class="d-flex justify-content-between align-items-center">
-                                             <div class="d-flex align-items-center">
-                                                <div class="team-unit">
-                                                    <div class="team-emblem-placeholder"><i class="bi bi-shield-fill fs-4 text-dark"></i></div>
-                                                    <div class="team-name-text">${item.opponent_name}</div>
+                                            <div class="d-flex align-items-center">
+                                                <%-- 제목 출력 --%>
+                                                <div class="fw-bold text-dark fs-5" style="word-break: break-all;">
+                                                    ${item.title}
                                                 </div>
-                                                <div class="ms-3"><span class="small text-muted mb-1 d-block">모집글 제목</span><span class="fw-bold text-dark">${item.title}</span></div>
                                             </div>
+                                            
+                                            <%-- 버튼 영역 --%>
                                             <div>
-                                                <c:if test="${item.recruit_status == 0}"><button class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">지원 취소</button></c:if>
-                                                <c:if test="${item.recruit_status == 1}"><a href="${pageContext.request.contextPath}/mercenary/article?num=${item.recruit_id}" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">글 보기</a></c:if>
+                                                <a href="${pageContext.request.contextPath}/mercenary/article?recruit_id=${item.recruit_id}&page=1" 
+                                                   class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">
+                                                   글 확인
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -296,12 +322,8 @@
                             </c:otherwise>
                         </c:choose>
                     </div>
-                </div> 
-            </div> 
-        </div> 
-    </div> 
-            
-    <footer><jsp:include page="/WEB-INF/views/layout/footer.jsp"/></footer>
+
+                </div> </div> </div> </div> <footer><jsp:include page="/WEB-INF/views/layout/footer.jsp"/></footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     
     <div class="modal fade" id="myPageTeamModal" tabindex="-1" aria-hidden="true">
