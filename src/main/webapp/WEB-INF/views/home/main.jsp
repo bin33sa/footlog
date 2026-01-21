@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
     <style>
-        /* [임팩트 섹션] 영상 대신 세련된 다크 그라데이션 배경 */
         .impact-header { 
             background: linear-gradient(135deg, #111111 0%, #222222 100%); 
             padding: 80px 0; 
@@ -21,24 +20,56 @@
         }
         #typing-text { font-size: 4rem; color: #D4F63F; font-weight: 800; min-height: 80px; }
         
-        /* [카운트업 스타일] */
         .stat-card { 
-            background: #fff; 
-            border-radius: 20px; 
-            padding: 25px; 
-            transition: all 0.3s; 
-            border: 1px solid #eee;
+            background: #fff; border-radius: 20px; padding: 25px; 
+            transition: all 0.3s; border: 1px solid #eee;
         }
         .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .count-num { font-size: 2.8rem; font-weight: 800; color: #111; display: inline-block; }
         .stat-unit { font-size: 1.5rem; color: #D4F63F; margin-left: 2px; }
 
-        /* 기존 스타일 유지 */ 
+        /* --- Swiper 이미지 레이아웃 추가 --- */
+        .main-swiper {
+    width: 100%;
+    height: 450px; /* 슬라이더 전체 높이 명시 */
+    border-radius: 20px;
+}
+
+.swiper-slide { 
+    overflow: hidden; 
+    background-size: cover; 
+    background-position: center;
+    background-repeat: no-repeat; /* 이미지 반복 방지 */
+    position: relative;
+    width: 100%;
+    height: 100%; /* 부모 높이 상속 */
+}
+
+/* 검은색 반투명 레이어 */
+.swiper-slide::after {
+    content: "";
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.3); /* 이미지 가독성을 위해 살짝 조절 */
+    z-index: 1;
+}
+
+.swiper-slide a { 
+    position: relative; 
+    z-index: 2; 
+    display: flex; 
+    width: 100%; 
+    height: 100%; /* 전체를 클릭 가능하게 */
+    text-decoration: none; 
+    cursor: pointer; 
+    align-items: center; 
+    justify-content: center;
+}
+        /* --- Swiper 끝 --- */
+
         .small-title:hover { text-decoration: underline; color: #0056b3 !important; }
         .calendar-day.active { background-color: #111111 !important; border: 2px solid #333; border-radius: 12px; }
         .calendar-day { min-height: 100px; padding: 10px; border: 1px solid #eee; border-radius: 8px; background: #fff; }
         .date-num { font-size: 1.1rem; display: block; margin-bottom: 5px; }
-        .swiper-slide a { display: flex; width: 100%; height: 200px; text-decoration: none; cursor: pointer; }
     </style>
 </head>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
@@ -83,22 +114,30 @@
                 <div class="modern-card p-0 mb-4">
                     <div class="swiper main-swiper">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide bg-dark d-flex align-items-center justify-content-center text-white">
-                                <a href="${pageContext.request.contextPath}/introduction" class="align-items-center justify-content-center text-white">
-                                    <div class="text-center">
-                                        <h2>FOOTLOG SEASON OPEN</h2>
-                                        <p>당신의 축구 기록을 시작하세요</p>
+                            <div class="swiper-slide" style="background-image: url('${pageContext.request.contextPath}/dist/images/slide1.jpg');">
+    <a href="${pageContext.request.contextPath}/introduction" class="align-items-center justify-content-center text-white text-center">
+        <div>
+            <h2 class="display-5 fw-bold mb-2">FOOTLOG SEASON OPEN</h2>
+            <p class="fs-5">당신의 축구 기록을 시작하세요</p>
+        </div>
+    </a>
+</div>
+
+                            <div class="swiper-slide" style="background-image: url('${pageContext.request.contextPath}/dist/images/slide2.jpg');">
+                                <a href="${pageContext.request.contextPath}/match/list" class="align-items-center justify-content-center text-white text-center">
+                                    <div>
+                                        <h2 class="display-5 fw-bold">MATCH DAY</h2>
+                                        <p class="fs-5">오늘의 경기를 확인하고 참여하세요</p>
                                     </div>
                                 </a>
                             </div>
-                             <div class="swiper-slide bg-primary d-flex align-items-center justify-content-center text-dark">
-                                <a href="${pageContext.request.contextPath}/match/list" class="align-items-center justify-content-center text-dark">
-                                    <h2>MATCH DAY</h2>
-                                </a>
-                            </div>
-                            <div class="swiper-slide bg-secondary d-flex align-items-center justify-content-center text-dark">
-                                <a href="${pageContext.request.contextPath}/team/list" class="align-items-center justify-content-center text-dark">
-                                    <h2>TEAM RECRUIT</h2>
+
+                            <div class="swiper-slide" style="background-image: url('${pageContext.request.contextPath}/dist/images/slide3.jpg');">
+                                <a href="${pageContext.request.contextPath}/team/list" class="align-items-center justify-content-center text-white text-center">
+                                    <div>
+                                        <h2 class="display-5 fw-bold">TEAM RECRUIT</h2>
+                                        <p class="fs-5">새로운 팀원을 찾고 구단을 성장시키세요</p>
+                                    </div>
                                 </a>
                             </div>
                         </div>
@@ -184,27 +223,22 @@
         }
 
         $(document).ready(function() {
-            // 타이핑 시작
             initTyping();
-
-            // 카운트업 수치 설정 (발표 시 보여주고 싶은 숫자를 적으세요)
             setTimeout(() => {
-                animateCount("count-matches", 1248, 2000); // 2초간 1248까지
-                animateCount("count-teams", 152, 2000);    // 2초간 152까지
-                animateCount("count-members", 5430, 2500); // 2.5초간 5430까지
-            }, 500); // 타이핑 시작 후 약간의 딜레이
+                animateCount("count-matches", 1248, 2000);
+                animateCount("count-teams", 152, 2000);
+                animateCount("count-members", 5430, 2500);
+            }, 500);
 
-            // 기존 달력 로직
             updateCalendar();
             
             new Swiper(".main-swiper", {
                 loop: true,
-                autoplay: { delay: 3000, disableOnInteraction: false },
+                autoplay: { delay: 4000, disableOnInteraction: false },
                 pagination: { el: ".swiper-pagination", clickable: true },
             });
         });
 
-        // (이하 updateCalendar 등 기존 JS 함수들 그대로 유지)
         function updateCalendar() {
             const today = new Date();
             const currentDay = today.getDay();
