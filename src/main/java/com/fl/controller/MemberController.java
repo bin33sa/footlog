@@ -23,6 +23,8 @@ import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
 import com.fl.mvc.annotation.ResponseBody;
 import com.fl.mvc.view.ModelAndView;
+import com.fl.service.MatchService;
+import com.fl.service.MatchServiceImpl;
 import com.fl.service.MemberService;
 import com.fl.service.MemberServiceImpl;
 import com.fl.service.MyPageService;
@@ -41,163 +43,166 @@ import jakarta.servlet.http.Part;
 @Controller
 @RequestMapping("/member/*")
 public class MemberController {
-	
-	private MemberService service = new MemberServiceImpl();
-	private MyPageService myPageService = new MyPageServiceImpl();
-	private TeamService teamService = new TeamServiceImpl();
-	private FileManager fileManager = new FileManager();
-	
+   
+   private MemberService service = new MemberServiceImpl();
+   private MyPageService myPageService = new MyPageServiceImpl();
+   private TeamService teamService = new TeamServiceImpl();
+   private MatchService matchService = new MatchServiceImpl();
+   private FileManager fileManager = new FileManager();
+   
 
-	// ==========================================
-	// 1. 로그인 및 로그아웃, 탈퇴 관련
-	// ==========================================
+   // ==========================================
+   // 1. 로그인 및 로그아웃, 탈퇴 관련
+   // ==========================================
 
-	@GetMapping("login")
-	public ModelAndView loginForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		return new ModelAndView("member/login");
-	}
+   @GetMapping("login")
+   public ModelAndView loginForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      return new ModelAndView("member/login");
+   }
 
-	@PostMapping("login")
-	public ModelAndView loginSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		
-		try {
-			String userId = req.getParameter("userId");
-			String password = req.getParameter("password");
+   @PostMapping("login")
+   public ModelAndView loginSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      HttpSession session = req.getSession();
+      
+      try {
+         String userId = req.getParameter("userId");
+         String password = req.getParameter("password");
 
-			Map<String, Object> map = new HashMap<>();
-			map.put("userId", userId);
-			map.put("password", password);
-			
-			MemberDTO dto = service.loginMember(map);
-			
-			// dto가 없거나 is_deleted가 1(탈퇴)이면 로그인 실패 처리 
-			if(dto == null || dto.getIs_deleted() == 1) {
-				ModelAndView mav = new ModelAndView("member/login");
-				
-				if(dto != null && dto.getIs_deleted() == 1) {
-					mav.addObject("message", "탈퇴한 회원입니다.\n복구를 원하시면 관리자에게 문의하세요.");	
-				} else {
-					mav.addObject("message", "아이디 또는 패스워드가 일치하지 않습니다.");
-				}
-				return mav;
-			}
-			
-			// 로그인 성공 처리
-			session.setMaxInactiveInterval(20 * 60); // 20분
+         Map<String, Object> map = new HashMap<>();
+         map.put("userId", userId);
+         map.put("password", password);
+         
+         MemberDTO dto = service.loginMember(map);
+         
+         // dto가 없거나 is_deleted가 1(탈퇴)이면 로그인 실패 처리 
+         if(dto == null || dto.getIs_deleted() == 1) {
+            ModelAndView mav = new ModelAndView("member/login");
+            
+            if(dto != null && dto.getIs_deleted() == 1) {
+               mav.addObject("message", "탈퇴한 회원입니다.\n복구를 원하시면 관리자에게 문의하세요.");   
+            } else {
+               mav.addObject("message", "아이디 또는 패스워드가 일치하지 않습니다.");
+            }
+            return mav;
+         }
+         List<TeamDTO> myTeams = matchService.listUserTeams(dto.getMember_code());
+         session.setAttribute("myTeams", myTeams);
+         
+         // 로그인 성공 처리
+         session.setMaxInactiveInterval(20 * 60); // 20분
 
-			SessionInfo info = new SessionInfo();
-			info.setMember_code(dto.getMember_code());
-			info.setMember_id(dto.getMember_id());
-			info.setMember_name(dto.getMember_name());
-			info.setRole_level(dto.getRole_level());
-			info.setProfile_image(dto.getProfile_image());
-			
-			session.setAttribute("member", info);
+         SessionInfo info = new SessionInfo();
+         info.setMember_code(dto.getMember_code());
+         info.setMember_id(dto.getMember_id());
+         info.setMember_name(dto.getMember_name());
+         info.setRole_level(dto.getRole_level());
+         info.setProfile_image(dto.getProfile_image());
+         
+         session.setAttribute("member", info);
 
-			String preLoginURI = (String)session.getAttribute("preLoginURI");
-			session.removeAttribute("preLoginURI");
+         String preLoginURI = (String)session.getAttribute("preLoginURI");
+         session.removeAttribute("preLoginURI");
 
-			if(preLoginURI != null) {
-				if(preLoginURI.contains("/login")) {
-					return new ModelAndView("redirect:/main");
-				}
-				return new ModelAndView(preLoginURI);
-			}
+         if(preLoginURI != null) {
+            if(preLoginURI.contains("/login")) {
+               return new ModelAndView("redirect:/main");
+            }
+            return new ModelAndView(preLoginURI);
+         }
 
-			return new ModelAndView("redirect:/main");
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ModelAndView("member/login");
-		}
-	}
+         return new ModelAndView("redirect:/main");
+         
+      } catch (Exception e) {
+         e.printStackTrace();
+         return new ModelAndView("member/login");
+      }
+   }
 
-	@GetMapping("logout")
-	public ModelAndView logout(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession(false);
-		if(session != null) {
-			session.removeAttribute("member");
-			session.invalidate();
-		}
-		return new ModelAndView("redirect:/main");
-	}
-	
-	
-	// 탈퇴 실행
-	@GetMapping("delete")
-	public ModelAndView deleteDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-	    HttpSession session = req.getSession();
-	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+   @GetMapping("logout")
+   public ModelAndView logout(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      HttpSession session = req.getSession(false);
+      if(session != null) {
+         session.removeAttribute("member");
+         session.invalidate();
+      }
+      return new ModelAndView("redirect:/main");
+   }
+   
+   
+   // 탈퇴 실행
+   @GetMapping("delete")
+   public ModelAndView deleteDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+       HttpSession session = req.getSession();
+       SessionInfo info = (SessionInfo) session.getAttribute("member");
 
-	    try {
-	        Map<String, Object> map = new HashMap<>();
-	        map.put("member_id", info.getMember_id());
-	        map.put("member_code", info.getMember_code()); // DB 삭제 로직에 필요
+       try {
+           Map<String, Object> map = new HashMap<>();
+           map.put("member_id", info.getMember_id());
+           map.put("member_code", info.getMember_code()); // DB 삭제 로직에 필요
 
-	        // 서비스 호출 (구단삭제 -> 회원탈퇴)
-	        service.deleteMember(map);
+           // 서비스 호출 (구단삭제 -> 회원탈퇴)
+           service.deleteMember(map);
 
-	        // 로그아웃
-	        session.removeAttribute("member");
-	        session.invalidate();
+           // 로그아웃
+           session.removeAttribute("member");
+           session.invalidate();
 
-	        // 완료 알림 페이지로 이동
-	        ModelAndView mav = new ModelAndView("member/delete_complete");
-	        mav.addObject("message", "회원탈퇴가 완료되었습니다.");
-	        mav.addObject("url", req.getContextPath() + "/main");
-	        
-	        return mav;
+           // 완료 알림 페이지로 이동
+           ModelAndView mav = new ModelAndView("member/delete_complete");
+           mav.addObject("message", "회원탈퇴가 완료되었습니다.");
+           mav.addObject("url", req.getContextPath() + "/main");
+           
+           return mav;
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        // 에러 나면 다시 마이페이지
-	        return new ModelAndView("redirect:/member/mypage");
-	    }
-	}
-	
-	
-	// 탈퇴 버튼 누를 때 구단장인지 확인 (ajax)
-	@ResponseBody
-	@PostMapping("checkLeader")
-	public Map<String, Object> checkLeader(HttpServletRequest req, HttpServletResponse resp) {
-	   
-	    HttpSession session = req.getSession();
-	    
-	    Map<String, Object> model = new HashMap<>();
-	    SessionInfo info = (SessionInfo) session.getAttribute("member");
-	    
-	    if (info == null) {
-	        model.put("isLogin", false);
-	        return model;
-	    }
+       } catch (Exception e) {
+           e.printStackTrace();
+           // 에러 나면 다시 마이페이지
+           return new ModelAndView("redirect:/member/mypage");
+       }
+   }
+   
+   
+   // 탈퇴 버튼 누를 때 구단장인지 확인 (ajax)
+   @ResponseBody
+   @PostMapping("checkLeader")
+   public Map<String, Object> checkLeader(HttpServletRequest req, HttpServletResponse resp) {
+      
+       HttpSession session = req.getSession();
+       
+       Map<String, Object> model = new HashMap<>();
+       SessionInfo info = (SessionInfo) session.getAttribute("member");
+       
+       if (info == null) {
+           model.put("isLogin", false);
+           return model;
+       }
 
-	    // 서비스 호출
-	    int leaderCount = service.countLeaderTeam(info.getMember_code());
-	    
-	    model.put("isLogin", true);
-	    model.put("leaderCount", leaderCount);
-	    
-	    return model;
-	}
-	
+       // 서비스 호출
+       int leaderCount = service.countLeaderTeam(info.getMember_code());
+       
+       model.put("isLogin", true);
+       model.put("leaderCount", leaderCount);
+       
+       return model;
+   }
+   
 
-	// ==========================================
-	// 2. 아이디 / 비밀번호 찾기
-	// ==========================================
+   // ==========================================
+   // 2. 아이디 / 비밀번호 찾기
+   // ==========================================
 
-	@GetMapping("findInfo")
-	public ModelAndView findInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		return new ModelAndView("member/findUserInfo");
-	}
+   @GetMapping("findInfo")
+   public ModelAndView findInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      return new ModelAndView("member/findUserInfo");
+   }
 
-	// ==========================================
-	// 3. 회원가입 관련
-	// ==========================================
-		
-	// MemberController.java
+   // ==========================================
+   // 3. 회원가입 관련
+   // ==========================================
+      
+   // MemberController.java
 
-	// 아이디 중복 검사 
+   // 아이디 중복 검사 
     @PostMapping("userIdCheck")
     public void userIdCheck(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
        
@@ -222,398 +227,398 @@ public class MemberController {
        resp.getWriter().write("{\"passed\": \"" + passed + "\"}");
     }
  
-	
-	// 패스워드 확인 폼
-	@GetMapping("pwd")
-	public ModelAndView pwdForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ModelAndView mav = new ModelAndView("member/pwd");
-		String mode = req.getParameter("mode");
-		mav.addObject("mode", mode);
-		return mav;
-	}
-	
-	@PostMapping("pwd")
-	public ModelAndView pwdSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		
-		try {
-			MemberDTO dto = service.findById(info.getMember_id());
-			
-			if(dto == null) {
-				session.invalidate();
-				return new ModelAndView("redirect:/");
-			}
-			
-			String password = req.getParameter("password");
-			String mode = req.getParameter("mode");
-			
-			if(! dto.getPassword().equals(password)) {
-				ModelAndView mav = new ModelAndView("member/pwd");
-				mav.addObject("mode", mode);
-				mav.addObject("message", "패스워드가 일치하지 않습니다.");
-				return mav;
-			}
-			
-			if(mode.equals("delete")) {
-				// 회원 탈퇴 처리 (구현 필요)
-				session.removeAttribute("member");
-				session.invalidate();
-			} else if(mode.equals("update")) {
-				ModelAndView mav = new ModelAndView("member/member");
-				mav.addObject("dto", dto);
-				mav.addObject("mode", "update");
-				return mav;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return new ModelAndView("redirect:/");
-	}
+   
+   // 패스워드 확인 폼
+   @GetMapping("pwd")
+   public ModelAndView pwdForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      ModelAndView mav = new ModelAndView("member/pwd");
+      String mode = req.getParameter("mode");
+      mav.addObject("mode", mode);
+      return mav;
+   }
+   
+   @PostMapping("pwd")
+   public ModelAndView pwdSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      HttpSession session = req.getSession();
+      SessionInfo info = (SessionInfo)session.getAttribute("member");
+      
+      try {
+         MemberDTO dto = service.findById(info.getMember_id());
+         
+         if(dto == null) {
+            session.invalidate();
+            return new ModelAndView("redirect:/");
+         }
+         
+         String password = req.getParameter("password");
+         String mode = req.getParameter("mode");
+         
+         if(! dto.getPassword().equals(password)) {
+            ModelAndView mav = new ModelAndView("member/pwd");
+            mav.addObject("mode", mode);
+            mav.addObject("message", "패스워드가 일치하지 않습니다.");
+            return mav;
+         }
+         
+         if(mode.equals("delete")) {
+            // 회원 탈퇴 처리 (구현 필요)
+            session.removeAttribute("member");
+            session.invalidate();
+         } else if(mode.equals("update")) {
+            ModelAndView mav = new ModelAndView("member/member");
+            mav.addObject("dto", dto);
+            mav.addObject("mode", "update");
+            return mav;
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
+      
+      return new ModelAndView("redirect:/");
+   }
 
-	
-	// 회원가입 
-	@GetMapping("signup")
-	public ModelAndView signupForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		ModelAndView mav = new ModelAndView("member/signup");
-		mav.addObject("mode", "sign");
-		return mav;
-	}
+   
+   // 회원가입 
+   @GetMapping("signup")
+   public ModelAndView signupForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      ModelAndView mav = new ModelAndView("member/signup");
+      mav.addObject("mode", "sign");
+      return mav;
+   }
 
-	// 회원가입 정보 저장 (프로필 사진 기본값 처리 추가)
-	@PostMapping("signup")
-	public ModelAndView signupSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		
-		// 파일 저장 경로 
-		String root = session.getServletContext().getRealPath("/");
-		String pathname = root + "uploads" + File.separator + "member";
-		
-		String message = "";
-		
-		try {
-			MemberDTO dto = new MemberDTO();
-			
-			dto.setMember_id(req.getParameter("member_id")); 
-			dto.setPassword(req.getParameter("password")); 
-			dto.setMember_name(req.getParameter("member_name")); 
-			dto.setPhone_number(req.getParameter("phone_number")); 
-			dto.setEmail(req.getParameter("email")); 
-			dto.setRegion(req.getParameter("region")); 
-			dto.setPreferred_position(req.getParameter("preferred_position")); 
-			
-			// 프로필 사진파일 업로드 처리
-			Part p = req.getPart("selectFile");
-			MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
-			
-			if(mp != null) {
-				// 1. 파일이 업로드 되었을 때
-				dto.setProfile_image(mp.getSaveFilename());
-			} else {
-				// 2. 파일이 없을 때 기본 이미지 설정 
-				dto.setProfile_image("avatar.png");
-			}
-			
-			service.insertMember(dto);
-			
-			session.setAttribute("mode", "signup");
-			session.setAttribute("member_name", dto.getMember_name());
-			
-			return new ModelAndView("redirect:/member/signupSuccess");
-			
-		} catch (SQLException e) {
-			if(e.getErrorCode() == 1) {
-				message = "아이디 중복으로 회원가입이 실패했습니다.";
-			} else if(e.getErrorCode() == 1400) {
-				message = "필수사항을 입력하지 않았습니다.";
-			} else {
-				message = "회원 가입이 실패했습니다.";
-			}
-			e.printStackTrace();
-		} catch (Exception e) {
-			message = "회원 가입이 실패했습니다.";
-			e.printStackTrace();
-		}
-		
-		ModelAndView mav = new ModelAndView("member/signup");
-		mav.addObject("mode", "signup");
-		mav.addObject("message", message);
-		
-		return mav;
-	}
+   // 회원가입 정보 저장 (프로필 사진 기본값 처리 추가)
+   @PostMapping("signup")
+   public ModelAndView signupSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      HttpSession session = req.getSession();
+      
+      // 파일 저장 경로 
+      String root = session.getServletContext().getRealPath("/");
+      String pathname = root + "uploads" + File.separator + "member";
+      
+      String message = "";
+      
+      try {
+         MemberDTO dto = new MemberDTO();
+         
+         dto.setMember_id(req.getParameter("member_id")); 
+         dto.setPassword(req.getParameter("password")); 
+         dto.setMember_name(req.getParameter("member_name")); 
+         dto.setPhone_number(req.getParameter("phone_number")); 
+         dto.setEmail(req.getParameter("email")); 
+         dto.setRegion(req.getParameter("region")); 
+         dto.setPreferred_position(req.getParameter("preferred_position")); 
+         
+         // 프로필 사진파일 업로드 처리
+         Part p = req.getPart("selectFile");
+         MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
+         
+         if(mp != null) {
+            // 1. 파일이 업로드 되었을 때
+            dto.setProfile_image(mp.getSaveFilename());
+         } else {
+            // 2. 파일이 없을 때 기본 이미지 설정 
+            dto.setProfile_image("avatar.png");
+         }
+         
+         service.insertMember(dto);
+         
+         session.setAttribute("mode", "signup");
+         session.setAttribute("member_name", dto.getMember_name());
+         
+         return new ModelAndView("redirect:/member/signupSuccess");
+         
+      } catch (SQLException e) {
+         if(e.getErrorCode() == 1) {
+            message = "아이디 중복으로 회원가입이 실패했습니다.";
+         } else if(e.getErrorCode() == 1400) {
+            message = "필수사항을 입력하지 않았습니다.";
+         } else {
+            message = "회원 가입이 실패했습니다.";
+         }
+         e.printStackTrace();
+      } catch (Exception e) {
+         message = "회원 가입이 실패했습니다.";
+         e.printStackTrace();
+      }
+      
+      ModelAndView mav = new ModelAndView("member/signup");
+      mav.addObject("mode", "signup");
+      mav.addObject("message", message);
+      
+      return mav;
+   }
 
-	@GetMapping("signupSuccess")
-	public ModelAndView signupSuccess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		
-		String mode = (String)session.getAttribute("mode");
-		String member_name = (String)session.getAttribute("member_name");
-		
-		// 세션에서 사용한 값 삭제 (새로고침 시 중복 방지)
-		session.removeAttribute("mode");
-		session.removeAttribute("member_name");
-		
-		if(mode == null) {
-			return new ModelAndView("redirect:/main");
-		}
-		
-	
-		String message = "<b>" + member_name + "</b>님의 회원가입이<br>성공적으로 완료되었습니다.";
-		
-		ModelAndView mav = new ModelAndView("member/signup_success");
-		mav.addObject("message", message);
-		
-		return mav;
-	}
+   @GetMapping("signupSuccess")
+   public ModelAndView signupSuccess(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      HttpSession session = req.getSession();
+      
+      String mode = (String)session.getAttribute("mode");
+      String member_name = (String)session.getAttribute("member_name");
+      
+      // 세션에서 사용한 값 삭제 (새로고침 시 중복 방지)
+      session.removeAttribute("mode");
+      session.removeAttribute("member_name");
+      
+      if(mode == null) {
+         return new ModelAndView("redirect:/main");
+      }
+      
+   
+      String message = "<b>" + member_name + "</b>님의 회원가입이<br>성공적으로 완료되었습니다.";
+      
+      ModelAndView mav = new ModelAndView("member/signup_success");
+      mav.addObject("message", message);
+      
+      return mav;
+   }
 
-	// ==========================================
-	// 4. 마이페이지 및 정보 수정
-	// ==========================================
+   // ==========================================
+   // 4. 마이페이지 및 정보 수정
+   // ==========================================
 
-	@GetMapping("mypage")
-	public ModelAndView myPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
-		
-		ModelAndView mav = new ModelAndView("member/mypage");
-		
-		try {
-			if(info != null) {
-				// 기본 정보 조회
-				MemberDTO myInfo = myPageService.readMember(info.getMember_code());
-				List<MatchDTO> matchList = myPageService.listMyMatch(info.getMember_code());
-				List<TeamDTO> myTeams = teamService.readMyTeam(info.getMember_code());
-				
-				// 대시보드 통계 계산 로직 추가
-				Map<String, Object> stats = new HashMap<>();
-				int monthMatchCount = 0;
-				MatchDTO nextMatch = null;
-				long minDaysDiff = Long.MAX_VALUE;
-				
-				LocalDate today = LocalDate.now();
-				
-				if(matchList != null) {
-					for(MatchDTO m : matchList) {
-						// 날짜 처리 (String -> LocalDate 변환, 예외처리 포함)
-						try {
-							// DB에서 가져온 날짜 문자열 (예: "2026-01-23 16:24")
-							String dateStr = m.getMatch_date(); 
-							if(dateStr.length() > 10) dateStr = dateStr.substring(0, 10); // 시간 자르고 날짜만
-							
-							LocalDate matchDate = LocalDate.parse(dateStr);
-							
-							// A. 이번 달 경기 수 카운트
-							if(matchDate.getYear() == today.getYear() && matchDate.getMonth() == today.getMonth()) {
-								monthMatchCount++;
-							}
-							
-							// B. 다가오는 가장 가까운 경기 (Next Match) 찾기
-							// 경기가 오늘 이후이고, 가장 가까운 날짜인지 확인
-							if( (matchDate.isEqual(today) || matchDate.isAfter(today)) && !m.getStatus().equals("완료")) {
-								long daysDiff = ChronoUnit.DAYS.between(today, matchDate);
-								if(daysDiff < minDaysDiff) {
-									minDaysDiff = daysDiff;
-									nextMatch = m;
-								}
-							}
-						} catch (Exception e) {
-							// 날짜 파싱 에러나면 무시하고 다음 거 진행
-						}
-					}
-				}
-				
-				// 통계 맵에 담기
-				stats.put("month_match_count", monthMatchCount);
-				stats.put("my_team_count", myTeams != null ? myTeams.size() : 0);
-				
-				if(nextMatch != null) {
-					stats.put("next_match_dday", minDaysDiff == 0 ? "Day" : minDaysDiff); // D-Day
-					stats.put("next_match_opponent", nextMatch.getAway_team_name()); // 상대팀
-					stats.put("next_match_date", nextMatch.getMatch_date());
-				}
+   @GetMapping("mypage")
+   public ModelAndView myPage(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      HttpSession session = req.getSession();
+      SessionInfo info = (SessionInfo) session.getAttribute("member");
+      
+      ModelAndView mav = new ModelAndView("member/mypage");
+      
+      try {
+         if(info != null) {
+            // 기본 정보 조회
+            MemberDTO myInfo = myPageService.readMember(info.getMember_code());
+            List<MatchDTO> matchList = myPageService.listMyMatch(info.getMember_code());
+            List<TeamDTO> myTeams = teamService.readMyTeam(info.getMember_code());
+            
+            // 대시보드 통계 계산 로직 추가
+            Map<String, Object> stats = new HashMap<>();
+            int monthMatchCount = 0;
+            MatchDTO nextMatch = null;
+            long minDaysDiff = Long.MAX_VALUE;
+            
+            LocalDate today = LocalDate.now();
+            
+            if(matchList != null) {
+               for(MatchDTO m : matchList) {
+                  // 날짜 처리 (String -> LocalDate 변환, 예외처리 포함)
+                  try {
+                     // DB에서 가져온 날짜 문자열 (예: "2026-01-23 16:24")
+                     String dateStr = m.getMatch_date(); 
+                     if(dateStr.length() > 10) dateStr = dateStr.substring(0, 10); // 시간 자르고 날짜만
+                     
+                     LocalDate matchDate = LocalDate.parse(dateStr);
+                     
+                     // A. 이번 달 경기 수 카운트
+                     if(matchDate.getYear() == today.getYear() && matchDate.getMonth() == today.getMonth()) {
+                        monthMatchCount++;
+                     }
+                     
+                     // B. 다가오는 가장 가까운 경기 (Next Match) 찾기
+                     // 경기가 오늘 이후이고, 가장 가까운 날짜인지 확인
+                     if( (matchDate.isEqual(today) || matchDate.isAfter(today)) && !m.getStatus().equals("완료")) {
+                        long daysDiff = ChronoUnit.DAYS.between(today, matchDate);
+                        if(daysDiff < minDaysDiff) {
+                           minDaysDiff = daysDiff;
+                           nextMatch = m;
+                        }
+                     }
+                  } catch (Exception e) {
+                     // 날짜 파싱 에러나면 무시하고 다음 거 진행
+                  }
+               }
+            }
+            
+            // 통계 맵에 담기
+            stats.put("month_match_count", monthMatchCount);
+            stats.put("my_team_count", myTeams != null ? myTeams.size() : 0);
+            
+            if(nextMatch != null) {
+               stats.put("next_match_dday", minDaysDiff == 0 ? "Day" : minDaysDiff); // D-Day
+               stats.put("next_match_opponent", nextMatch.getAway_team_name()); // 상대팀
+               stats.put("next_match_date", nextMatch.getMatch_date());
+            }
 
-				// 3. JSP로 데이터 전송
-				mav.addObject("dto", myInfo);
-				mav.addObject("matchList", matchList);
-				mav.addObject("myTeams", myTeams);
-				mav.addObject("stats", stats); // 통계 데이터 추가
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+            // 3. JSP로 데이터 전송
+            mav.addObject("dto", myInfo);
+            mav.addObject("matchList", matchList);
+            mav.addObject("myTeams", myTeams);
+            mav.addObject("stats", stats); // 통계 데이터 추가
+         }
+      } catch (Exception e) {
+         e.printStackTrace();
+      }
 
-		return mav;
-	}
-	
-	// 일단 쓸지말지 보류.. (안쓸듯)
-	@GetMapping("profile")
-	public ModelAndView profileForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		return new ModelAndView("member/profile");
-	}
-	
-	// 매치/용병 신청내역 가기 
-	@GetMapping("history")
-	public ModelAndView match_history(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-	    HttpSession session = req.getSession();
-	    SessionInfo info = (SessionInfo) session.getAttribute("member");
-	    
-	    if(info == null) return new ModelAndView("redirect:/member/login");
-	    
-	    ModelAndView mav = new ModelAndView("member/match_history");
-	    
-	    try {
-	        // 1. 매치 신청 내역 (기존 유지)
-	        List<MatchHistoryDTO> matchApplyList = myPageService.listMatchApply(info.getMember_code());
-	        
-	        // 2. 내가 쓴 용병 게시글 내역 (구인/구직)
-	        List<MercenaryDTO> myMercenaryList = myPageService.listMyMercenaryPosts(info.getMember_code());
-	        
-	        mav.addObject("matchApplyList", matchApplyList);
-	        mav.addObject("myMercenaryList", myMercenaryList); // 이름 변경됨
-	        
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    
-	    return mav;
-	}
+      return mav;
+   }
+   
+   // 일단 쓸지말지 보류.. (안쓸듯)
+   @GetMapping("profile")
+   public ModelAndView profileForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      return new ModelAndView("member/profile");
+   }
+   
+   // 매치/용병 신청내역 가기 
+   @GetMapping("history")
+   public ModelAndView match_history(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+       HttpSession session = req.getSession();
+       SessionInfo info = (SessionInfo) session.getAttribute("member");
+       
+       if(info == null) return new ModelAndView("redirect:/member/login");
+       
+       ModelAndView mav = new ModelAndView("member/match_history");
+       
+       try {
+           // 1. 매치 신청 내역 (기존 유지)
+           List<MatchHistoryDTO> matchApplyList = myPageService.listMatchApply(info.getMember_code());
+           
+           // 2. 내가 쓴 용병 게시글 내역 (구인/구직)
+           List<MercenaryDTO> myMercenaryList = myPageService.listMyMercenaryPosts(info.getMember_code());
+           
+           mav.addObject("matchApplyList", matchApplyList);
+           mav.addObject("myMercenaryList", myMercenaryList); // 이름 변경됨
+           
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+       
+       return mav;
+   }
 
-	@GetMapping("updateInfo")
-	public ModelAndView updateInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
-		
-		if(info == null) {
-	        return new ModelAndView("redirect:/member/login");
-	    }
-	    
-	    ModelAndView mav = new ModelAndView("member/updateInfo");
-	    
-	    try {
-	        // 회원 아이디로 전체 정보를 조회
-	        MemberDTO dto = service.findById(info.getMember_id());
-	        
-	        // 조회한 데이터를 "dto"라는 이름으로 추가
-	        mav.addObject("dto", dto);
-	        
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	    }
-	    
-	    return mav;
-	}
-	
-	@PostMapping("updateDo")
-	public ModelAndView updateInfoSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-	    HttpSession session = req.getSession();
-	    SessionInfo info = (SessionInfo) session.getAttribute("member");
-	    
-	    String root = session.getServletContext().getRealPath("/");
-	    String pathname = root + "uploads" + File.separator + "member";
+   @GetMapping("updateInfo")
+   public ModelAndView updateInfoForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      HttpSession session = req.getSession();
+      SessionInfo info = (SessionInfo) session.getAttribute("member");
+      
+      if(info == null) {
+           return new ModelAndView("redirect:/member/login");
+       }
+       
+       ModelAndView mav = new ModelAndView("member/updateInfo");
+       
+       try {
+           // 회원 아이디로 전체 정보를 조회
+           MemberDTO dto = service.findById(info.getMember_id());
+           
+           // 조회한 데이터를 "dto"라는 이름으로 추가
+           mav.addObject("dto", dto);
+           
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+       
+       return mav;
+   }
+   
+   @PostMapping("updateDo")
+   public ModelAndView updateInfoSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+       HttpSession session = req.getSession();
+       SessionInfo info = (SessionInfo) session.getAttribute("member");
+       
+       String root = session.getServletContext().getRealPath("/");
+       String pathname = root + "uploads" + File.separator + "member";
 
-	    try {
-	        MemberDTO dto = service.findById(info.getMember_id());
-	        
-	        dto.setMember_name(req.getParameter("member_name"));
-	        dto.setPhone_number(req.getParameter("phone_number"));
-	        dto.setEmail(req.getParameter("email"));
-	        dto.setRegion(req.getParameter("region"));
-	        dto.setPreferred_position(req.getParameter("preferred_position"));
-	        
-	        // 비밀번호 수정 (입력했을 때만)
-	        String pwd = req.getParameter("password");
-	        if(pwd != null && !pwd.trim().isEmpty()) {
-	            dto.setPassword(pwd);
-	        }
+       try {
+           MemberDTO dto = service.findById(info.getMember_id());
+           
+           dto.setMember_name(req.getParameter("member_name"));
+           dto.setPhone_number(req.getParameter("phone_number"));
+           dto.setEmail(req.getParameter("email"));
+           dto.setRegion(req.getParameter("region"));
+           dto.setPreferred_position(req.getParameter("preferred_position"));
+           
+           // 비밀번호 수정 (입력했을 때만)
+           String pwd = req.getParameter("password");
+           if(pwd != null && !pwd.trim().isEmpty()) {
+               dto.setPassword(pwd);
+           }
 
-	        // 파일 처리
-	        String imageDeleted = req.getParameter("imageDeleted");
-	        Part p = req.getPart("selectFile");
-	        MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
-	        
-	        if(mp != null) {
-	            if(dto.getProfile_image() != null && !dto.getProfile_image().equals("avatar.png")) {
-	                fileManager.doFiledelete(pathname, dto.getProfile_image());
-	            }
-	            dto.setProfile_image(mp.getSaveFilename());
-	        } else if("true".equals(imageDeleted)) {
-	            if(dto.getProfile_image() != null && !dto.getProfile_image().equals("avatar.png")) {
-	                fileManager.doFiledelete(pathname, dto.getProfile_image());
-	            }
-	            dto.setProfile_image("avatar.png");
-	        }
-	    
-	        service.updateMember(dto);
-	        
-	        info.setMember_name(dto.getMember_name()); // 이름 변경 대비
-	        info.setProfile_image(dto.getProfile_image()); // 수정된 새 이미지 파일명 저장
-	        session.setAttribute("member", info); // 갱신된 info 객체를 세션에 다시 덮어쓰기
+           // 파일 처리
+           String imageDeleted = req.getParameter("imageDeleted");
+           Part p = req.getPart("selectFile");
+           MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
+           
+           if(mp != null) {
+               if(dto.getProfile_image() != null && !dto.getProfile_image().equals("avatar.png")) {
+                   fileManager.doFiledelete(pathname, dto.getProfile_image());
+               }
+               dto.setProfile_image(mp.getSaveFilename());
+           } else if("true".equals(imageDeleted)) {
+               if(dto.getProfile_image() != null && !dto.getProfile_image().equals("avatar.png")) {
+                   fileManager.doFiledelete(pathname, dto.getProfile_image());
+               }
+               dto.setProfile_image("avatar.png");
+           }
+       
+           service.updateMember(dto);
+           
+           info.setMember_name(dto.getMember_name()); // 이름 변경 대비
+           info.setProfile_image(dto.getProfile_image()); // 수정된 새 이미지 파일명 저장
+           session.setAttribute("member", info); // 갱신된 info 객체를 세션에 다시 덮어쓰기
 
-	        // 성공 플래그와 함께 다시 이동
-	        ModelAndView mav = new ModelAndView("member/updateInfo");
-	        mav.addObject("updateComplete", "true");
-	        return mav;
+           // 성공 플래그와 함께 다시 이동
+           ModelAndView mav = new ModelAndView("member/updateInfo");
+           mav.addObject("updateComplete", "true");
+           return mav;
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        ModelAndView mav = new ModelAndView("member/updateInfo");
-	        mav.addObject("dto", info); 
-	        mav.addObject("message", "회원 정보 수정 중 오류가 발생했습니다.");
-	        return mav;
-	    }
-	}
-	
-	
-	// 아이디 찾기 실행
-	@PostMapping("findIdDo")
-	public ModelAndView findIdDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
-		String name = req.getParameter("name");
-		String email = req.getParameter("email");
-		
-		Map<String, Object> map = new HashMap<>();
-		map.put("member_name", name);
-		map.put("email", email);
-		
-		// 서비스 호출
-		MemberDTO dto = service.findId(map);
-		
-		ModelAndView mav = new ModelAndView("member/findUserInfo"); // 원래 페이지로 돌아감 (결과 보여주기 위해)
-		
-		if (dto != null) {
-			
-			String rawId = dto.getMember_id();
-			String maskedId = rawId;
+       } catch (Exception e) {
+           e.printStackTrace();
+           ModelAndView mav = new ModelAndView("member/updateInfo");
+           mav.addObject("dto", info); 
+           mav.addObject("message", "회원 정보 수정 중 오류가 발생했습니다.");
+           return mav;
+       }
+   }
+   
+   
+   // 아이디 찾기 실행
+   @PostMapping("findIdDo")
+   public ModelAndView findIdDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+      
+      String name = req.getParameter("name");
+      String email = req.getParameter("email");
+      
+      Map<String, Object> map = new HashMap<>();
+      map.put("member_name", name);
+      map.put("email", email);
+      
+      // 서비스 호출
+      MemberDTO dto = service.findId(map);
+      
+      ModelAndView mav = new ModelAndView("member/findUserInfo"); // 원래 페이지로 돌아감 (결과 보여주기 위해)
+      
+      if (dto != null) {
+         
+         String rawId = dto.getMember_id();
+         String maskedId = rawId;
 
-			// 아이디가 3글자 초과일 때만 뒤 3글자 마스킹 (예: yeonhwa -> yeon***)
-			if(rawId.length() > 3) {
-				maskedId = rawId.substring(0, rawId.length() - 3) + "***";
-			} else {
-				
-				maskedId = "***"; 
-			}
-	
-			// 메시지에 마스킹된 아이디(maskedId)를 넣음
-			mav.addObject("message", "회원님의 아이디는 <b>" + maskedId + "</b> 입니다.");
-			
-			// 탭 유지를 위해 추가 
-			mav.addObject("activeTab", "id"); 
-		} else {
-			// 못 찾았을 경우
-			mav.addObject("message", "일치하는 회원 정보가 없습니다.");
-			mav.addObject("activeTab", "id");
-		}
-		
-		return mav;
-	}
-	
-	
+         // 아이디가 3글자 초과일 때만 뒤 3글자 마스킹 (예: yeonhwa -> yeon***)
+         if(rawId.length() > 3) {
+            maskedId = rawId.substring(0, rawId.length() - 3) + "***";
+         } else {
+            
+            maskedId = "***"; 
+         }
+   
+         // 메시지에 마스킹된 아이디(maskedId)를 넣음
+         mav.addObject("message", "회원님의 아이디는 <b>" + maskedId + "</b> 입니다.");
+         
+         // 탭 유지를 위해 추가 
+         mav.addObject("activeTab", "id"); 
+      } else {
+         // 못 찾았을 경우
+         mav.addObject("message", "일치하는 회원 정보가 없습니다.");
+         mav.addObject("activeTab", "id");
+      }
+      
+      return mav;
+   }
+   
+   
 
-	@PostMapping("findPwDo")
+   @PostMapping("findPwDo")
     public ModelAndView findPwDo(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         
-		// 처리가 끝나면 무조건 결과 페이지로 리다이렉트
+      // 처리가 끝나면 무조건 결과 페이지로 리다이렉트
         String url = "redirect:/member/findPwResult";
         
         HttpSession session = req.getSession();
@@ -699,9 +704,9 @@ public class MemberController {
         
         return new ModelAndView(url);
     }
-	
-	// 이메일 전송 확인 
-	@GetMapping("findPwResult")
+   
+   // 이메일 전송 확인 
+   @GetMapping("findPwResult")
     public ModelAndView findPwResult(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("member/findPwResult");
         HttpSession session = req.getSession();
@@ -738,7 +743,7 @@ public class MemberController {
         
         return mav;
     }
-	
+   
 
     // 임시 비밀번호 생성기 (영문+숫자)
     private String generateTempPassword(int length) {
