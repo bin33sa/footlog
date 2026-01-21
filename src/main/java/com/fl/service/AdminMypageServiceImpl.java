@@ -8,7 +8,9 @@ import com.fl.mapper.BoardQnaMapper;
 import com.fl.model.BoardQnaDTO;
 import com.fl.model.MemberDTO;
 import com.fl.model.StadiumDTO;
+import com.fl.model.StadiumTimeSlotDTO;
 import com.fl.model.TeamDTO;
+import com.fl.model.TimeCodeDTO;
 import com.fl.mybatis.support.MapperContainer;
 
 public class AdminMypageServiceImpl implements AdminMypageService {
@@ -117,7 +119,41 @@ public class AdminMypageServiceImpl implements AdminMypageService {
 	        return dto;
 	    }
 
+	    
+	    // 해당 구장 정보
+		@Override
+		public StadiumDTO ListStadiumFind(Long stadiumCode) {
+			
+			StadiumDTO dto = mapper.ListStadiumFind(stadiumCode);
+			return dto;
+		}
 		
+		//타임코드 조회
+		@Override
+		public List<TimeCodeDTO> ListTimeCode(){
+			
+			List<TimeCodeDTO> list = mapper.ListTimeCode();
+			
+			return list;
+		}
+
+		public int InsertTimeSlot(StadiumTimeSlotDTO dto) {
+			int result=0;
+			try {
+				result = mapper.InsertTimeSlot(dto);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			return result;
+		}
+		
+		//타임슬롯삭제
+		@Override
+		public void DeleteTimeSlot(Long stadiumCode) {
+			
+			mapper.DeleteTimeSlot(stadiumCode);
+		}
 
 
 

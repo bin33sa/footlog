@@ -10,7 +10,9 @@ import com.fl.model.BoardQnaDTO;
 import com.fl.model.MemberDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.StadiumDTO;
+import com.fl.model.StadiumTimeSlotDTO;
 import com.fl.model.TeamDTO;
+import com.fl.model.TimeCodeDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
 import com.fl.mvc.annotation.PostMapping;
@@ -42,7 +44,7 @@ public class MypageAdminController {
 	
 	
 	private MyPageService myPageService = new MyPageServiceImpl();
-	private AdminMypageService AdminService = new AdminMypageServiceImpl();
+	private AdminMypageService adminService = new AdminMypageServiceImpl();
 	
 	
 	private MyUtil util = new MyUtil();
@@ -62,14 +64,14 @@ public class MypageAdminController {
 				mav.addObject("dto", myInfo);
 			}
 
-			List<TeamDTO> team = AdminService.CountTeamAll();
-			List<TeamDTO> teamList = AdminService.ListTeamAll();
+			List<TeamDTO> team = adminService.CountTeamAll();
+			List<TeamDTO> teamList = adminService.ListTeamAll();
 			
-			List<StadiumDTO> stadium = AdminService.CountStadiumAll();
-			List<StadiumDTO> stadiumList = AdminService.ListStadiumAll();
+			List<StadiumDTO> stadium = adminService.CountStadiumAll();
+			List<StadiumDTO> stadiumList = adminService.ListStadiumAll();
 			
-			List<MemberDTO> member = AdminService.CountMemberAll();
-			List<MemberDTO> memberList = AdminService.ListMemberAll();
+			List<MemberDTO> member = adminService.CountMemberAll();
+			List<MemberDTO> memberList = adminService.ListMemberAll();
 			mav.addObject("team", team);
 			mav.addObject("stadium", stadium);
 			mav.addObject("member", member);
@@ -138,6 +140,68 @@ public class MypageAdminController {
 	}
 	
 	
+	@GetMapping("updateStadiumTime")
+	public ModelAndView updateStadiumTimeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		ModelAndView mav = new ModelAndView("admin/mypage/updateStadiumTime");
+		
+		long stadiumCode = Long.parseLong(req.getParameter("stadiumCode"));
+		StadiumDTO stadiumName = adminService.ListStadiumFind(stadiumCode);
+		
+		List<TimeCodeDTO> timeCodes = adminService.ListTimeCode();
+		
+
+			    mav.addObject("timeCodes", timeCodes);
+			    mav.addObject("stadiumName", stadiumName);
+			    return mav;
+	}
+	
+	@PostMapping("updateTimeDo")
+	public ModelAndView updateStadiumTime(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		
+		try {
+			
+		long stadiumCode = Long.parseLong(req.getParameter("stadiumCode"));
+		String[] weekdayTimes = req.getParameterValues("weekday_times");
+		String[] weekendTimes = req.getParameterValues("weekend_times");
+		
+		//기존 운영시간 삭제
+		adminService.DeleteTimeSlot(stadiumCode);
+		
+		// 평일 저장
+		if (weekdayTimes != null) {
+	        for (String timeCode : weekdayTimes) {
+	            StadiumTimeSlotDTO dto = new StadiumTimeSlotDTO();
+	            dto.setStadiumCode(stadiumCode);
+	            dto.setTimeCode(Long.parseLong(timeCode));
+	            dto.setDayType("WEEKDAY");
+
+	            adminService.InsertTimeSlot(dto);
+	        }
+	    }
+		// 주말 저장
+		 if (weekendTimes != null) {
+		        for (String timeCode : weekendTimes) {
+		            StadiumTimeSlotDTO dto = new StadiumTimeSlotDTO();
+		            dto.setStadiumCode(stadiumCode);
+		            dto.setTimeCode(Long.parseLong(timeCode));
+		            dto.setDayType("WEEKEND");
+
+		            adminService.InsertTimeSlot(dto);
+		        }
+		    }
+		 
+		 
+		 return new ModelAndView("redirect:/admin/mypage?menu=stadium");
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+			ModelAndView mav = new ModelAndView("admin/updateStadiumTime");
+	        mav.addObject("message", "운영시간 수정 중 오류가 발생했습니다.");
+	        return mav;
+		}
+		
+	}
+	
 	@GetMapping("insertStadium")
 	public ModelAndView insertStadiumForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		ModelAndView mav = new ModelAndView("admin/mypage/updateStadium");
@@ -165,7 +229,7 @@ public class MypageAdminController {
 		long stadiumCode = Long.parseLong(req.getParameter("stadiumCode"));
 
 		try {
-			AdminService.DeleteStadium(stadiumCode);
+			adminService.DeleteStadium(stadiumCode);
 			
 			
 			// 페이지 이동
@@ -221,18 +285,18 @@ public class MypageAdminController {
 		        String mode = req.getParameter("mode");
 		        
 		        if("insert".equals(mode)) {
-		        AdminService.InsertStadium(dto);
+		        	adminService.InsertStadium(dto);
 		        } else {
 		        	dto.setStadiumCode(Long.parseLong(req.getParameter("stadiumCode")));
-		        AdminService.UpdateStadium(dto);
+		        	adminService.UpdateStadium(dto);
 		        }
 		        // 페이지 이동
 		        return new ModelAndView("redirect:/admin/mypage?menu=stadium");
 
 		    } catch (Exception e) {
 		        e.printStackTrace();
-		        ModelAndView mav = new ModelAndView("member/updateInfo");
-		        mav.addObject("message", "회원 정보 수정 중 오류가 발생했습니다.");
+		        ModelAndView mav = new ModelAndView("admin/updateStadium");
+		        mav.addObject("message", "구장 정보 수정 중 오류가 발생했습니다.");
 		        return mav;
 		    }
 		    

@@ -207,7 +207,7 @@
 		<div class="text-center mb-5">
 			<button class="btn btn-light rounded-pill px-4"
 				onclick="location.href='${pageContext.request.contextPath}/field/list'">
-				목록으로 돌아가기 stadiumCode = ${dto.stadiumCode}</button>
+				목록으로 돌아가기</button>
 		</div>
 
 	</div>

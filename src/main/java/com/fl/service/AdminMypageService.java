@@ -6,7 +6,9 @@ import java.util.Map;
 import com.fl.model.BoardQnaDTO;
 import com.fl.model.MemberDTO;
 import com.fl.model.StadiumDTO;
+import com.fl.model.StadiumTimeSlotDTO;
 import com.fl.model.TeamDTO;
+import com.fl.model.TimeCodeDTO;
 
 public interface AdminMypageService {
 	
@@ -27,11 +29,21 @@ public interface AdminMypageService {
 	public List<StadiumDTO> ListStadiumAll();
 	public List<MemberDTO> ListMemberAll();
 	
+	public StadiumDTO ListStadiumFind(Long stadiumCode);
+	
 	// 문의게시판 관련
     public List<BoardQnaDTO> listQna(Map<String, Object> map);
     public int dataCount(Map<String, Object> map);
     public BoardQnaDTO findByCode(long board_qna_code);
     
+    //타임코드 조회
+    public List<TimeCodeDTO> ListTimeCode();
+    
+    //타임슬롯 저장
+    public int InsertTimeSlot(StadiumTimeSlotDTO dto);
+    
+    //타임슬롯 삭제
+    public void DeleteTimeSlot(Long stadiumCode);
     
     
 }

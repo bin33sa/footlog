@@ -1,36 +1,20 @@
 package com.fl.model;
 
 public class StadiumTimeSlotDTO {
-	private long slotId;
 	private long stadiumCode;
-	private String playDate;
-	private int timeCode;
+	private long timeCode;
 	private String timeLabel; // time_code 조인용
-	private String availableYn; // Y / N
-	
-	
-	public long getSlotId() {
-		return slotId;
-	}
-	public void setSlotId(long slotId) {
-		this.slotId = slotId;
-	}
+	private String dayType;
 	public long getStadiumCode() {
 		return stadiumCode;
 	}
 	public void setStadiumCode(long stadiumCode) {
 		this.stadiumCode = stadiumCode;
 	}
-	public String getPlayDate() {
-		return playDate;
-	}
-	public void setPlayDate(String playDate) {
-		this.playDate = playDate;
-	}
-	public int getTimeCode() {
+	public long getTimeCode() {
 		return timeCode;
 	}
-	public void setTimeCode(int timeCode) {
+	public void setTimeCode(long timeCode) {
 		this.timeCode = timeCode;
 	}
 	public String getTimeLabel() {
@@ -39,12 +23,14 @@ public class StadiumTimeSlotDTO {
 	public void setTimeLabel(String timeLabel) {
 		this.timeLabel = timeLabel;
 	}
-	public String getAvailableYn() {
-		return availableYn;
+	public String getDayType() {
+		return dayType;
 	}
-	public void setAvailableYn(String availableYn) {
-		this.availableYn = availableYn;
+	public void setDayType(String dayType) {
+		this.dayType = dayType;
 	}
+	
+	
 	
 	
 	

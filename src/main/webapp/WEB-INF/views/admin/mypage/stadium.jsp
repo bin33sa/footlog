@@ -22,7 +22,7 @@
                     <th>구장명</th>
                     <th style="width: 10%">평점</th>
                     <th style="width: 20%">가격</th>
-                    <th style="width: 15%">예약 관리</th>
+                    <th style="width: 15%">운영 시간</th>
                     <th style="width: 15%">구장 관리</th>
                 </tr>
             </thead>
@@ -36,9 +36,12 @@
 	                    <td>${list.rating}</td>
 	                    <td>${list.price}</td>
 	                    <td>
-	                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-	                            수정
-	                        </button>
+		                    <form method="get" action="${pageContext.request.contextPath}/admin/updateStadiumTime">
+	                			<input type="hidden" name="stadiumCode" value="${list.stadiumCode}">
+		                        <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill me-1">
+		                            수정
+		                        </button>
+	            			</form>
 	                    </td>
 	                    <td>
 		                    <form method="get" action="${pageContext.request.contextPath}/admin/updateStadium">
