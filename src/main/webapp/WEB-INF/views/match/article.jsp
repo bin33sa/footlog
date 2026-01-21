@@ -9,18 +9,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link
-	href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-	rel="stylesheet">
-<link rel="stylesheet"
-	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<link rel="stylesheet"
-	href="${pageContext.request.contextPath}/dist/css/style.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css?v=<%=System.currentTimeMillis()%>">
 </head>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
-<body class="bg-light"> <header>
+<body class="bg-light">
+
+	<header>
 		<jsp:include page="/WEB-INF/views/layout/header.jsp" />
 	</header>
 
@@ -50,13 +48,13 @@
 					<div>
 						<c:choose>
 							<c:when test="${dto.status == '모집중'}">
-								<span class="badge bg-primary text-dark rounded-pill mb-2 px-3 py-2">${dto.status}</span>
+								<span class="badge bg-primary text-dark rounded-pill mb-2 px-3 py-2 fw-bold">${dto.status}</span>
 							</c:when>
 							<c:when test="${dto.status == '마감임박'}">
-								<span class="badge bg-danger text-white rounded-pill mb-2 px-3 py-2">${dto.status}</span>
+								<span class="badge bg-danger text-white rounded-pill mb-2 px-3 py-2 fw-bold">${dto.status}</span>
 							</c:when>
 							<c:otherwise>
-								<span class="badge bg-secondary text-white rounded-pill mb-2 px-3 py-2">${dto.status}</span>
+								<span class="badge bg-secondary text-white rounded-pill mb-2 px-3 py-2 fw-bold">${dto.status}</span>
 							</c:otherwise>
 						</c:choose>
 						
@@ -72,20 +70,21 @@
 							</span>
 						</div>
 					</div>
-					<button class="btn btn-light rounded-circle">
-						<i class="bi bi-share"></i>
+					
+					<button class="btn btn-light rounded-circle shadow-sm" onclick="openShareModal()">
+						<i class="bi bi-share-fill"></i>
 					</button>
 				</div>
 
-                <div class="card border-0 shadow-sm p-4 mb-4 bg-white">
+				<div class="card border-0 shadow-sm p-4 mb-4 bg-white">
 					<table class="table table-borderless match-info-table mb-0">
 						<tbody>
 							<tr>
-								<td class="text-muted" style="width: 100px;">일시</td>
+								<td class="text-muted fw-bold" style="width: 100px;">일시</td>
 								<td class="fw-bold fs-5">${dto.match_date}</td>
 							</tr>
 							<tr>
-							    <td class="text-muted">구장</td>
+							    <td class="text-muted fw-bold">구장</td>
 							    <td class="fw-bold">
 							    	<a href="${pageContext.request.contextPath}/field/view?stadiumCode=${dto.stadium_code}" 
 							           class="text-primary text-decoration-underline">
@@ -94,22 +93,22 @@
 							    </td>
 							</tr>
 							<tr>
-								<td class="text-muted">진행방식</td>
+								<td class="text-muted fw-bold">진행방식</td>
 								<td class="fw-bold">${dto.matchType}</td>
 							</tr>
 							<tr>
-								<td class="text-muted">참가비</td>
+								<td class="text-muted fw-bold">참가비</td>
 								<td class="fw-bold text-primary"><fmt:formatNumber value="${dto.fee}"/>원</td>
 							</tr>
 							<tr>
-								<td class="text-muted">실력/성별</td>
+								<td class="text-muted fw-bold">실력/성별</td>
 								<td class="fw-bold">${dto.matchLevel} / ${dto.gender}</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 
-                <div class="card border-0 shadow-sm p-5 bg-white" style="min-height: 300px;">
+				<div class="card border-0 shadow-sm p-5 bg-white" style="min-height: 300px;">
 
 					<h5 class="fw-bold mb-3">매치 소개</h5>
 					<p class="text-muted mb-5" style="line-height: 1.8;">
@@ -212,15 +211,14 @@
 
 	<div class="modal fade" id="teamSelectModal" tabindex="-1" aria-hidden="true">
 	    <div class="modal-dialog modal-dialog-centered">
-	        <div class="modal-content">
-	            <div class="modal-header">
+	        <div class="modal-content rounded-4 border-0 shadow-lg">
+	            <div class="modal-header border-0 pb-0 pt-4 px-4">
 	                <h5 class="modal-title fw-bold">매치 신청 팀 선택</h5>
 	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 	            </div>
 	            
-	            <div class="modal-body">
+	            <div class="modal-body p-4">
 	                <p class="text-muted small mb-3">신청할 팀을 선택해주세요. (팀 운영진만 신청 가능)</p>
-	                
 	                <div class="list-group">
 	                    <c:choose>
 	                        <c:when test="${not empty myTeams}">
@@ -229,7 +227,7 @@
 	                                <c:choose>
 	                                    <c:when test="${team.role_level >= 10}">
 	                                        <c:set var="canApplyCount" value="${canApplyCount + 1}" />
-	                                        <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer list-group-item-action">
+	                                        <label class="list-group-item d-flex gap-3 align-items-center cursor-pointer list-group-item-action border rounded-3 mb-2 p-3">
 	                                            <input class="form-check-input flex-shrink-0" type="radio" name="selectedTeam" 
 	                                                   value="${team.team_code}" data-name="${team.team_name}" style="font-size: 1.2em;">
 	                                            <span class="fw-bold text-dark">${team.team_name}</span>
@@ -237,7 +235,7 @@
 	                                        </label>
 	                                    </c:when>
 	                                    <c:otherwise>
-	                                        <label class="list-group-item d-flex gap-3 align-items-center bg-light text-muted" style="cursor: not-allowed; opacity: 0.6;">
+	                                        <label class="list-group-item d-flex gap-3 align-items-center bg-light text-muted border rounded-3 mb-2 p-3" style="cursor: not-allowed; opacity: 0.6;">
 	                                            <input class="form-check-input flex-shrink-0" type="radio" disabled>
 	                                            <span class="fw-bold text-decoration-line-through">${team.team_name}</span>
 	                                            <span class="badge bg-secondary ms-auto">권한부족</span>
@@ -265,11 +263,30 @@
 	                </div>
 	            </div>
 	            
-	            <div class="modal-footer">
-	                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+	            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+	                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">취소</button>
 	                <c:if test="${not empty myTeams}">
-	                    <button type="button" class="btn btn-primary" id="btnApplySubmit" onclick="submitApply()">매치 신청</button>
+	                    <button type="button" class="btn btn-primary rounded-pill px-4" id="btnApplySubmit" onclick="submitApply()">매치 신청</button>
 	                </c:if>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	
+	<div class="modal fade" id="shareModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog modal-dialog-centered">
+	        <div class="modal-content rounded-4 border-0 shadow-lg">
+	            <div class="modal-header border-0 pb-0 pt-4 px-4">
+	                <h5 class="modal-title fw-bold">매치 공유하기</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	            </div>
+	            <div class="modal-body p-4">
+	                <p class="text-muted small mb-3">아래 주소를 복사하여 팀원들에게 공유하세요.</p>
+	                <div class="input-group">
+	                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-link-45deg"></i></span>
+	                    <input type="text" id="shareUrlInput" class="form-control bg-light border-start-0" readonly>
+	                    <button class="btn btn-dark" type="button" onclick="copyToClipboard()">복사</button>
+	                </div>
 	            </div>
 	        </div>
 	    </div>
@@ -284,6 +301,27 @@
 	<script src="${pageContext.request.contextPath}/dist/api/map.js"></script>
 	
 	<script type="text/javascript">
+		function openShareModal() {
+			const currentUrl = window.location.href;
+			document.getElementById('shareUrlInput').value = currentUrl;
+			const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
+			shareModal.show();
+		}
+
+		function copyToClipboard() {
+			const urlInput = document.getElementById('shareUrlInput');
+			
+			urlInput.select();
+			urlInput.setSelectionRange(0, 99999); // 모바일 호환성
+
+			navigator.clipboard.writeText(urlInput.value).then(() => {
+				alert('주소가 복사되었습니다!');
+			}).catch(err => {
+				document.execCommand('copy');
+				alert('주소가 복사되었습니다!');
+			});
+		}
+
 		function apply(){
 			let myTeamCode = "${sessionScope.member_team.team_code}";
 			

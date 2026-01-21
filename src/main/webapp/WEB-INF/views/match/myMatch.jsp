@@ -71,14 +71,12 @@
 
                 <ul class="nav nav-pills mb-4">
                     <li class="nav-item">
-                        <a href="${pageContext.request.contextPath}/match/myMatch?tab=future" 
-                           class="nav-link ${tab == 'future' ? 'active' : ''}">
+                        <a href="${pageContext.request.contextPath}/match/myMatch?tab=future" class="nav-link ${tab == 'future' ? 'active' : ''}">
                            🔥 예정된 매치
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="${pageContext.request.contextPath}/match/myMatch?tab=past" 
-                           class="nav-link ${tab == 'past' ? 'active' : ''}">
+                        <a href="${pageContext.request.contextPath}/match/myMatch?tab=past" class="nav-link ${tab == 'past' ? 'active' : ''}">
                            🏁 지난 매치
                         </a>
                     </li>

@@ -383,7 +383,6 @@ public class MatchController {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
 		return new ModelAndView("redirect:/match/list?page="+page);
 	}
 	
@@ -457,7 +456,6 @@ public class MatchController {
 			e.printStackTrace();
 			result.put("state","false");
 		}
-		
 		return result;
 	}
 	
@@ -500,10 +498,8 @@ public class MatchController {
 		return mav;
 	}
 	
-	@ResponseBody
 	@PostMapping("updateScore")
 	public ModelAndView updateScore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
-		ModelAndView mav = new ModelAndView("match/myMatch");
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
 		if (info == null) {
@@ -511,6 +507,17 @@ public class MatchController {
 	    }
 		
 		try {
+			String page = req.getParameter("page");
+			int current_page = 1;
+			if(page!=null) {
+				current_page = Integer.parseInt(page);
+			}
+			
+			String schType = req.getParameter("schType");
+			String kwd = req.getParameter("kwd");
+			
+			
+			
 			MatchDTO dto = new MatchDTO();
 			
 			dto.setMatch_code(Long.parseLong(req.getParameter("match_code")));

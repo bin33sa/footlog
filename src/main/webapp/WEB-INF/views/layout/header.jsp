@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <c:set var="canCreate" value="false"/>
 	<c:if test="${not empty myTeams}">
 	    <c:forEach var="team" items="${myTeams}">
@@ -53,9 +54,9 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link px-4 dropdown-toggle" href="#" id="navMatch">매치</a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">내 매치 일정</a></li>
+                            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/match/myMatch">내 매치 일정</a></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/match/list">전체 매치 리스트</a></li>
-                            <c:if test="${canCreate }">
+                            <c:if test="${canCreate}">
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/match/write">매치 개설하기</a></li>
                             </c:if>
                             <li><hr class="dropdown-divider bg-secondary opacity-25"></li>
