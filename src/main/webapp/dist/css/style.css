@@ -1280,6 +1280,65 @@ a { text-decoration: none; color: inherit; }
     padding-left: 25px;
 }
 
+/* =========================================
+   Paging Design (공통 페이징 스타일)
+   ========================================= */
+
+/* 페이징 전체 컨테이너 */
+.page-navigation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+/* MyUtil이 생성하는 내부 래퍼 (옵션) */
+.page-navigation .paginate {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* 버튼 사이 간격 */
+}
+
+/* 페이지 번호 및 화살표 공통 스타일 */
+.page-navigation a, 
+.page-navigation span,
+.page-navigation b { 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px; /* 약간 둥근 사각형 */
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #666;
+    background-color: #fff;
+    border: 1px solid #eee;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+}
+
+/* 마우스 올렸을 때 (Hover) */
+.page-navigation a:hover {
+    background-color: #f8f9fa;
+    border-color: #ddd;
+    color: #333;
+    transform: translateY(-2px); /* 살짝 위로 떠오르는 효과 */
+}
+
+/* 현재 활성화된 페이지 (검은색 배경 + 라임색 글씨) */
+/* MyUtil 버전에 따라 <span> 또는 <b> 태그가 활성 상태임 */
+.page-navigation span,
+.page-navigation b {
+    background-color: #111 !important;
+    color: #D4F63F !important; /* 포인트 컬러 (라임) */
+    border-color: #111 !important;
+    cursor: default; /* 클릭 커서 방지 */
+    transform: none;
+}
+
 /* [모바일] 991px 이하: 디자인 조정 */
 @media (max-width: 991px) {
     .dropdown-menu {
