@@ -208,14 +208,25 @@ public class MatchServiceImpl implements MatchService{
 	}
 
 	@Override
-	public List<MatchDTO> listMyMatch(long member_code) {
+	public List<MatchDTO> listMyMatch(Map<String, Object> map) {
 		List<MatchDTO> list = null;
 		try {
-			list = mapper.listMyMatch(member_code);
+			list = mapper.listMyMatch(map);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return list;
+	}
+
+	@Override
+	public int dataCountMyMatch(Map<String, Object> map) {
+		int result = 0;
+		try {
+			result = mapper.dataCountMyMatch(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 	
 }

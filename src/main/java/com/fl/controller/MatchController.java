@@ -1,9 +1,6 @@
 package com.fl.controller;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,13 +62,11 @@ public class MatchController {
 			}
 			
 			//검색
-			String schType = req.getParameter("schType");
 			String kwd = req.getParameter("kwd");
 			String region = req.getParameter("region");
 			String match_date = req.getParameter("matchDate");
 			
-			if(schType == null) {
-				schType = "";
+			if(kwd == null) {
 				kwd = "";
 			}
 			kwd = util.decodeUrl(kwd);
@@ -83,7 +78,6 @@ public class MatchController {
 			int dataCount = 0;
 			
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("schType", schType);
 			map.put("kwd", kwd);
 			map.put("region", region);
 			map.put("match_date", match_date);
@@ -110,7 +104,7 @@ public class MatchController {
 			String cp = req.getContextPath();
 			String articleUrl = cp + "/match/article?page=" + current_page;
 			if(! kwd.isBlank()) {
-				query = "schType=" + schType + "&kwd="+util.encodeUrl(kwd);
+				query = "&kwd="+util.encodeUrl(kwd);
 				articleUrl += "&" + query;
 			}
 			
@@ -120,7 +114,6 @@ public class MatchController {
 			mav.addObject("total_page", total_page);
 			mav.addObject("page", current_page);
 			mav.addObject("articleUrl", articleUrl);
-			mav.addObject("schType", schType);
 			mav.addObject("kwd", kwd);
 
 			
@@ -460,80 +453,114 @@ public class MatchController {
 	}
 	
 	@GetMapping("myMatch")
-	public ModelAndView myMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
-		ModelAndView mav = new ModelAndView("match/myMatch");
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		if (info == null) {
+	public ModelAndView myMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	    ModelAndView mav = new ModelAndView("match/myMatch");
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+	    if (info == null) {
 	        return new ModelAndView("redirect:/member/login");
 	    }
-		try {
-			String tab = req.getParameter("tab");
-			if(tab==null || tab.isBlank()) {
-				tab="future";
-			}
-			
-			List<MatchDTO> allList = service.listMyMatch(info.getMember_code());
-			List<MatchDTO> resultList = new ArrayList<MatchDTO>();
-			
-			String nowStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-			
-			for(MatchDTO dto : allList) {
-				int compareResult = dto.getMatch_date().compareTo(nowStr);
-				
-				if("future".equals(tab)) {
-					if(compareResult>0) resultList.add(dto);
-				}else {
-					if(compareResult<=0) resultList.add(dto);
-				}
-			}
-			mav.addObject("tab", tab);
-			mav.addObject("list", resultList);
-			mav.addObject("mode", "update");
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return mav;
+
+	    try {
+	        String page = req.getParameter("page");
+	        int current_page = 1;
+	        if (page != null) {
+	            current_page = Integer.parseInt(page);
+	        }
+
+	        String tab = req.getParameter("tab");
+	        if (tab == null || tab.isBlank()) {
+	            tab = "future"; 
+	        }
+
+	        String kwd = req.getParameter("kwd");
+	        String match_date = req.getParameter("match_date");
+	        String region = req.getParameter("region");
+
+	        if (kwd == null) kwd = "";
+	        kwd = util.decodeUrl(kwd);
+
+	        int size = 5; 
+	        int dataCount = 0;
+
+	        Map<String, Object> map = new HashMap<>();
+	        map.put("member_code", info.getMember_code());
+	        map.put("tab", tab);     
+	        map.put("kwd", kwd);
+	        map.put("match_date", match_date);
+	        map.put("region", region);
+
+	        dataCount = service.dataCountMyMatch(map); 
+
+	        int total_page = util.pageCount(dataCount, size);
+	        if (current_page > total_page) current_page = total_page;
+
+	        int offset = (current_page - 1) * size;
+	        if (offset < 0) offset = 0;
+
+	        map.put("offset", offset);
+	        map.put("size", size);
+
+	        List<MatchDTO> list = service.listMyMatch(map); 
+
+	        String cp = req.getContextPath();
+	        String listUrl = cp + "/match/myMatch?tab=" + tab; 
+
+	        String query = "";
+	        if (!kwd.isBlank()) query += "&kwd=" + util.encodeUrl(kwd);
+	        if (match_date != null && !match_date.isBlank()) query += "&matchDate=" + match_date;
+	        if (region != null && !region.isBlank()) query += "&region=" + util.encodeUrl(region);
+
+	        if (!query.isBlank()) listUrl += query;
+
+	        String paging = util.paging(current_page, total_page, listUrl);
+
+	        mav.addObject("list", list);
+	        mav.addObject("dataCount", dataCount);
+	        mav.addObject("page", current_page);
+	        mav.addObject("total_page", total_page);
+	        mav.addObject("paging", paging); 
+	        
+	        mav.addObject("tab", tab);
+	        mav.addObject("kwd", kwd);
+	        mav.addObject("match_date", match_date);
+	        mav.addObject("region", region);
+	        
+	        List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
+	         mav.addObject("myTeams", myTeams);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return mav;
 	}
-	
+
 	@PostMapping("updateScore")
-	public ModelAndView updateScore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		if (info == null) {
+	public ModelAndView updateScore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+	    if (info == null) {
 	        return new ModelAndView("redirect:/member/login");
 	    }
-		
-		try {
-			String page = req.getParameter("page");
-			int current_page = 1;
-			if(page!=null) {
-				current_page = Integer.parseInt(page);
-			}
-			
-			String schType = req.getParameter("schType");
-			String kwd = req.getParameter("kwd");
-			
-			
-			
-			MatchDTO dto = new MatchDTO();
-			
-			dto.setMatch_code(Long.parseLong(req.getParameter("match_code")));
-			dto.setHome_score(Integer.parseInt(req.getParameter("home_score")));
-			dto.setAway_score(Integer.parseInt(req.getParameter("away_score")));
-			
-			
-			int result = service.updateMatchResult(dto); 
-			
-			if(result ==0) {
-				service.insertMatchResult(dto);
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return new ModelAndView("redirect:/match/myMatch?tab=past");
+
+	    try {
+	        MatchDTO dto = new MatchDTO();
+	        dto.setMatch_code(Long.parseLong(req.getParameter("match_code")));
+	        dto.setHome_score(Integer.parseInt(req.getParameter("home_score")));
+	        dto.setAway_score(Integer.parseInt(req.getParameter("away_score")));
+
+	        int result = service.updateMatchResult(dto);
+	        if (result == 0) {
+	            service.insertMatchResult(dto);
+	        }
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    return new ModelAndView("redirect:/match/myMatch?tab=past");
 	}
 }

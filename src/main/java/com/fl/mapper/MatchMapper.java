@@ -35,5 +35,6 @@ public interface MatchMapper {
 	public int countMatchResult(long match_code);
 	public int insertMatchResult(MatchDTO dto);
 	public int updateMatchResult(MatchDTO dto);
-	public List<MatchDTO> listMyMatch(long member_code);
-}
+	public List<MatchDTO> listMyMatch(Map<String, Object> map);
+	public int dataCountMyMatch(Map<String, Object> map );
+	}

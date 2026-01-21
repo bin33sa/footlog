@@ -186,7 +186,33 @@
 	</update>
 	
 	<!-- 내 매치 리스트 -->
-	<select id="listMyMatch" parameterType="Long" resultType="com.fl.model.MatchDTO">
+	<select id="dataCountMyMatch" parameterType="map" resultType="Integer">
+		SELECT NVL(COUNT(*), 0)
+		FROM match_post m
+		JOIN team ht ON ht.team_code = m.home_code
+		JOIN stadium s ON s.stadium_code = m.stadium_code
+		LEFT JOIN team at ON at.team_code = m.away_code
+		LEFT JOIN match_result r ON m.match_code = r.match_code 
+	   <where>
+	      <include refid="where-list"/>
+	      AND (
+				m.home_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})
+				OR
+			  m.away_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})	      
+	      )
+	       
+	      <choose>
+	      	<when test="tab == 'future' ">
+	      		AND ( match_date &gt; SYSDATE )
+	      	</when>
+	      	<when test="tab == 'past' ">
+	      		AND ( match_date &lt;= SYSDATE )
+	      	</when>
+	      </choose>
+	    </where>
+	</select>
+		
+	<select id="listMyMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
 		SELECT m.match_code, ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
         m.status, m.title, m.content, m.fee, s.stadium_name AS stadiumName, 
         s.region AS region, m.matchType, m.gender, m.matchLevel, m.stadium_code, 
@@ -197,10 +223,25 @@
 		JOIN stadium s ON s.stadium_code = m.stadium_code
 		LEFT JOIN team at ON at.team_code = m.away_code
 		LEFT JOIN match_result r ON m.match_code = r.match_code 
-		WHERE m.home_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})
-			OR
-			  m.away_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})
-		ORDER BY m.match_date DESC
-	
+	   <where>
+	      <include refid="where-list"/>
+	      AND (
+				m.home_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})
+				OR
+			  m.away_code IN (SELECT team_code FROM member_team WHERE member_code=#{member_code})	      
+	      )
+	      <choose>
+	      	<when test="tab == 'future' ">
+	      		AND ( match_date &gt; SYSDATE )
+	      	</when>
+	      	<when test="tab == 'past' ">
+	      		AND ( match_date &lt;= SYSDATE )
+	      	</when>
+	      </choose>
+	    </where>
+	    ORDER BY m.match_date DESC
+	   	OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>
+	
+	
 </mapper>

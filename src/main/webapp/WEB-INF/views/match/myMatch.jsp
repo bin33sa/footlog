@@ -59,7 +59,7 @@
 
             <div class="col-lg-9 col-12 ms-lg-4">
                 
-                <div class="d-flex justify-content-between align-items-end mb-5">
+                <div class="d-flex justify-content-between align-items-end mb-4">
                     <div>
                         <h2 class="fw-bold mb-1">내 매치 관리</h2>
                         <p class="text-muted mb-0">참여 예정인 경기와 지난 기록을 관리하세요.</p>
@@ -69,27 +69,53 @@
                     </button>
                 </div>
 
-                <ul class="nav nav-pills mb-4">
-                    <li class="nav-item">
-                        <a href="${pageContext.request.contextPath}/match/myMatch?tab=future" class="nav-link ${tab == 'future' ? 'active' : ''}">
-                           🔥 예정된 매치
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="${pageContext.request.contextPath}/match/myMatch?tab=past" class="nav-link ${tab == 'past' ? 'active' : ''}">
-                           🏁 지난 매치
-                        </a>
-                    </li>
-                </ul>
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                    
+                    <ul class="nav nav-pills">
+                        <li class="nav-item">
+                            <a href="#" onclick="changeTab('future'); return false;" class="nav-link ${tab == 'future' ? 'active' : ''}">
+                               🔥 예정된 매치
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" onclick="changeTab('past'); return false;" class="nav-link ${tab == 'past' ? 'active' : ''}">
+                               🏁 지난 매치
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="d-flex gap-2">
+                        <input type="date" id="searchDate" class="form-control rounded-pill border-0 shadow-sm" 
+                               style="width: 150px;" value="${match_date}">
+                        
+                        <select id="searchRegion" class="form-select rounded-pill border-0 shadow-sm" style="width: 120px;">
+                            <option value="" ${region == "" ? "selected" : ""}>지역 전체</option>
+                            <option value="서울" ${region == "서울" ? "selected" : ""}>서울</option>
+                            <option value="경기" ${region == "경기" ? "selected" : ""}>경기</option>
+                            <option value="인천" ${region == "인천" ? "selected" : ""}>인천</option>
+                            <option value="강원" ${region == "강원" ? "selected" : ""}>강원</option>
+                            <option value="제주" ${region == "제주" ? "selected" : ""}>제주</option>
+                        </select>
+
+                        <div class="position-relative" style="width: 220px;">
+                            <input type="text" id="myMatchKeyword" class="form-control rounded-pill ps-5 border-0 shadow-sm" 
+                                   placeholder="제목, 팀명 검색" value="${kwd}">
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                        </div>
+                        
+                        <button type="button" id="btnReset" class="btn btn-white bg-white border-0 shadow-sm rounded-circle d-flex justify-content-center align-items-center" 
+                                style="width: 40px; height: 40px;" title="필터 초기화">
+                            <i class="bi bi-arrow-counterclockwise fs-5 text-secondary"></i>
+                        </button>
+                    </div>
+                </div>
 
                 <div id="list-container">
                     
                     <c:if test="${empty list}">
                         <div class="text-center py-5 border rounded bg-white mt-2">
                             <i class="bi bi-exclamation-circle fs-1 text-muted opacity-50"></i>
-                            <p class="text-muted mt-3 fw-bold">
-                                ${tab == 'future' ? '예정된 매치 일정이 없습니다.' : '지난 매치 기록이 없습니다.'}
-                            </p>
+                            <p class="text-muted mt-3 fw-bold">등록된 매치 일정이 없습니다.</p>
                         </div>
                     </c:if>
 
@@ -97,7 +123,7 @@
                         <fmt:parseDate value="${dto.match_date}" var="tempDate" pattern="yyyy-MM-dd HH:mm"/>
 
                         <div class="match-item modern-card p-3 mb-3 d-flex align-items-center gap-4 border rounded shadow-sm bg-white" 
-                             onclick="location.href='${pageContext.request.contextPath}/match/article?match_code=${dto.match_code}&page=1'" 
+                             onclick="location.href='${pageContext.request.contextPath}/match/article?match_code=${dto.match_code}&page=${current_page}'" 
                              style="cursor: pointer;">
                             
                             <div class="match-time-box text-center rounded-3 p-2 bg-light flex-shrink-0 border" style="min-width: 80px;">
@@ -112,15 +138,16 @@
                             <div class="flex-grow-1" style="min-width: 0;">
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <c:choose>
+                                    	<c:when test="${tab=='past' &&  (empty dto.away_code ||dto.away_code==0)}">
+                                            <span class="badge bg-secondary text-white rounded-pill">매칭실패</span>
+                                        </c:when>
                                         <c:when test="${dto.status == '모집중'}">
                                             <span class="badge bg-primary text-dark rounded-pill border border-primary-subtle">모집중</span>
                                         </c:when>
                                         <c:when test="${dto.status == '매칭완료'}">
                                             <span class="badge bg-success text-white rounded-pill">매칭완료</span>
                                         </c:when>
-                                        <c:when test="${tab=='past' &&  (empty dto.away_code ||dto.away_code==0)}">
-                                        	<span class="badge bg-secondary text-white rounded-pill">매칭실패</span>
-                                        </c:when>
+                                        
                                         <c:otherwise>
                                             <span class="badge bg-secondary text-white rounded-pill">${dto.status}</span>
                                         </c:otherwise>
@@ -152,17 +179,21 @@
                                             <span class="badge bg-dark fs-6 px-3 py-1">${dto.home_score} : ${dto.away_score}</span>
                                         </div>
                                         <button class="btn btn-sm btn-dark rounded-pill px-3 fw-bold"
-										    onclick="event.stopPropagation(); openScoreModal('${dto.match_code}', '${dto.home_score}', '${dto.away_score}', '${dto.home_team_name}', '${dto.away_team_name}');">
-										    결과 입력
-										</button>
+                                            onclick="event.stopPropagation(); openScoreModal('${dto.match_code}', '${dto.home_score}', '${dto.away_score}', '${dto.home_team_name}', '${dto.away_team_name}');">
+                                            결과 입력
+                                        </button>
                                     </c:when>
                                    
                                 </c:choose>
                             </div>
                         </div>
                     </c:forEach>
-                    
                 </div>
+
+                <div class="page-navigation">
+                    ${dataCount == 0 ? "" : paging}
+                </div>
+
             </div>
         </div>
     </div>
@@ -179,7 +210,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 
-                <form action="${ pageContext.request.contextPath}/match/updateScore" method="post">
+                <form action="${pageContext.request.contextPath}/match/updateScore" method="post">
                     <div class="modal-body text-center p-4">
                         <input type="hidden" name="match_code" id="modalMatchCode">
                         
@@ -210,6 +241,35 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        $(function(){
+            $('#myMatchKeyword').keydown(function(e){
+                if(e.key === 'Enter'){
+                    searchMyMatch();
+                }
+            });
+            
+            $('#searchDate').change(function(){
+                searchMyMatch();
+            });
+            $('#searchRegion').change(function(){
+                searchMyMatch();
+            });
+            
+           $('#btnReset').click(function(){
+               $('#searchDate').val('');      
+                $('#searchRegion').val('');   
+                $('#myMatchKeyword').val('');   
+                searchMyMatch();
+           })
+        })
+        
+        function changeTab(tabName){
+            let currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('tab',tabName);
+            currentUrl.searchParams.delete('page'); 
+            location.href = currentUrl.toString();
+        }
+        
         function deleteMatch(matchCode) {
             if(confirm("정말로 이 매치를 취소하시겠습니까?")) {
                 location.href = "${pageContext.request.contextPath}/match/delete?match_code=" + matchCode;
@@ -228,23 +288,36 @@
         }
         
         function submitScore(){
-        	let home = $("#modalHomeScore").val();
-        	let away = $("#modalAwayScore").val();
-        	
-        	if(home===""||away===""||parseInt(home)<0 || parseInt(away)<0){
-        		alert('점수를 올바르게 입력해주세요. ');
-        		return;
-        	}
-        	
-        	if(!confirm("경기 결과를["+home+":"+away+"] 로 저장하시겠습니까?")){
-        		return;
-        	}
-        	
-        	
-        	$("#scoreModal form").submit();
-        	
-        	
-        	
+            let home = $("#modalHomeScore").val();
+            let away = $("#modalAwayScore").val();
+            
+            if(home===""||away===""||parseInt(home)<0 || parseInt(away)<0){
+                alert('점수를 올바르게 입력해주세요. ');
+                return;
+            }
+            
+            if(!confirm("경기 결과를["+home+":"+away+"] 로 저장하시겠습니까?")){
+                return;
+            }
+            $("#scoreModal form").submit();
+        }
+        
+        function searchMyMatch(){
+            let tab = "${tab}";
+            let date = $('#searchDate').val();
+            let region = $('#searchRegion').val();
+            let keyword = $('#myMatchKeyword').val().trim();
+            
+            let url = "${pageContext.request.contextPath}/match/myMatch";
+            url += "?tab="+tab;
+            
+            if(date) url += "&match_date=" + date;
+            
+            if(region) url += "&region=" + encodeURIComponent(region);
+            
+            if(keyword) url += "&kwd=" + encodeURIComponent(keyword);
+            
+            location.href = url;
         }
     </script>
     
