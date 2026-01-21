@@ -152,9 +152,7 @@
 								<label class="form-label fw-bold d-block mb-2">시간 선택</label>
 
 								<!-- 타임슬롯카드 -->
-								<div class="row g-2" id="timeSlotArea">
-									
-								</div>
+								<div class="row g-2" id="timeSlotArea"></div>
 
 
 								<div class="mt-2 small text-muted">
@@ -182,22 +180,25 @@
 							style="height: 400px;"></div>
 
 						<script>
-    var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
-        mapOption = { 
-            center: new kakao.maps.LatLng(37.571679, 126.898320), // 지도의 중심좌표
-            level: 3 
-        };
+							var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+							mapOption = {
+								center : new kakao.maps.LatLng(37.571679,
+										126.898320), // 지도의 중심좌표
+								level : 3
+							};
 
-    var map = new kakao.maps.Map(mapContainer, mapOption); 
-    
-    var markerPosition  = new kakao.maps.LatLng(37.571679, 126.898320);
-    
-    var marker = new kakao.maps.Marker({
-        position: markerPosition
-    });
-    
-    marker.setMap(map);	
-</script>
+							var map = new kakao.maps.Map(mapContainer,
+									mapOption);
+
+							var markerPosition = new kakao.maps.LatLng(
+									37.571679, 126.898320);
+
+							var marker = new kakao.maps.Marker({
+								position : markerPosition
+							});
+
+							marker.setMap(map);
+						</script>
 					</div>
 				</div>
 
@@ -212,54 +213,37 @@
 
 	</div>
 
-	<div class="col-lg-2 d-none d-lg-block">
-		<div class="sidebar-menu sticky-top" style="top: 100px;">
-			<div class="mb-4">
-				<p class="sidebar-title">Community</p>
-				<div class="list-group">
-					<a href="#" class="list-group-item list-group-item-action">게시판</a>
-					<a href="#" class="list-group-item list-group-item-action">공지사항</a>
-					<a href="#" class="list-group-item list-group-item-action">자유
-						게시판</a> <a href="#" class="list-group-item list-group-item-action">팀
-						사진첩</a>
-				</div>
-			</div>
-		</div>
-	</div>
-
 	<footer>
 		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
 	</footer>
 	<script type="text/javascript">
+		$(function() {
+			$('#reservationDate').on('change', function() {
+				const date = this.value;
+				const $list = $('#timeSlotArea');
 
-$(function () {
-  $('#reservationDate').on('change', function () {
-	    const date = this.value;
-	    const $list = $('#timeSlotArea');
-	    
-	    $.ajax({
-			url : '${pageContext.request.contextPath}/field/timeSlot',
-			type : 'get',
-			data : {
-				  stadiumCode: '${dto.stadiumCode}',
-			      date: date
-			},
-			dataType : 'html',
-			success : function(html) {
-				$list.html(html);
-			},
-			error : function() {
-				console.error('구장 목록 로드 실패');
-			}
+				$.ajax({
+					url : '${pageContext.request.contextPath}/field/timeSlot',
+					type : 'get',
+					data : {
+						stadiumCode : '${dto.stadiumCode}',
+						date : date
+					},
+					dataType : 'html',
+					success : function(html) {
+						$list.html(html);
+					},
+					error : function() {
+						console.error('구장 목록 로드 실패');
+					}
+				});
+			});
+
+			// 페이지 처음 들어왔을 때도 한번 불러오게
+			$('#reservationDate').trigger('change');
+
 		});
-  });
-    
-  // 페이지 처음 들어왔을 때도 한번 불러오게
-  $('#reservationDate').trigger('change');
-  
-});
-
-</script>
+	</script>
 
 
 </body>

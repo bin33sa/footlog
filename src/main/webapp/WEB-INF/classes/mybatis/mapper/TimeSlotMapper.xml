@@ -3,20 +3,32 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.TimeSlotMapper">
 
-		<!-- 타임카드 리스트 -->
-		<select id="listTimeSlots" parameterType="map" resultType="com.fl.model.StadiumTimeSlotDTO">
-    	SELECT
-        tc.time_code AS timeCode,
-        tc.label AS timeLabel,
-        NVL(s.available_yn, 'N') AS availableYn
-    	FROM time_code tc
-    	
-    	LEFT JOIN stadium_timeSlot s
-        ON s.time_code = tc.time_code
-        AND s.stadium_code = #{stadiumCode}
-        AND s.play_date = TO_DATE(#{playDate}, 'YYYY-MM-DD')
-    	ORDER BY tc.time_code
-		</select>
-		
+	<!-- 타임카드 리스트 -->
+	<select id="listTimeSlots" parameterType="map"
+		resultType="com.fl.model.StadiumTimeSlotDTO">
+		SELECT
+		tc.time_code AS timeCode,
+		tc.label AS timeLabel,
+		CASE
+		WHEN st.stadium_code IS NULL THEN 'N' -- 운영 안 함
+		WHEN r.reservation_id IS NOT NULL THEN 'N' -- 예약됨
+		ELSE 'Y' -- 예약 가능
+		END AS availableYn
+
+		FROM time_code tc
+
+		LEFT JOIN stadium_timeslot st
+		ON st.time_code = tc.time_code
+		AND st.stadium_code = #{stadiumCode}
+		AND st.day_type = #{dayType}
+
+		LEFT JOIN stadium_reservation r
+		ON r.stadium_code = #{stadiumCode}
+		AND r.time_code = tc.time_code
+		AND r.play_date = #{playDate}
+
+		ORDER BY tc.time_code
+	</select>
+
 
 </mapper>

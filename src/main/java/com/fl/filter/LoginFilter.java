@@ -126,7 +126,6 @@ public class LoginFilter implements Filter {
 				"/match/myMatch",
 				
 				"/field/list","/field/listMore",
-				"/field/view", 
 				
 				"/introduction",
 				"/qna/list",

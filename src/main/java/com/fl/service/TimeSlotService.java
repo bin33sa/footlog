@@ -8,5 +8,10 @@ public interface TimeSlotService {
 
 	
 	public List<StadiumTimeSlotDTO> TimeSlots(
-			long stadiumCode, String playDate) ;
+			long stadiumCode,String playDate, String dayType) ;
+	
+	
+	
+	public boolean isWeekend(String date);
+	
 }

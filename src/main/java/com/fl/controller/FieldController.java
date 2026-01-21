@@ -93,9 +93,12 @@ public class FieldController {
 				throws ServletException, IOException{
 			
 		int stadiumCode = Integer.parseInt(req.getParameter("stadiumCode"));
-	    String date = req.getParameter("date");
+		String playDate = req.getParameter("date");
 		
-	    List<StadiumTimeSlotDTO> result = TimeSlotservice.TimeSlots(stadiumCode, date);
+	    // 날짜 평일/주말 판단
+	    String dayType = TimeSlotservice.isWeekend(playDate) ? "WEEKEND" : "WEEKDAY" ;
+	    
+	    List<StadiumTimeSlotDTO> result = TimeSlotservice.TimeSlots(stadiumCode, playDate, dayType);
 
 	    ModelAndView mav = new ModelAndView("field/timeSlot");
 	    mav.addObject("list", result);

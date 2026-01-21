@@ -10,4 +10,5 @@ public interface TimeSlotMapper {
 	
 	public List<StadiumTimeSlotDTO> listTimeSlots(Map<String, Object> map);
 	  
+	
 }
