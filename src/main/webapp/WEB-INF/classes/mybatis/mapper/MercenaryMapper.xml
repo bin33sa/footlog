@@ -53,11 +53,11 @@
     </insert>
 
     <select id="listTeam" parameterType="map" resultType="com.fl.model.MercenaryDTO">
-		SELECT t.team_code, t.team_name
-		FROM team t 
-		JOIN member_team m ON t.team_code = m.team_code
-		WHERE m.member_code = #{member_code}
-    </select>
+    SELECT t.team_code, t.team_name
+    FROM team t 
+    JOIN member_team m ON t.team_code = m.team_code
+    WHERE m.member_code = #{member_code}
+      AND t.status = 1  </select>
 	
 	<update id="updateMercenary" parameterType="com.fl.model.MercenaryDTO">
 		UPDATE Mercenary_post 
