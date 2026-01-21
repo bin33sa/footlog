@@ -3,72 +3,119 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.AdminMypageMapper">
 
-	
-		<!-- 구단 전체 조회 -->
-		<select id="CountTeamAll"
-			resultType="com.fl.model.TeamDTO">
-			SELECT
-			*
-			FROM team
-		</select>
-		
-		<!-- 구단 관리 구단주명 포함 조회 -->
-		<select id="ListTeamAll"
-				resultType="com.fl.model.TeamDTO">	
-				SELECT
-				    t.team_name      AS team_name,
-				    t.contact_number AS contact_number,
-				    t.region,
-				    t.member_count   AS member_count,
-				    m.member_name    AS leader_name
-				FROM team t
-				JOIN member_team mt
-				  ON t.team_code = mt.team_code
-				JOIN member m
-				  ON mt.member_code = m.member_code
-				WHERE mt.role_level >= 10 
-		  </select>
-		
-		
-		<!-- 구장 전체 조회 -->
-		<select id="CountStadiumAll"
-			resultType="com.fl.model.StadiumDTO">
+	<!-- 구장 삭제 -->
+	<update id="DeleteStadium"
+        parameterType="long">
+	    UPDATE stadium
+	    SET
+	        is_deleted = 1
+	    WHERE stadium_code = #{stadiumCode}
+	</update>
+	<!-- 구장 인서트 -->
+	<insert id="InsertStadium"
+		parameterType="com.fl.model.StadiumDTO">
 
-			SELECT
-			*
-			FROM stadium
-		</select>
-		
-		<!-- 구장 관리 구장 조회 -->
-		<select id="ListStadiumAll"
-			resultType="com.fl.model.StadiumDTO">
-			SELECT
-			stadium_name AS stadiumName,
-			region,
-			description,
-			rating,
-			price
-			FROM stadium
-		</select>
-		
-		<!-- 멤버 전체 조회 -->
-		<select id="CountMemberAll"
-			resultType="com.fl.model.MemberDTO">
-			SELECT
-			*
-			FROM member
-		</select>
-		
-		<!-- 멤버 관리 멤버 조회 -->
-		<select id="ListMemberAll"
-			resultType="com.fl.model.MemberDTO">
-			SELECT
-			member_id AS member_id,
-			member_name AS member_name,
-			phone_number AS phone_number,
-			email AS email,
-			is_deleted AS is_deleted
-			FROM member
-		</select>
+		INSERT INTO stadium (
+		stadium_code,
+		stadium_name,
+		region,
+		phone_number,
+		description,
+		stadium_image,
+		rating,
+		price
+		) VALUES (
+		seq_stadium.NEXTVAL,
+		#{stadiumName},
+		#{region},
+		#{phoneNumber},
+		#{description},
+		#{stadium_image},
+		#{rating},
+		#{price}
+		)
+	</insert>
+	<!-- 구장 업데이트 -->
+	<update id="UpdateStadium"
+        parameterType="com.fl.model.StadiumDTO">
+
+	    UPDATE stadium
+	    SET
+	        stadium_name   = #{stadiumName},
+	        region         = #{region},
+	        phone_number   = #{phoneNumber},
+	        description    = #{description},
+	        stadium_image  = #{stadium_image},
+	        rating         = #{rating},
+	        price          = #{price}
+	    WHERE stadium_code = #{stadiumCode}
+
+	</update>
+	
+	
+
+	<!-- 구단 전체 조회 -->
+	<select id="CountTeamAll" resultType="com.fl.model.TeamDTO">
+		SELECT
+		*
+		FROM team
+	</select>
+
+	<!-- 구단 관리 구단주명 포함 조회 -->
+	<select id="ListTeamAll" resultType="com.fl.model.TeamDTO">
+		SELECT
+		t.team_name AS team_name,
+		t.contact_number AS contact_number,
+		t.region,
+		t.member_count AS member_count,
+		m.member_name AS leader_name
+		FROM team t
+		JOIN member_team mt
+		ON t.team_code = mt.team_code
+		JOIN member m
+		ON mt.member_code = m.member_code
+		WHERE mt.role_level >= 10
+	</select>
+
+
+	<!-- 구장 전체 조회 -->
+	<select id="CountStadiumAll"
+		resultType="com.fl.model.StadiumDTO">
+
+		SELECT
+		*
+		FROM stadium
+	</select>
+
+	<!-- 구장 관리 구장 조회 -->
+	<select id="ListStadiumAll" resultType="com.fl.model.StadiumDTO">
+		SELECT
+		stadium_code AS stadiumCode,
+		stadium_name AS stadiumName,
+		region,
+		description,
+		rating,
+		price,
+		is_deleted AS is_deleted
+		FROM stadium
+	</select>
+
+	<!-- 멤버 전체 조회 -->
+	<select id="CountMemberAll" resultType="com.fl.model.MemberDTO">
+		SELECT
+		*
+		FROM member
+	</select>
+
+	<!-- 멤버 관리 멤버 조회 -->
+	<select id="ListMemberAll" resultType="com.fl.model.MemberDTO">
+		SELECT
+		member_id AS member_id,
+		member_name AS member_name,
+		phone_number AS phone_number,
+		email AS email,
+		is_deleted AS is_deleted
+		FROM member
+	</select>
 
 </mapper>

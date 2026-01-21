@@ -17,7 +17,7 @@
 			price,
 			rating
 			FROM stadium
-			WHERE stadium_code = #{stadiumCode}
+			WHERE stadium_code = #{stadiumCode} AND is_deleted = 0
 
 		</select>
 		<!-- 전체 리스트 조회 -->
@@ -33,6 +33,7 @@
 			price,
 			rating
 			FROM stadium
+			WHERE is_deleted = 0
 
 		</select>
 
@@ -47,8 +48,9 @@
 			price, rating
 			FROM stadium
 			<where>
+					is_deleted = 0
 				<if test="keyword != null and keyword != ''">
-					(
+					AND (
 					stadium_name LIKE '%' || #{keyword} || '%'
 					OR region LIKE
 					'%' || #{keyword} || '%'
@@ -75,8 +77,9 @@
 			SELECT COUNT(*)
 			FROM stadium
 			<where>
+				is_deleted = 0
 				<if test="keyword != null and keyword != ''">
-					(
+					AND (
 					stadium_name LIKE '%' || #{keyword} || '%'
 					OR region LIKE
 					'%' || #{keyword} || '%'

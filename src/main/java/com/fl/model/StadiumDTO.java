@@ -10,8 +10,16 @@ public class StadiumDTO {
 	private String stadium_image;
 	private long rating;
 	private long price;
+	private long is_deleted;
 	
 	
+	
+	public long getIs_deleted() {
+		return is_deleted;
+	}
+	public void setIs_deleted(long is_deleted) {
+		this.is_deleted = is_deleted;
+	}
 	public Long getStadiumCode() {
 		return stadiumCode;
 	}

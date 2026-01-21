@@ -8,9 +8,9 @@
     <!-- 상단 타이틀 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h5 class="fw-bold mb-0">🏟️ 구장 관리</h5>
-        <button class="btn btn-sm btn-dark rounded-pill px-3">
+        <a href="${pageContext.request.contextPath}/admin/insertStadium" class="btn btn-sm btn-dark rounded-pill px-3">
             + 구장 등록
-        </button>
+        </a>
     </div>
 
     <!-- 리스트 테이블 (테두리 강조) -->
@@ -29,6 +29,7 @@
 
             <tbody>
 				<c:forEach var="list" items="${stadiumList}">
+					<c:if test="${list.is_deleted == 0}">
 	                <tr>
 	                    <td>${list.region}</td>
 	                    <td class="fw-bold">${list.stadiumName}</td>
@@ -40,14 +41,23 @@
 	                        </button>
 	                    </td>
 	                    <td>
-	                        <button class="btn btn-sm btn-outline-dark rounded-pill me-1">
-	                            수정
-	                        </button>
-	                        <button class="btn btn-sm btn-outline-danger rounded-pill">
-	                            삭제
-	                        </button>
+		                    <form method="get" action="${pageContext.request.contextPath}/admin/updateStadium">
+	                			<input type="hidden" name="stadiumCode" value="${list.stadiumCode}">
+		                        <button type="submit" class="btn btn-sm btn-outline-dark rounded-pill me-1">
+		                            수정
+		                        </button>
+	            			</form>
+	            			
+	            			<form method="post" action="${pageContext.request.contextPath}/admin/deleteStadium" style="display:inline;"
+							      onsubmit="return confirm('정말 삭제하시겠습니까?');">
+							    <input type="hidden" name="stadiumCode" value="${list.stadiumCode}">
+							    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+							        삭제
+							    </button>
+							</form>
 	                    </td>
 	                </tr>
+	                </c:if>
 				</c:forEach>
             </tbody>
             
