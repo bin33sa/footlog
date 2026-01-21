@@ -27,7 +27,7 @@
             border: 3px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* 탭 버튼 스타일 */
+        /* 탭 버튼 */
         .nav-pills .nav-link {
             color: #555; background-color: #fff; border-radius: 50px; padding: 10px 24px;
             margin-right: 10px; font-weight: 600; font-size: 0.95rem; border: 1px solid #eee; transition: all 0.2s;
@@ -44,7 +44,7 @@
         }
         .history-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: #e0e0e0; }
 
-        /* --- 배지 스타일 --- */
+        /* 배지 스타일 */
         .status-badge { 
             font-size: 0.8rem; padding: 5px 12px; border-radius: 50px;
             font-weight: 700; display: inline-block; margin-bottom: 6px; letter-spacing: -0.5px;
@@ -53,6 +53,7 @@
         .status-recruiting { background: #e7f5ff; color: #1c7ed6; border: 1px solid #d0ebff; }
         .status-ok { background: #e6fcf5; color: #0ca678; border: 1px solid #c3fae8; }
         .status-no { background: #fff5f5; color: #fa5252; border: 1px solid #ffc9c9; }
+        .status-done { background: #f1f3f5; color: #495057; border: 1px solid #dee2e6; }
         
         .match-tag { font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; font-weight: 800; margin-right: 6px; vertical-align: middle; }
         .tag-home { background: #212529; color: #fff; }
@@ -81,14 +82,14 @@
         }
         .btn-arrow-go:hover { background-color: #111; color: #fff; border-color: #111; }
 
-        /* --- [중요] 페이징 스타일 수정 (MyUtil 호환) --- */
+        /* 페이징 */
         .page-navigation {
             display: flex; justify-content: center; align-items: center; margin-top: 30px;
         }
         .page-navigation .paginate {
             display: flex; gap: 6px;
         }
-        .page-navigation a, .page-navigation span { 
+        .page-navigation a, .page-navigation span, .page-navigation b { 
             display: inline-flex; align-items: center; justify-content: center;
             width: 36px; height: 36px;
             border-radius: 10px;
@@ -100,7 +101,7 @@
         .page-navigation a:hover {
             background-color: #f8f9fa; border-color: #ddd; color: #333;
         }
-        .page-navigation span {
+        .page-navigation span, .page-navigation b {
             background-color: #111 !important;
             color: #D4F63F !important;
             border-color: #111 !important;
@@ -175,25 +176,36 @@
                             </c:when>
                             <c:otherwise>
                                 <c:forEach var="item" items="${matchApplyList}">
+                                    
+                                    <c:set var="isHome" value="${item.apply_code == 0}" />
+                                    <c:set var="isAway" value="${item.apply_code != 0}" />
+                                    <c:set var="isPast" value="${item.match_date < nowString}" />
+                                    <c:set var="isSuccess" value="${item.status eq '매칭완료' or item.status eq '수락' or item.status eq '확정'}" />
+                                    <c:set var="isClosed" value="${item.status eq '마감'}" />
+                                    
                                     <div class="history-card">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <div>
                                                 <c:choose>
-                                                    <c:when test="${item.apply_code == 0}">
+                                                    <c:when test="${isHome}">
                                                         <span class="match-tag tag-home">HOME</span>
                                                         <c:choose>
+                                                            <c:when test="${isClosed}"><span class="status-badge status-no">마감</span></c:when>
+                                                            <c:when test="${isPast and isSuccess}"><span class="status-badge status-done">완료된 매치</span></c:when>
+                                                            <c:when test="${isPast}"><span class="status-badge status-no">마감</span></c:when>
                                                             <c:when test="${item.status eq '모집중'}"><span class="status-badge status-recruiting">상대 모집중</span></c:when>
-                                                            <c:when test="${item.status eq '매칭완료' or item.status eq '확정'}"><span class="status-badge status-ok">매치 확정</span></c:when>
-                                                            <c:when test="${item.status eq '마감'}"><span class="status-badge status-no">마감</span></c:when>
+                                                            <c:when test="${isSuccess}"><span class="status-badge status-ok">매치 확정</span></c:when>
                                                             <c:otherwise><span class="status-badge status-wait">${item.status}</span></c:otherwise>
                                                         </c:choose>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <span class="match-tag tag-away">AWAY</span>
                                                         <c:choose>
+                                                            <c:when test="${isClosed}"><span class="status-badge status-no">마감</span></c:when>
+                                                            <c:when test="${isPast and isSuccess}"><span class="status-badge status-done">완료된 매치</span></c:when>
+                                                            <c:when test="${isPast}"><span class="status-badge status-no">마감</span></c:when>
                                                             <c:when test="${item.status eq '매칭대기'}"><span class="status-badge status-wait">수락 대기중</span></c:when>
-                                                            <c:when test="${item.status eq '수락'}"><span class="status-badge status-ok">매치 성사</span></c:when>                                                
-                                                            <c:when test="${item.status eq '마감'}"><span class="status-badge status-no">마감</span></c:when>
+                                                            <c:when test="${isSuccess}"><span class="status-badge status-ok">매치 성사</span></c:when>                                                
                                                             <c:otherwise><span class="status-badge status-no">${item.status}</span></c:otherwise>
                                                         </c:choose>
                                                     </c:otherwise>
@@ -234,10 +246,20 @@
                                             
                                             <div>
                                                 <c:choose>
-                                                    <c:when test="${item.status eq '매칭완료' or item.status eq '수락' or item.status eq '확정'}">
+                                                    <c:when test="${isClosed}">
+                                                        <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" 
+                                                           class="btn btn-sm btn-light rounded-pill px-3 fw-bold border">마감됨</a>
+                                                    </c:when>
+                                                    
+                                                    <c:when test="${isPast}">
+                                                        <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" 
+                                                           class="btn btn-sm btn-light rounded-pill px-3 fw-bold border">종료됨</a>
+                                                    </c:when>
+                                                    
+                                                    <c:when test="${isSuccess}">
                                                         <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">게시글 보기</a>
                                                     </c:when>
-                                                    <c:when test="${item.apply_code == 0}">
+                                                    <c:when test="${isHome}">
                                                         <a href="${pageContext.request.contextPath}/match/article?page=1&match_code=${item.match_code}" class="btn-arrow-go" title="게시글로 이동"><i class="bi bi-arrow-right fs-5"></i></a>
                                                     </c:when>
                                                     <c:when test="${item.status eq '매칭대기'}">
@@ -291,11 +313,10 @@
                                                 
                                                 <div class="me-3">
                                                     <c:choose>
-                                                        <%-- 1. 구인 (팀 엠블럼) --%>
+                                                        <%-- 구인 (팀 엠블럼) --%>
                                                         <c:when test="${item.category == 'RECRUIT'}">
                                                             <c:choose>
                                                                 <c:when test="${not empty item.emblem_image}">
-                                                                    <%-- [수정] icon.jpg -> emblem.png --%>
                                                                     <img src="${pageContext.request.contextPath}/uploads/team/${item.emblem_image}" 
                                                                          class="team-emblem-img" 
                                                                          style="width: 48px; height: 48px; border: 1px solid #eee;"
@@ -309,7 +330,7 @@
                                                             </c:choose>
                                                         </c:when>
                                                         
-                                                        <%-- 2. 구직 (사람 아이콘) --%>
+                                                        <%-- 구직 (사람 아이콘) --%>
                                                         <c:otherwise>
                                                             <div class="team-emblem-placeholder bg-light text-dark" style="width: 48px; height: 48px; border: 1px solid #eee;">
                                                                 <i class="bi bi-person-fill fs-3"></i>

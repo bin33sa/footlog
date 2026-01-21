@@ -125,11 +125,11 @@
                     </div>
                     
                     <div class="col-md-4">
-                        <div class="modern-card p-4 h-100 d-flex flex-column justify-content-center text-center">
-                            <span class="text-muted small fw-bold mb-1">이번 달 경기</span>
-                            <h2 class="fw-bold m-0">${stats.month_match_count} <span class="fs-6 text-muted fw-normal">matches</span></h2>
-                        </div>
-                    </div>
+					    <div class="modern-card p-4 h-100 d-flex flex-column justify-content-center text-center">
+					        <span class="text-muted small fw-bold mb-1">예정된 이번달 매치</span>
+					        <h2 class="fw-bold m-0">${stats.month_match_count} <span class="fs-6 text-muted fw-normal">matches</span></h2>
+					    </div>
+					</div>
                     
                     <div class="col-md-4">
                         <div class="modern-card p-4 h-100 d-flex flex-column justify-content-center text-center">

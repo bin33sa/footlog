@@ -27,7 +27,7 @@
             m.away_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code}) 
         ) 
         AND m.status = '매칭완료' 
-        ORDER BY m.match_date ASC
+        AND m.match_date >= SYSDATE  ORDER BY m.match_date ASC
     </select>
     
     <select id="readMember" parameterType="Long" resultType="com.fl.model.MemberDTO">
@@ -43,23 +43,16 @@
             FROM match_apply ma 
             JOIN match_post mp ON ma.match_code = mp.match_code 
             WHERE ma.team_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
-            
             UNION ALL
-            
-            SELECT 0 
-            FROM match_post mp 
+            SELECT 0 FROM match_post mp 
             WHERE mp.home_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
-            
             UNION ALL
-            
-            SELECT 0 
-            FROM match_post mp 
+            SELECT 0 FROM match_post mp 
             JOIN team at ON mp.away_code = at.team_code   
             WHERE at.team_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
             AND mp.status = '매칭완료' 
             AND mp.match_code NOT IN (
-                SELECT ma.match_code 
-                FROM match_apply ma 
+                SELECT ma.match_code FROM match_apply ma 
                 WHERE ma.team_code IN (SELECT team_code FROM member_team WHERE member_code = #{member_code})
             )
         )
@@ -116,6 +109,9 @@
                       )
                 ) A
                 ORDER BY 
+                    -- [정렬 1순위] 현재 시간보다 이전(과거)이면 2(뒤로), 아니면 1(앞으로)
+                    CASE WHEN A.match_date &lt; TO_CHAR(SYSDATE, 'YYYY-MM-DD HH24:MI') THEN 2 ELSE 1 END ASC,
+                    -- [정렬 2순위] 상태별 우선순위
                     CASE 
                         WHEN A.status IN ('매칭대기', '모집중') THEN 1     
                         WHEN A.status IN ('수락', '매칭완료', '확정') THEN 2 
@@ -127,23 +123,20 @@
     </select>
 
     <select id="countMyMercenaryPosts" parameterType="Long" resultType="Integer">
-        SELECT COUNT(*) 
-        FROM mercenary_post 
-        WHERE member_code = #{member_code}
+        SELECT COUNT(*) FROM mercenary_post WHERE member_code = #{member_code}
     </select>
 
     <select id="listMyMercenaryPosts" parameterType="map" resultType="com.fl.model.MercenaryDTO">
         SELECT * FROM (
             SELECT ROWNUM rnum, tb.* FROM (
                 SELECT 
-                    p.recruit_id, 
-                    p.category,        
-                    p.title, 
-                    p.view_count, 
+                    p.recruit_id, p.category, p.title, p.view_count, 
                     TO_CHAR(p.created_at, 'YYYY-MM-DD') AS created_at, 
                     p.status,
-                    t.team_name,       t.emblem_image     FROM mercenary_post p
-                LEFT JOIN team t ON p.team_code = t.team_code  WHERE p.member_code = #{member_code}
+                    t.team_name, t.emblem_image
+                FROM mercenary_post p
+                LEFT JOIN team t ON p.team_code = t.team_code
+                WHERE p.member_code = #{member_code}
                 ORDER BY p.recruit_id DESC
             ) tb WHERE ROWNUM &lt;= #{offset} + #{size}
         ) WHERE rnum &gt; #{offset}
