@@ -16,7 +16,9 @@ public interface AdminMypageMapper {
 	
 	public List<MemberDTO> CountMemberAll();
 	public List<MemberDTO> ListMemberAll();
-	 
 	
+	public int UpdateStadium(StadiumDTO dto);
+	public int InsertStadium(StadiumDTO dto);
+	public void DeleteStadium(Long stadiumCode);
 	
 }

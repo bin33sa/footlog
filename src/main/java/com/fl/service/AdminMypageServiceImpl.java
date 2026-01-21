@@ -16,6 +16,27 @@ public class AdminMypageServiceImpl implements AdminMypageService {
 	private BoardQnaMapper qnaMapper = MapperContainer.get(BoardQnaMapper.class); 
 	
 	
+	// 구장 인서트,업데이트
+	@Override
+	public int InsertStadium(StadiumDTO dto) {
+		int result= mapper.InsertStadium(dto);
+		
+		return result;
+	}
+	
+	@Override
+	public int UpdateStadium(StadiumDTO dto) {
+		int result= mapper.UpdateStadium(dto);
+		return result;
+	}
+	
+	@Override
+	public void DeleteStadium(Long stadiumCode) {
+		mapper.DeleteStadium(stadiumCode);
+	}
+	
+	
+	
 	// 전체 구단,구장,회원수 조회
 	@Override
 	public List<TeamDTO> CountTeamAll() {
@@ -95,6 +116,9 @@ public class AdminMypageServiceImpl implements AdminMypageService {
 	        }
 	        return dto;
 	    }
+
+		
+
 
 
 }

@@ -109,19 +109,15 @@
 			match_date ASC
 	</select>
 	
-	<select id="listMercenaryApply" parameterType="Long" resultType="com.fl.model.MatchHistoryDTO">
-	   SELECT 
-            ma.apply_id,       
-            ma.status AS recruit_status, 
-            ma.recruit_id,
-            mp.title,
-            t.team_name AS opponent_name,
-            TO_CHAR(mp.created_at, 'YYYY-MM-DD') AS created_at 
-        FROM mercenary_apply ma
-        JOIN mercenary_post mp ON ma.recruit_id = mp.recruit_id
-        JOIN team t ON mp.team_code = t.team_code
-        WHERE ma.member_code = #{member_code}
-        ORDER BY ma.apply_id DESC
+	<select id="listMyMercenaryPosts" parameterType="Long" resultType="com.fl.model.MercenaryDTO">
+	    SELECT 
+	        recruit_id, 
+	        category,        title, 
+	        view_count, 
+	        TO_CHAR(created_at, 'YYYY-MM-DD') AS created_at, 
+	        status           FROM mercenary_post
+	    WHERE member_code = #{member_code}
+	    ORDER BY recruit_id DESC
 	</select>
 	
 </mapper>

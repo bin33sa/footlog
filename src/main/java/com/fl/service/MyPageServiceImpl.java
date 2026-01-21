@@ -6,6 +6,7 @@ import com.fl.mapper.MyPageMapper;
 import com.fl.model.MatchDTO;
 import com.fl.model.MatchHistoryDTO;
 import com.fl.model.MemberDTO;
+import com.fl.model.MercenaryDTO;
 import com.fl.mybatis.support.MapperContainer;
 
 public class MyPageServiceImpl implements MyPageService {
@@ -45,14 +46,17 @@ public class MyPageServiceImpl implements MyPageService {
    }
 
 	@Override
-	public List<MatchHistoryDTO> listMercenaryApply(long member_code) {
-		List<MatchHistoryDTO> list = null;
-        try {
-            list = mapper.listMercenaryApply(member_code);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
+	public List<MercenaryDTO> listMyMercenaryPosts(long member_code) {
+	    List<MercenaryDTO> list = null;
+	    try {
+	        // 매퍼 메소드 이름도 변경
+	        list = mapper.listMyMercenaryPosts(member_code);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return list;
+	}
+
+	
 	
 }

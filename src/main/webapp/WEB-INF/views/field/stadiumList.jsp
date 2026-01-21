@@ -4,7 +4,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
 	<c:forEach var="dto" items="${list}">
-
+		<c:if test="${dto.is_deleted == 0}">
 		<div class="col-md-6"
 			onclick="location.href='${pageContext.request.contextPath}/field/view?stadiumCode=${dto.stadiumCode}'">
 			<div class="modern-card stadium-card p-0 h-100">
@@ -39,5 +39,5 @@
 				</div>
 			</div>
 		</div>
-
+	</c:if>
 	</c:forEach>

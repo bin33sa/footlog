@@ -1245,4 +1245,59 @@ a { text-decoration: none; color: inherit; }
         }
         /* 카드 등 나머지 스타일은 로딩되는 조각 JSP에 있거나 공통 CSS에 있어야 함 */
         
-        
+        @media (min-width: 992px) {
+    .dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+        animation: fadeInDown 0.3s ease;
+    }
+}
+
+/* 애니메이션 */
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 드롭다운 메뉴 디자인 */
+.dropdown-menu {
+    background-color: #111;
+    border: 1px solid #333;
+    border-radius: 15px;
+    padding: 10px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.dropdown-item {
+    color: #fff;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: 0.2s;
+}
+.dropdown-item:hover {
+    background-color: transparent;
+    color: var(--primary-color, #D4F63F);
+    padding-left: 25px;
+}
+
+/* [모바일] 991px 이하: 디자인 조정 */
+@media (max-width: 991px) {
+    .dropdown-menu {
+        position: static !important;
+        float: none;
+        width: auto;
+        margin-top: 0;
+        background-color: #f8f9fa; 
+        border: none;
+        box-shadow: none;
+        padding-left: 20px;
+        display: none; 
+    }
+    .dropdown-item {
+        color: #333 !important;
+    }
+    .dropdown-item:hover {
+        color: #000 !important;
+        font-weight: 700;
+    }
+}

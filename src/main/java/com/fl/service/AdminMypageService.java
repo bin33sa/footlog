@@ -10,6 +10,14 @@ import com.fl.model.TeamDTO;
 
 public interface AdminMypageService {
 	
+	//구장 업데이트
+	public int UpdateStadium(StadiumDTO dto);
+	public int InsertStadium(StadiumDTO dto);
+	
+	//구장 삭제
+	public void DeleteStadium(Long stadiumCode);
+	
+	
 	//전체 구단,구장,회원 수
 	public List<TeamDTO> CountTeamAll();
 	public List<StadiumDTO> CountStadiumAll();

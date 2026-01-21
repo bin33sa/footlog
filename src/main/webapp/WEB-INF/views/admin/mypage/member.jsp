@@ -8,9 +8,6 @@
     <!-- 상단 타이틀 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h5 class="fw-bold mb-0">👥 회원 관리</h5>
-        <button class="btn btn-sm btn-dark rounded-pill px-3">
-            + 구단 등록
-        </button>
     </div>
 
     <!-- 리스트 테이블 (테두리 강조) -->
@@ -22,7 +19,7 @@
                     <th>회원명</th>
                     <th style="width: 25%">이메일</th>
                     <th style="width: 25%">전화번호</th>
-                    <th style="width: 10%">탈퇴여부</th>
+                    <th style="width: 15%">탈퇴여부</th>
                 </tr>
             </thead>
 
