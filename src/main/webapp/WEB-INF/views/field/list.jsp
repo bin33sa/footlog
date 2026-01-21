@@ -27,6 +27,8 @@
 		<jsp:include page="/WEB-INF/views/layout/header.jsp" />
 	</header>
 
+
+
 	<div class="container-fluid px-lg-5 mt-4">
 		<div class="row">
 			<div class="col-lg-2 d-none d-lg-block">
@@ -44,40 +46,28 @@
 			</div>
 
 			<div class="col-lg-8 col-12">
-
-				<div class="modern-card p-4 mb-4">
-					<div class="d-flex justify-content-between align-items-center">
-						<div class="d-flex align-items-center gap-3">
-							<div
-								class="bg-light rounded-circle d-flex align-items-center justify-content-center"
-								style="width: 50px; height: 50px;">
-								<i class="bi bi-shield-shaded fs-3 text-secondary"></i>
-							</div>
-							<div>
-								<h6 class="text-muted small mb-0">MY TEAM</h6>
-								<h5 class="fw-bold mb-0">가입된 구단이 없습니다.</h5>
-							</div>
-						</div>
-						<button class="btn btn-outline-dark rounded-pill btn-sm px-3"
-							onclick="location.href='${pageContext.request.contextPath}/team/list'">구단
-							생성 / 가입 &rarr;</button>
-					</div>
+				
+				<!-- 예약 탭 -->
+				<div class="mb-3">
+					<ul class="nav nav-pills nav-fill booking-tabs">
+						<li class="nav-item"><a class="nav-link"
+							href="${pageContext.request.contextPath}/field/booking">
+								<i class="bi bi-calendar-check me-1"></i> 내가 예약한 구장
+						</a></li>
+					</ul>
 				</div>
 
 				<div
 					class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 gap-3">
 					<div class="search-bar-wrapper w-100">
-						<i class="bi bi-search position-absolute ms-3 text-muted"></i> 
-						<input
-							id="searchInput"
-							type="text"
+						<i class="bi bi-search position-absolute ms-3 text-muted"></i> <input
+							id="searchInput" type="text"
 							class="form-control rounded-pill ps-5 py-2 border-0 shadow-sm"
 							placeholder="지역명, 구장명으로 검색">
 					</div>
 
 					<div class="d-flex gap-2 w-100 w-md-auto justify-content-end">
-						<select 
-							id = "sortSelect"
+						<select id="sortSelect"
 							class="form-select rounded-pill border-0 shadow-sm"
 							style="width: 140px;">
 							<option selected>조회 방법</option>
@@ -126,47 +116,42 @@
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 	<script type="text/javascript">
-	
-	
-	
-		function getSort(){
+		function getSort() {
 			return $('#sortSelect').val();
 		}
-		
-		$('#sortSelect').on('change',function(){
+
+		$('#sortSelect').on('change', function() {
 			const $list = $('#stadiumList');
 			$list.empty();
-			$list.data('pageNo',1);
-			
+			$list.data('pageNo', 1);
+
 			loadContent(1);
-			
+
 		});
-		
-		
-		function getKeyword(){
+
+		function getKeyword() {
 			return $('#searchInput').val().trim();
 		}
-		
-		$('#searchInput').on('keydown',function(e){
-			if(e.key === 'Enter'){
+
+		$('#searchInput').on('keydown', function(e) {
+			if (e.key === 'Enter') {
 				e.preventDefault();
-				
+
 				const $list = $('#stadiumList');
-				
+
 				$list.empty();
-				$list.data('pageNo',1);
-				
+				$list.data('pageNo', 1);
+
 				loadContent(1);
-				
+
 			}
 		});
-	
-	
+
 		function loadContent(pageNo) {
 			const $list = $('#stadiumList');
 			const keyword = getKeyword();
 			const sort = getSort();
-			
+
 			$.ajax({
 				url : `${pageContext.request.contextPath}/field/listMore`,
 				type : 'get',
@@ -185,9 +170,6 @@
 			});
 		}
 
-		
-		
-		
 		$(function() {
 			$('#loadMoreBtn').click(function() {
 

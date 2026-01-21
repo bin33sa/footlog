@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.mapper.StadiumMapper;
-
 import com.fl.model.PageResult;
 import com.fl.model.StadiumDTO;
+import com.fl.model.TeamDTO;
 import com.fl.mybatis.support.MapperContainer;
 
 public class StadiumServiceImpl implements StadiumService {
@@ -55,10 +55,15 @@ public class StadiumServiceImpl implements StadiumService {
 	
 
 
-	@Override
-	public int arenaCount(Map<String, Object> map) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	
 
+	@Override
+	public List<TeamDTO> findByMemberCode(long memberCode){
+		
+		List<TeamDTO> list = mapper.findByMemberCode(memberCode);
+		
+		
+		return list;
+	}
+	
 }

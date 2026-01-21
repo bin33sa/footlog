@@ -3,6 +3,105 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fl.mapper.TimeSlotMapper">
 
+	<!-- 예약내역 삭제 -->
+	<delete id="DeleteTimeSlot" parameterType="long">
+	DELETE
+	FROM stadium_reservation
+	WHERE reservation_id = #{reservationId}
+	</delete>
+
+
+	<!-- 전체 예약된 내역(관리자용) -->
+
+	<select id="BookingList" 
+		resultType="com.fl.model.StadiumReservationDTO">
+		SELECT
+		sr.reservation_id AS reservationId,
+		
+		s.stadium_name AS stadiumName,
+		TO_CHAR(sr.play_date, 'YYYY-MM-DD') AS playDate,
+
+		tc.label AS timeLabel,
+		t.team_name AS teamName,
+		m.member_name AS memberName
+		
+		FROM stadium_reservation sr
+		
+		JOIN member m
+		ON sr.member_code = m.member_code
+
+		JOIN team t
+		ON sr.team_code = t.team_code
+		
+		JOIN stadium s
+		ON sr.stadium_code = s.stadium_code
+		
+		JOIN time_code tc
+		ON sr.time_code = tc.time_code
+		
+		ORDER BY sr.play_date DESC
+
+
+	</select>
+
+	<!-- 예약된 내역(멤버코드) -->
+
+	<select id="BookingFindById" parameterType="long"
+		resultType="com.fl.model.StadiumReservationDTO">
+		SELECT
+		sr.reservation_id AS reservationId,
+		
+		s.stadium_name AS stadiumName,
+		TO_CHAR(sr.play_date, 'YYYY-MM-DD') AS playDate,
+
+		tc.label AS timeLabel,
+		t.team_name AS teamName,
+		m.member_name AS memberName
+		
+		FROM stadium_reservation sr
+		
+		JOIN member m
+		ON sr.member_code = m.member_code
+
+		JOIN team t
+		ON sr.team_code = t.team_code
+		
+		JOIN stadium s
+		ON sr.stadium_code = s.stadium_code
+		
+		JOIN time_code tc
+		ON sr.time_code = tc.time_code
+		
+		WHERE sr.member_code = #{memberCode}
+		
+		ORDER BY sr.play_date DESC
+
+
+	</select>
+	<!-- 예약하기 -->
+	<insert id="InsertReservation"
+		parameterType="com.fl.model.StadiumReservationDTO">
+		INSERT INTO stadium_reservation (
+		reservation_id,
+		stadium_code,
+		member_code,
+		team_code,
+		play_date,
+		time_code,
+		reserved_at
+		)
+		VALUES (
+		seq_stadium_reservation.NEXTVAL,
+		#{stadiumCode},
+		#{memberCode},
+		#{teamCode},
+		TO_DATE(#{playDate}, 'YYYY-MM-DD'),
+		#{timeCode},
+		SYSDATE
+		)
+	</insert>
+
+
 	<!-- 타임카드 리스트 -->
 	<select id="listTimeSlots" parameterType="map"
 		resultType="com.fl.model.StadiumTimeSlotDTO">
@@ -11,21 +110,27 @@
 		tc.label AS timeLabel,
 		CASE
 		WHEN st.stadium_code IS NULL THEN 'N' -- 운영 안 함
-		WHEN r.reservation_id IS NOT NULL THEN 'N' -- 예약됨
+		WHEN r.reservation_id
+		IS NOT NULL THEN 'N' -- 예약됨
 		ELSE 'Y' -- 예약 가능
 		END AS availableYn
 
-		FROM time_code tc
+		FROM
+		time_code tc
 
 		LEFT JOIN stadium_timeslot st
-		ON st.time_code = tc.time_code
+		ON st.time_code =
+		tc.time_code
 		AND st.stadium_code = #{stadiumCode}
-		AND st.day_type = #{dayType}
+		AND st.day_type =
+		#{dayType}
 
 		LEFT JOIN stadium_reservation r
-		ON r.stadium_code = #{stadiumCode}
+		ON r.stadium_code =
+		#{stadiumCode}
 		AND r.time_code = tc.time_code
-		AND r.play_date = #{playDate}
+		AND r.play_date =
+		#{playDate}
 
 		ORDER BY tc.time_code
 	</select>

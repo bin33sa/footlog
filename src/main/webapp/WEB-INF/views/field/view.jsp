@@ -68,9 +68,21 @@
 
 				<div class="modern-card p-0 overflow-hidden mb-4">
 					<div class="position-relative" style="height: 400px;">
-						<img
-							src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=1000&auto=format&fit=crop&q=80"
-							class="w-100 h-100 object-fit-cover" alt="stadium">
+
+						<c:choose>
+							<c:when test="${not empty dto and not empty dto.stadiumImage}">
+							<img
+								src="${pageContext.request.contextPath}/uploads/stadium/${dto.stadiumImage}"
+								class="w-100 h-100 object-fit-cover" alt="${dto.stadiumName}">
+						</c:when>
+
+						<c:otherwise>
+							<img
+								src="${pageContext.request.contextPath}/dist/images/default.jpg"
+								class="w-100 h-100 object-fit-cover" alt="${dto.stadiumName}">
+						</c:otherwise>
+						</c:choose>
+
 						<div class="position-absolute bottom-0 start-0 w-100 p-4"
 							style="background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);">
 							<h2 class="text-white fw-bold mb-1">${dto.stadiumName}</h2>
@@ -113,7 +125,7 @@
 								<hr class="my-4">
 								<h5 class="fw-bold mb-3">구장 소개</h5>
 								<p class="text-muted" style="line-height: 1.8;">
-									${dto.stadiumName} 구장소개글로 바꿔야함 여기.</p>
+									${dto.description}</p>
 							</div>
 
 							<div class="col-md-4 border-start ps-md-4">
@@ -138,67 +150,126 @@
 							</div>
 						</div>
 
-						<div class="bg-light p-4 rounded-4 mb-4 border">
-							<h4 class="fw-bold mb-4">📅 예약 일정 선택</h4>
+						<form id="reservationForm"
+							action="${pageContext.request.contextPath}/field/reservation"
+							method="post">
+							<input type="hidden" name="stadiumCode"
+								value="${dto.stadiumCode}"> <input type="hidden"
+								name="playDate" id="selectedDate"> <input type="hidden"
+								name="timeCode" id="selectedTimeCode">
 
-							<div class="mb-4">
-								<label class="form-label fw-bold">날짜</label> <input type="date"
-									id="reservationDate"
-									class="form-control form-control-lg border-0 shadow-sm"
-									value="${today}" min="${today}" required>
-							</div>
+							<div class="bg-light p-4 rounded-4 mb-4 border">
+								<h4 class="fw-bold mb-4">📅 예약 일정 선택</h4>
 
-							<div class="mb-4">
-								<label class="form-label fw-bold d-block mb-2">시간 선택</label>
-
-								<!-- 타임슬롯카드 -->
-								<div class="row g-2" id="timeSlotArea"></div>
-
-
-								<div class="mt-2 small text-muted">
-									<span class="me-2"><i
-										class="bi bi-square-fill text-secondary opacity-25"></i> 마감</span> <span><i
-										class="bi bi-square-fill text-primary opacity-50"></i> 예약가능</span>
+								<div class="mb-4">
+									<label class="form-label fw-bold">날짜</label> <input type="date"
+										id="reservationDate"
+										class="form-control form-control-lg border-0 shadow-sm"
+										value="${today}" min="${today}" required>
 								</div>
-							</div>
 
-							<hr>
-							<div
-								class="d-flex justify-content-between align-items-center mt-4">
-								<div>
-									<span class="text-muted small">총 결제금액 (2시간)</span>
-									<h3 class="fw-bold text-dark mb-0">${dto.price}원</h3>
+								<div class="mb-4">
+									<label class="form-label fw-bold d-block mb-2">시간 선택</label>
+
+									<!-- 타임슬롯카드 -->
+									<div class="row g-2" id="timeSlotArea"></div>
+
+
+									<div class="mt-2 small text-muted">
+										<span class="me-2"><i
+											class="bi bi-square-fill text-secondary opacity-25"></i> 마감</span> <span><i
+											class="bi bi-square-fill text-primary opacity-50"></i> 예약가능</span>
+									</div>
 								</div>
-								<button class="btn btn-dark btn-lg rounded-pill px-5 fw-bold"
-									onclick="alert('예약 페이지로 이동합니다.')">예약하기</button>
+
+								<hr>
+
+								<div class="mb-4">
+									<label class="form-label fw-bold">예약 팀 선택</label>
+
+
+									<c:choose>
+										<c:when test="${not empty teams}">
+											<select name="teamCode"
+												class="form-select form-select-lg border-0 shadow-sm"
+												required>
+												<option value="">-- 팀을 선택하세요 --</option>
+
+												<c:forEach var="team" items="${teams}">
+													<option value="${team.team_code}">
+														${team.team_name}</option>
+												</c:forEach>
+											</select>
+										</c:when>
+
+										<c:otherwise>
+											<div
+												class="form-control form-control-lg border-0 shadow-sm bg-light text-muted">
+												가입한 팀이 없습니다</div>
+										</c:otherwise>
+									</c:choose>
+								</div>
+
+								<hr>
+
+								<div
+									class="d-flex justify-content-between align-items-center mt-4">
+									<div>
+										<span class="text-muted small">총 결제금액 (2시간)</span>
+										<h3 class="fw-bold text-dark mb-0">${dto.price}원</h3>
+									</div>
+
+									<c:choose>
+										<c:when test="${not empty teams}">
+											<button type="submit"
+												class="btn btn-dark btn-lg rounded-pill px-5 fw-bold">
+												예약하기</button>
+										</c:when>
+
+										<c:otherwise>
+											<button type="button"
+												class="btn btn-secondary btn-lg rounded-pill px-5 fw-bold"
+												disabled style="cursor: not-allowed;">팀 가입 후 예약 가능
+											</button>
+										</c:otherwise>
+									</c:choose>
+
+								</div>
+
+								<hr>
+
+								<h5 class="fw-bold mb-3">위치 안내</h5>
+
+								<div id="map" class="rounded-4 border shadow-sm w-100"
+									style="height: 400px;"></div>
+
+								<script>
+									var mapContainer = document
+											.getElementById('map'), // 지도를 표시할 div 
+									mapOption = {
+										center : new kakao.maps.LatLng(
+												37.571679, 126.898320), // 지도의 중심좌표
+										level : 3
+									};
+
+									var map = new kakao.maps.Map(mapContainer,
+											mapOption);
+
+									var markerPosition = new kakao.maps.LatLng(
+											37.571679, 126.898320);
+
+									var marker = new kakao.maps.Marker({
+										position : markerPosition
+									});
+
+									marker.setMap(map);
+								</script>
+
+
 							</div>
-						</div>
+						</form>
 
-						<h5 class="fw-bold mb-3">위치 안내</h5>
 
-						<div id="map" class="rounded-4 border shadow-sm w-100"
-							style="height: 400px;"></div>
-
-						<script>
-							var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
-							mapOption = {
-								center : new kakao.maps.LatLng(37.571679,
-										126.898320), // 지도의 중심좌표
-								level : 3
-							};
-
-							var map = new kakao.maps.Map(mapContainer,
-									mapOption);
-
-							var markerPosition = new kakao.maps.LatLng(
-									37.571679, 126.898320);
-
-							var marker = new kakao.maps.Marker({
-								position : markerPosition
-							});
-
-							marker.setMap(map);
-						</script>
 					</div>
 				</div>
 
@@ -216,11 +287,42 @@
 	<footer>
 		<jsp:include page="/WEB-INF/views/layout/footer.jsp" />
 	</footer>
+
+
 	<script type="text/javascript">
+	(function () {
+		  const params = new URLSearchParams(window.location.search);
+		  const success = params.get('success');   // 예: /field/view?success=1
+		  const error   = params.get('error');     // 예: /field/view?error=1
+
+		  // 서버에서 mav.addObject("message", "...")로 넘긴 경우 대비
+		  const message = "<c:out value='${message}'/>";
+
+		  if (success === '1') {
+		    alert('예약이 완료되었습니다 ✅');
+		    // 원하면 쿼리 제거(뒤로가기/새로고침 중복 알림 방지)
+		    params.delete('success');
+		    history.replaceState(null, '', window.location.pathname + (params.toString() ? '?' + params.toString() : ''));
+		    return;
+		  }
+
+		  if (error === '1') {
+		    alert((message && message !== 'null') ? message : '예약에 실패했습니다 ❌');
+		    params.delete('error');
+		    history.replaceState(null, '', window.location.pathname + (params.toString() ? '?' + params.toString() : ''));
+		  }
+		})();
+	
+	
+	
+	
 		$(function() {
-			$('#reservationDate').on('change', function() {
-				const date = this.value;
+
+			function loadTimeSlots(date) {
 				const $list = $('#timeSlotArea');
+
+				// hidden 날짜 세팅
+				$('#selectedDate').val(date);
 
 				$.ajax({
 					url : '${pageContext.request.contextPath}/field/timeSlot',
@@ -232,18 +334,43 @@
 					dataType : 'html',
 					success : function(html) {
 						$list.html(html);
+						// 날짜 바뀌면 시간 선택 초기화
+						$('#selectedTimeCode').val('');
 					},
 					error : function() {
-						console.error('구장 목록 로드 실패');
+						console.error('타임슬롯 로드 실패');
 					}
 				});
+			}
+
+			// 날짜 변경 시
+			$('#reservationDate').on('change', function() {
+				loadTimeSlots(this.value);
 			});
 
-			// 페이지 처음 들어왔을 때도 한번 불러오게
-			$('#reservationDate').trigger('change');
-
+			// 최초 진입 시
+			loadTimeSlots($('#reservationDate').val());
 		});
+
+		// 시간 선택 (AJAX로 생긴 요소라 document.on)
+		$(document).on(
+				'click',
+				'.time-btn',
+				function() {
+
+					// 기존 선택 해제
+					$('.time-btn').removeClass('btn-primary').addClass(
+							'btn-outline-primary');
+
+					// 현재 선택
+					$(this).removeClass('btn-outline-primary').addClass(
+							'btn-primary');
+
+					// hidden에 timeCode 저장
+					$('#selectedTimeCode').val($(this).data('time-code'));
+				});
 	</script>
+
 
 
 </body>

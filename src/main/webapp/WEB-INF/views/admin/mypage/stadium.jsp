@@ -8,6 +8,9 @@
     <!-- 상단 타이틀 -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h5 class="fw-bold mb-0">🏟️ 구장 관리</h5>
+        <a href="${pageContext.request.contextPath}/field/booking" class="btn btn-sm btn-dark rounded-pill px-3">
+            구장예약 전체내역
+        </a>
         <a href="${pageContext.request.contextPath}/admin/insertStadium" class="btn btn-sm btn-dark rounded-pill px-3">
             + 구장 등록
         </a>

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fl.model.StadiumDTO;
+import com.fl.model.StadiumReservationDTO;
+import com.fl.model.TeamDTO;
 
 public interface StadiumMapper {
 
@@ -12,5 +14,11 @@ public interface StadiumMapper {
 	  
 	  public StadiumDTO findById(int stadiumCode);
 	  
-	  int stadiumCount(Map<String, Object> map);
+	  public List<TeamDTO> findByMemberCode(long memberCode);
+	  
+	  
+	  public int stadiumCount(Map<String, Object> map);
+	  
+	  
+	  
 }

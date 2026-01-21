@@ -258,7 +258,7 @@ public class MypageAdminController {
 		        dto.setDescription(req.getParameter("description"));
 		        dto.setRating(Long.parseLong(req.getParameter("rating")));
 		        dto.setPrice(Long.parseLong(req.getParameter("price")));
-		        dto.setStadium_image(req.getParameter("stadiumImage"));
+		        dto.setStadiumImage(req.getParameter("stadiumImage"));
 		        
 		        // 파일 처리
 		        String imageDeleted = req.getParameter("imageDeleted");
@@ -268,16 +268,16 @@ public class MypageAdminController {
 		        MyMultipartFile mp = fileManager.doFileUpload(p, pathname);
 		        
 		        if(mp != null) {
-		            if(dto.getStadium_image() != null && !dto.getStadium_image().equals("avatar.png")) {
-		                fileManager.doFiledelete(pathname, dto.getStadium_image());
+		            if(dto.getStadiumImage() != null && !dto.getStadiumImage().equals("default.jpg")) {
+		                fileManager.doFiledelete(pathname, dto.getStadiumImage());
 		            }
 		            
-		            dto.setStadium_image(mp.getSaveFilename());
+		            dto.setStadiumImage(mp.getSaveFilename());
 		        } else if("true".equals(imageDeleted)) {
-		            if(dto.getStadium_image() != null && !dto.getStadium_image().equals("avatar.png")) {
-		                fileManager.doFiledelete(pathname, dto.getStadium_image());
+		            if(dto.getStadiumImage() != null && !dto.getStadiumImage().equals("default.jpg")) {
+		                fileManager.doFiledelete(pathname, dto.getStadiumImage());
 		            }
-		            dto.setStadium_image("avatar.png");
+		            dto.setStadiumImage("default.jpg");
 		        }
 		        
 		    

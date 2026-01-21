@@ -3,15 +3,25 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
-	<c:forEach var="dto" items="${list}">
-		<c:if test="${dto.is_deleted == 0}">
+<c:forEach var="dto" items="${list}">
+	<c:if test="${dto.is_deleted == 0}">
 		<div class="col-md-6"
 			onclick="location.href='${pageContext.request.contextPath}/field/view?stadiumCode=${dto.stadiumCode}'">
 			<div class="modern-card stadium-card p-0 h-100">
 				<div class="stadium-img-wrapper position-relative">
-					<img
-						src="https://images.unsplash.com/photo-1529900748604-07564a03e7a6?w=500&auto=format&fit=crop&q=60"
-						alt="stadium">
+					<c:choose>
+						<c:when test="${not empty dto and not empty dto.stadiumImage}">
+							<img
+								src="${pageContext.request.contextPath}/uploads/stadium/${dto.stadiumImage}"
+								class="w-100 h-100 object-fit-cover" alt="${dto.stadiumName}">
+						</c:when>
+
+						<c:otherwise>
+							<img
+								src="${pageContext.request.contextPath}/dist/images/default.jpg"
+								class="w-100 h-100 object-fit-cover" alt="${dto.stadiumName}">
+						</c:otherwise>
+					</c:choose>
 				</div>
 				<div class="p-4">
 					<div class="d-flex justify-content-between align-items-start mb-1">
@@ -40,4 +50,4 @@
 			</div>
 		</div>
 	</c:if>
-	</c:forEach>
+</c:forEach>
