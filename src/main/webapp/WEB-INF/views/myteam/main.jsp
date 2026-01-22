@@ -18,6 +18,14 @@
         .board-row:hover {
             background-color: #f8f9fa;
         }
+        /* 매치 카드 스타일 보정 */
+        .match-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .match-card:hover {
+            transform: translateY(-5px);
+        }
     </style>
 </head>
 
@@ -26,7 +34,6 @@
    <header>
        <jsp:include page="/WEB-INF/views/layout/teamheader.jsp"/>
     </header>
-
 
     <div class="container-fluid px-lg-5 mt-4">
         <div class="row">
@@ -132,73 +139,66 @@
                         <div class="match-slider-wrapper">
                             <div class="match-slider-track" id="matchTrack">
                                 
-                                <div class="match-slide-item">
-                                    <div class="match-card bg-home">
-                                        <span class="match-date-badge text-primary">Today • 19:00</span>
-                                        <div class="match-teams">
-                                            <div class="team-row text-primary"> <span class="team-logo-placeholder bg-dark"></span> FC 풋로그
+                                <c:choose>
+                                    <c:when test="${not empty matchList}">
+                                        <c:forEach var="match" items="${matchList}">
+                                            <div class="match-slide-item">
+                                                <c:set var="cardClass" value="${match.home_code == teamCode ? 'bg-home' : 'bg-away'}" />
+                                                
+                                                <div class="match-card ${cardClass}"
+                                                     onclick="location.href='${pageContext.request.contextPath}/myteam/attendance?teamCode=${teamCode}&matchCode=${match.match_code}'">
+                                                    
+                                                    <span class="match-date-badge ${match.home_code == teamCode ? 'text-primary' : ''}">
+                                                        ${match.match_month}.${match.match_day} • ${match.match_time}
+                                                    </span>
+
+                                                    <div class="match-teams">
+                                                        <div class="team-row text-dark fw-bold">
+                                                            <span class="team-logo-placeholder bg-dark"></span> 
+                                                            <c:choose>
+                                                                <c:when test="${match.home_code == teamCode}">
+                                                                    vs ${match.opponent_name} (홈)
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    vs ${match.opponent_name} (원정)
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </div>
+                                                        <div class="team-row text-muted small mt-1">
+                                                            <i class="bi bi-geo-alt-fill me-1"></i>
+                                                            ${not empty match.stadiumName ? match.stadiumName : '장소 미정'}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="match-footer">
+                                                        <span>
+                                                            <c:choose>
+                                                                <c:when test="${match.my_attendance_status != null}">
+                                                                    <i class="bi bi-check-circle-fill text-success"></i> 투표 완료
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    Vote Now
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </span>
+                                                        <i class="bi bi-arrow-right"></i>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="team-row text-muted">
-                                                <span class="team-logo-placeholder"></span> 맨체스터 시티
-                                            </div>
-                                        </div>
-                                        <div class="match-footer" onclick="location.href='${pageContext.request.contextPath}/myteam/matchdetail'">
-                                            <span>Match Center</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="match-slide-item">
-                                    <div class="match-card bg-away">
-                                        <span class="match-date-badge">SAT 28 SEP • 20:00</span>
-                                        <div class="match-teams">
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder"></span> 개발자 유나이티드
-                                            </div>
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder bg-dark"></span> FC 풋로그
-                                            </div>
-                                        </div>
-                                        <div class="match-footer">
-                                            <span>Vote Now</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="match-slide-item">
-                                    <div class="match-card bg-home">
-                                        <span class="match-date-badge">SUN 02 OCT • 08:00</span>
-                                        <div class="match-teams">
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder bg-dark"></span> FC 풋로그
-                                            </div>
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder"></span> 조기축구회
-                                            </div>
-                                        </div>
-                                        <div class="match-footer">
-                                            <span>Match Center</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="match-slide-item">
-                                    <div class="match-card bg-away">
-                                        <span class="match-date-badge">SUN 09 OCT • 10:00</span>
-                                        <div class="match-teams">
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder"></span> FC 서울팬
-                                            </div>
-                                            <div class="team-row">
-                                                <span class="team-logo-placeholder bg-dark"></span> FC 풋로그
+                                        </c:forEach>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="match-slide-item" style="width: 100%;">
+                                            <div class="match-card bg-light d-flex align-items-center justify-content-center" style="height: 180px; cursor: default;">
+                                                <div class="text-center text-muted">
+                                                    <i class="bi bi-calendar-x fs-3"></i>
+                                                    <p class="mt-2 mb-0">예정된 매치 일정이 없습니다.</p>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="match-footer">
-                                            <span>Coming Soon</span>
-                                            <i class="bi bi-arrow-right"></i>
-                                        </div>
-                                    </div>
-                                </div>
+                                    </c:otherwise>
+                                </c:choose>
+
                             </div>
                         </div>
 
@@ -250,9 +250,7 @@
                                             </td>
                                             
                                             <td class="text-center">${dto.member_name}</td>
-                                            
                                             <td class="text-center text-muted small">${dto.created_at}</td>
-                                            
                                             <td class="text-center text-muted small">${dto.view_count}</td>
                                         </tr>
                                     </c:forEach>
@@ -286,20 +284,23 @@
         const nextBtn = document.getElementById('nextMatchBtn');
         
         let currentIndex = 0;
-        const totalItems = 6; // 아이템 총 개수 (추후 동적으로 변경 필요)
-        const itemsPerView = 3; // 한 화면에 보이는 개수 (반응형에 따라 조정 필요할 수 있음)
+        
+        const totalItems = ${not empty matchList ? matchList.size() : 0}; 
+        const itemsPerView = 3;
         
         function updateSlider() {
-            // 33.333% 씩 이동
+            if (totalItems === 0) return;
+
             const percentage = -(currentIndex * 33.333); 
-            track.style.transform = `translateX(${percentage}%)`;
+            track.style.transform = `translateX(\${percentage}%)`;
             
-            // 버튼 상태 업데이트
             prevBtn.disabled = (currentIndex === 0);
             nextBtn.disabled = (currentIndex >= totalItems - itemsPerView);
         }
 
         if(nextBtn && prevBtn && track) {
+            updateSlider();
+
             nextBtn.addEventListener('click', () => {
                 if (currentIndex < totalItems - itemsPerView) {
                     currentIndex++;

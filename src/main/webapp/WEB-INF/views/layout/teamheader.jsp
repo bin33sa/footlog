@@ -85,9 +85,17 @@
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/update?teamCode=${sessionScope.currentTeamCode}">구단 프로필 수정</a></li>
                             <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/squad">스쿼드 관리</a></li>
                             
+                            <li>
+                                <a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/match">
+                                    <c:choose>
+                                        <c:when test="${myRoleLevel >= 10}">매치 관리</c:when>
+                                        <c:otherwise>매치 일정</c:otherwise>
+                                    </c:choose>
+                                </a>
+                            </li>
+
                             <c:if test="${myRoleLevel >= 10}">
                             	<li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/teamUpdate?teamCode=${sessionScope.currentTeamCode}">구단 정보 수정</a></li>
-                                <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/match">매치관리</a></li>
                                 <li><a class="dropdown-item" href="${pageContext.request.contextPath}/myteam/requestList">신청현황</a></li>
                             </c:if>
 
