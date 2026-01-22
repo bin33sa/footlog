@@ -57,8 +57,14 @@
 	
 	<!-- 회원정보수정 -->
 	<update id="updateMember" parameterType="com.fl.model.MemberDTO">
-		UPDATE member SET password = #{password}, member_name = #{member_name}, 
-			phone_number = #{phone_number}, email = #{email}, region = #{region}, profile_image = #{profile_image},
+		UPDATE member SET 
+			password = #{password}, 
+			member_name = #{member_name}, 
+			phone_number = #{phone_number}, 
+			email = #{email}, 
+			
+			region = #{region, jdbcType=VARCHAR}, 
+			profile_image = #{profile_image, jdbcType=VARCHAR},
 			preferred_position = #{preferred_position, jdbcType=VARCHAR}
 		WHERE member_id = #{member_id}
 	</update>

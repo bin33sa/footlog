@@ -8,6 +8,7 @@ public class SessionInfo {
     private String profile_image;
     private String email;
     private String phone_number;
+    private String region;
     
     public Long getMember_code() { return member_code; }
     public void setMember_code(Long member_code) { this.member_code = member_code; }
@@ -37,6 +38,12 @@ public class SessionInfo {
 	}
 	public void setPhone_number(String phone_number) {
 		this.phone_number = phone_number;
+	}
+	public String getRegion() {
+		return region;
+	}
+	public void setRegion(String region) {
+		this.region = region;
 	}
 	
   
