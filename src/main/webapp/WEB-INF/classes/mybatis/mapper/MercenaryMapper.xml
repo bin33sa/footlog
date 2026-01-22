@@ -65,12 +65,12 @@
       AND t.status = 1  </select>
 	
 	<update id="updateMercenary" parameterType="com.fl.model.MercenaryDTO">
-		UPDATE Mercenary_post 
-    	SET title = #{title}, 
-        content = #{content}, 
-        team_code = #{team_code}  
-        WHERE recruit_id = #{recruit_id} AND member_code = #{member_code}
-	</update>
+    UPDATE Mercenary_post
+       SET title = #{title},
+           content = #{content},
+           team_code = #{team_code, jdbcType=NUMERIC}  WHERE recruit_id = #{recruit_id} 
+       AND member_code = #{member_code}
+</update>
     
     <select id="findById" parameterType="long" resultType="com.fl.model.MercenaryDTO">
         SELECT recruit_id, team_code, match_code, member_code, category,

@@ -170,5 +170,7 @@ public interface MyTeamMapper {
 
     public void updateMatchAttendance(Map<String, Object> map) throws SQLException;
     
+    MatchDTO readMatch(Map<String, Object> map) throws SQLException;
+    
 	public void insertVoteFromMatch(VoteDTO dto) throws SQLException;
 }

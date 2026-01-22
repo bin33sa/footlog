@@ -370,6 +370,32 @@ public class MyTeamController {
         return result;
     }
     
+    @ResponseBody
+    @GetMapping("read_match_info")
+    public Map<String, Object> readMatchInfo(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        try {
+            String matchCode = req.getParameter("match_code");
+            String teamCode = req.getParameter("team_code");
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("match_code", matchCode);
+            map.put("team_code", teamCode);
+            
+            MatchDTO dto = service.readMatch(map);
+            if (dto != null) {
+                model.put("state", "true");
+                model.put("dto", dto);
+            } else {
+                model.put("state", "false");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            model.put("state", "false");
+        }
+        return model;
+    }
+    
     @GetMapping("squad")
     public ModelAndView squad(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/squad");

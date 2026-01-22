@@ -734,6 +734,17 @@ public class MyTeamServiceImpl implements MyTeamService {
     }
     
     @Override
+    public MatchDTO readMatch(Map<String, Object> map) {
+        MatchDTO dto = null;
+        try {
+            dto = mapper.readMatch(map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return dto;
+    }
+    
+    @Override
     public int dataCountMatch(Map<String, Object> map) {
         int result = 0;
         try {
