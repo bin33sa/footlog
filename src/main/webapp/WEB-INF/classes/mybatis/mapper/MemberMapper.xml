@@ -89,6 +89,15 @@
 		WHERE member_id = #{member_id} 
 	</update>
 	
+	<!-- 내가 구단장인 팀이 미래에 매치가 잡혀있는지 (회원탈퇴 막기 용) -->
+	<select id="countActiveMatchAsLeader" parameterType="Long" resultType="int">
+    	SELECT COUNT(*)
+    	FROM match_post m
+    	JOIN member_team mt ON (m.home_code = mt.team_code OR m.away_code = mt.team_code)
+    	WHERE mt.member_code = #{member_code}
+      	AND mt.role_level = 10  AND m.match_date > SYSDATE AND m.status IN ('모집중', '매칭완료', '확정') 
+    </select>
+	
 	<!-- 아이디찾기(이름, 이메일이 일치) -->
 	<select id="findId" parameterType="map" resultType="com.fl.model.MemberDTO">
 	    SELECT *

@@ -224,7 +224,7 @@
     <script>
     // 회원 탈퇴 확인 창 
     function deleteMember() {
-	    // 구단장 여부 확인
+	    // 구단장 여부 및 남은 매치 확인
 	    $.ajax({
 	        url: "${pageContext.request.contextPath}/member/checkLeader",
 	        type: "post",
@@ -236,24 +236,35 @@
 	                return;
 	            }
 	
-	            let msg = "";
-	
-	            // 구단장일 경우 경고 메시지
-	            if(data.leaderCount > 0) {
-	                msg = "⚠️ [경고] 현재 운영 중인 구단이 " + data.leaderCount + "개 있습니다.\n\n"
-	                    + "회원 탈퇴 시, 회원님이 구단장으로 있는\n"
-	                    + "모든 구단이 자동으로 삭제 됩니다.\n\n"
-	                    + "이 작업은 되돌릴 수 없습니다.\n"
-	                    + "정말로 탈퇴하시겠습니까?";
-	            } else {
-	                // 일반 회원일 경우 메시지
-	                msg = "정말 탈퇴하시겠습니까?\n\n"
-	                    + "탈퇴 시 해당 아이디로 로그인이 불가능합니다.";
+	            // ★ 1. 남은 매치가 있으면 탈퇴 차단 (가장 강력한 조건)
+	            if(data.activeMatchCount > 0) {
+	                let msg = "⚠️ [탈퇴 불가]\n\n"
+	                        + "회원님이 구단장으로 있는 구단에\n"
+	                        + "진행 중이거나 예정된 매치가 " + data.activeMatchCount + "건 있습니다.\n\n"
+	                        + "책임 있는 운영을 위해,\n"
+	                        + "모든 매치를 취소하거나 완료한 후에 탈퇴할 수 있습니다.";
+	                alert(msg);
+	                return; // 여기서 함수 종료 (탈퇴 진행 안 됨)
 	            }
 	
-	            // 확인 누르면 탈퇴 URL로 이동
-	            if(confirm(msg)) {
-	                location.href = "${pageContext.request.contextPath}/member/delete";
+	            // 2. 구단장인 팀이 있으면 경고 (매치는 없는 상태)
+	            if(data.leaderCount > 0) {
+	                let msg = "⚠️ [경고] 현재 운영 중인 구단이 " + data.leaderCount + "개 있습니다.\n\n"
+	                        + "회원 탈퇴 시, 회원님이 구단장으로 있는\n"
+	                        + "모든 구단이 자동으로 삭제 됩니다.\n\n"
+	                        + "정말로 탈퇴하시겠습니까?";
+	                
+	                if(confirm(msg)) {
+	                    location.href = "${pageContext.request.contextPath}/member/delete";
+	                }
+	            } else {
+	                // 3. 일반 회원 탈퇴
+	                let msg = "정말 탈퇴하시겠습니까?\n\n"
+	                        + "탈퇴 시 해당 아이디로 로그인이 불가능합니다.";
+	                
+	                if(confirm(msg)) {
+	                    location.href = "${pageContext.request.contextPath}/member/delete";
+	                }
 	            }
 	        },
 	        error: function(e) {
@@ -262,6 +273,7 @@
 	        }
 	    });
 	}
+    
     
     // 내 구단 가기 모달 창 
     function openMyPageTeamModal(e) {

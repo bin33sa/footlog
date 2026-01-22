@@ -18,8 +18,10 @@ public interface MemberService {
 	
 	// 내가 구단장인 팀 개수 확인 (경고창용)
     public int countLeaderTeam(long member_code);
+    // 구단장인 팀의 진행 중인 매치 개수 확인
+    public int countActiveMatchAsLeader(long member_code);
 	
 	public MemberDTO findId(Map<String, Object> map); // 아이디 찾기
 	public MemberDTO findById(String userId); // 아이디 중복 확인 
-	public List<Map<String, Object>> listAgeSection();
+
 }

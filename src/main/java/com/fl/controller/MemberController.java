@@ -170,9 +170,8 @@ public class MemberController {
    @ResponseBody
    @PostMapping("checkLeader")
    public Map<String, Object> checkLeader(HttpServletRequest req, HttpServletResponse resp) {
-      
-       HttpSession session = req.getSession();
        
+       HttpSession session = req.getSession();
        Map<String, Object> model = new HashMap<>();
        SessionInfo info = (SessionInfo) session.getAttribute("member");
        
@@ -181,11 +180,15 @@ public class MemberController {
            return model;
        }
 
-       // 서비스 호출
+       // 1. 구단장인 팀 개수 조회
        int leaderCount = service.countLeaderTeam(info.getMember_code());
+       
+       // 2. [추가] 구단장인 팀의 남은 매치 개수 조회
+       int activeMatchCount = service.countActiveMatchAsLeader(info.getMember_code());
        
        model.put("isLogin", true);
        model.put("leaderCount", leaderCount);
+       model.put("activeMatchCount", activeMatchCount); // 프론트로 전달
        
        return model;
    }

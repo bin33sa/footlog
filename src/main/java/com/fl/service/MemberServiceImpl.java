@@ -82,6 +82,18 @@ public class MemberServiceImpl implements MemberService {
 	}
 	
 	@Override
+	public int countActiveMatchAsLeader(long member_code) {
+		int result = 0;
+		try {
+			result = mapper.countActiveMatchAsLeader(member_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	
+	@Override
 	public int countLeaderTeam(long memberCode) {
 	    int count = 0;
 	    try {
@@ -104,12 +116,6 @@ public class MemberServiceImpl implements MemberService {
 			e.printStackTrace();
 		}
 		return dto;
-	}
-
-	@Override
-	public List<Map<String, Object>> listAgeSection() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	// 아이디 찾기 (이메일, 이름)
