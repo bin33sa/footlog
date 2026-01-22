@@ -259,31 +259,37 @@ public class MercenaryController {
 		return new ModelAndView("redirect:/mercenary/list?page=" + page);
 	}
 	
-	@PostMapping("update")
-	public ModelAndView updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		
-		String page = req.getParameter("page");
-		try {
-			MercenaryDTO dto = new MercenaryDTO();
-			
-			dto.setRecruit_id(Long.parseLong(req.getParameter("recruit_id")));
-			dto.setTitle(req.getParameter("title"));
-			dto.setContent(req.getParameter("content"));
-			
-			dto.setTeam_code(Long.parseLong(req.getParameter("team_code")));
-			
-			dto.setMember_code(info.getMember_code());
-			
-			service.updateMercenary(dto);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return new ModelAndView("redirect:/mercenary/list?page=" + page);
-	}
+    @PostMapping("update")
+    public ModelAndView updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession();
+        SessionInfo info = (SessionInfo)session.getAttribute("member");
+        
+        String page = req.getParameter("page");
+        try {
+            MercenaryDTO dto = new MercenaryDTO();
+            
+            dto.setRecruit_id(Long.parseLong(req.getParameter("recruit_id")));
+            dto.setTitle(req.getParameter("title"));
+            dto.setContent(req.getParameter("content"));
+            dto.setMember_code(info.getMember_code());
+
+            // --- 수정된 부분: team_code가 있을 때만 파싱 ---
+            String teamCodeStr = req.getParameter("team_code");
+            if (teamCodeStr != null && !teamCodeStr.trim().isEmpty()) {
+                dto.setTeam_code(Long.parseLong(teamCodeStr));
+            } else {
+                dto.setTeam_code(null); // 팀 정보가 없으면 null 세팅
+            }
+            // ------------------------------------------
+            
+            service.updateMercenary(dto);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return new ModelAndView("redirect:/mercenary/list?page=" + page);
+    }
 	
 	@GetMapping("delete")
 	public ModelAndView deleteMercenary(HttpServletRequest req, HttpServletResponse resp) {
