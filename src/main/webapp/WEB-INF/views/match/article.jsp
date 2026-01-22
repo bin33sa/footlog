@@ -111,8 +111,24 @@
 						${dto.content}</p>
 
 					<h5 class="fw-bold mb-3">위치 안내</h5>
-					<div id="map" class="rounded-4 border shadow-sm w-100"
-						style="height: 400px;"></div>
+					<div id="map" class="rounded-4 border shadow-sm w-100" style="height: 400px;"></div>
+					<c:import url="/WEB-INF/views/api/field.jsp"/>
+					<script>
+						console.log("lat:", ${dto.lat});
+						console.log("lng:", ${dto.lng});
+								
+						var mapContainer = document.getElementById('map'),  
+						mapOption = {center : new kakao.maps.LatLng(${dto.lat}, ${dto.lng}), level : 3
+									};
+
+						var map = new kakao.maps.Map(mapContainer,mapOption);
+
+						var markerPosition = new kakao.maps.LatLng(${dto.lat}, ${dto.lng});
+
+						var marker = new kakao.maps.Marker({position : markerPosition});
+
+						marker.setMap(map);
+						</script>
 
 					<div class="d-flex justify-content-between align-items-center mt-5">
 						<div class="d-flex gap-2">
@@ -294,9 +310,19 @@
 
 	<jsp:include page="/WEB-INF/views/layout/footerResources.jsp" />
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="${pageContext.request.contextPath}/dist/api/map.js"></script>
 	
 	<script type="text/javascript">
+		$(function(){
+			let lat = "${dto.lat}";
+			let lng = "${dto.lng}";
+			
+			if(lat && lng && lat!==0 && lng != 0){
+				initKakaoMap(lat,lng,'map');
+			}else{
+				$("#map").html('<div class="d-flex justify-content-center align-items-center h-100 text-muted bg-light">위치 정보가 등록되지 않은 구장입니다.</div>');
+			}
+		})
+	
 		function openShareModal() {
 			const currentUrl = window.location.href;
 			document.getElementById('shareUrlInput').value = currentUrl;

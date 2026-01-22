@@ -1,49 +1,51 @@
 package com.fl.model;
 
 public class MatchDTO {
-	private Long match_code;         
-    private Long home_code;          
-    private Long away_code;          
-    private String match_date;       
-    private String status;           
-    private String title;            
-    private String content;          
-    private String created_at;       
-    private int view_count;          
+	private Long match_code;
+	private Long home_code;
+	private Long away_code;
+	private String match_date;
+	private String status;
+	private String title;
+	private String content;
+	private String created_at;
+	private int view_count;
 
-    private int home_score;
-    private int away_score;
-   
-    private String home_team_name;
-    private String home_team_emblem; 
-    private String region;          
-    
-    private String away_team_name;
-    private String away_team_emblem;
-    
-    private int reply_count;
-    
-    private String matchType;
-    private String gender;
-    private Long fee;
-    private Long member_code;
-    
-    private int stadium_code;
-    private String stadiumName; 
-    private String matchLevel;
-    
-    private String match_month;
-    private String match_day;
-    private String match_time;
-    private String opponent_name;
-    private int vote_count; 
-    private int vote_target;
-    private int attend_count;        
-    private int total_member_count;  
-    private String my_attendance_status;
-    
-    
-    public String getMatchType() {
+	private int home_score;
+	private int away_score;
+
+	private String home_team_name;
+	private String home_team_emblem;
+	private String region;
+
+	private String away_team_name;
+	private String away_team_emblem;
+
+	private int reply_count;
+
+	private String matchType;
+	private String gender;
+	private Long fee;
+	private Long member_code;
+
+	private int stadium_code;
+	private String stadiumName;
+	private String matchLevel;
+
+	private String match_month;
+	private String match_day;
+	private String match_time;
+	private String opponent_name;
+	private int vote_count;
+	private int vote_target;
+	private int attend_count;
+	private int total_member_count;
+	private String my_attendance_status;
+
+	private Double lat;
+	private Double lng;
+
+	public String getMatchType() {
 		return matchType;
 	}
 
@@ -306,6 +308,21 @@ public class MatchDTO {
 	public void setMy_attendance_status(String my_attendance_status) {
 		this.my_attendance_status = my_attendance_status;
 	}
-    
-    
+
+	public Double getLat() {
+		return lat;
+	}
+
+	public void setLat(Double lat) {
+		this.lat = lat;
+	}
+
+	public Double getLng() {
+		return lng;
+	}
+
+	public void setLng(Double lng) {
+		this.lng = lng;
+	}
+
 }
