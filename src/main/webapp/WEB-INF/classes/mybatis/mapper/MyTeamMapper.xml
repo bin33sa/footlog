@@ -785,19 +785,26 @@
 	    )
 	</insert>
     
-    <select id="readMatch" parameterType="long" resultType="com.fl.model.MatchDTO">
+ 	<select id="readMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
 	    SELECT 
 	        m.match_code, 
 	        m.home_code, 
 	        m.away_code, 
 	        m.status,
-	        TO_CHAR(m.match_date, 'YYYY년 MM월 DD일 (DY) HH24:MI') AS match_date,
+	        m.matchType,
+	        m.gender,
+	        m.fee,
+	        TO_CHAR(m.match_date, 'YYYY"년" MM"월" DD"일" (DY) HH24:MI') AS match_date,
 	        s.stadium_name AS stadiumName,
+	        s.stadium_code,
 	        CASE 
 	            WHEN m.home_code = #{team_code} THEN NVL(at.team_name, '매칭 대기 중')
 	            WHEN m.away_code = #{team_code} THEN ht.team_name
 	            ELSE '미정'
-	        END AS opponent_name
+	        END AS opponent_name,
+	        (SELECT COUNT(*) 
+	         FROM match_attendance ma 
+	         WHERE ma.match_code = m.match_code AND ma.status = '참석') AS attend_count
 	    FROM match_post m
 	    LEFT JOIN team ht ON m.home_code = ht.team_code
 	    LEFT JOIN team at ON m.away_code = at.team_code

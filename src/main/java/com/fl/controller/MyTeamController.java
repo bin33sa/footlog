@@ -336,38 +336,32 @@ public class MyTeamController {
     
     @ResponseBody
     @PostMapping("vote_match")
-    public Map<String, Object> voteMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {      
-        Map<String, Object> result = new HashMap<>();
+    public Map<String, Object> voteMatch(HttpServletRequest req, HttpServletResponse resp) {
+        Map<String, Object> model = new HashMap<>();
+        HttpSession session = req.getSession();
         
         try {
-            HttpSession session = req.getSession();
             SessionInfo info = (SessionInfo) session.getAttribute("member");
-            
             if (info == null) {
-                result.put("state", "false");
-                return result;
+                model.put("state", "false");
+                return model;
             }
-
-            String matchCodeStr = req.getParameter("match_code");
+            String matchCode = req.getParameter("match_code");
+            String teamCode = req.getParameter("team_code");
             String status = req.getParameter("status");
-            
-            long matchCode = Long.parseLong(matchCodeStr);
-            long memberCode = info.getMember_code();
             Map<String, Object> map = new HashMap<>();
             map.put("match_code", matchCode);
-            map.put("member_code", memberCode);
+            map.put("team_code", teamCode);
+            map.put("member_code", info.getMember_code());
             map.put("status", status);
-
             service.updateMatchAttendance(map);
+            model.put("state", "true");
             
-            result.put("state", "true");
-
         } catch (Exception e) {
-            result.put("state", "false");
             e.printStackTrace();
+            model.put("state", "false");
         }
-        
-        return result;
+        return model;
     }
     
     @ResponseBody
@@ -375,14 +369,22 @@ public class MyTeamController {
     public Map<String, Object> readMatchInfo(HttpServletRequest req, HttpServletResponse resp) {
         Map<String, Object> model = new HashMap<>();
         try {
-            String matchCode = req.getParameter("match_code");
-            String teamCode = req.getParameter("team_code");
+            String mCodeParam = req.getParameter("match_code");
+            String tCodeParam = req.getParameter("team_code");
+            
+            if(mCodeParam == null || tCodeParam == null) {
+                model.put("state", "false");
+                return model;
+            }
+
+            long matchCode = Long.parseLong(mCodeParam);
+            long teamCode = Long.parseLong(tCodeParam);
 
             Map<String, Object> map = new HashMap<>();
             map.put("match_code", matchCode);
             map.put("team_code", teamCode);
-            
             MatchDTO dto = service.readMatch(map);
+            
             if (dto != null) {
                 model.put("state", "true");
                 model.put("dto", dto);
