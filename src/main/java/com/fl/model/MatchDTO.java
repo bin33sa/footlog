@@ -41,7 +41,9 @@ public class MatchDTO {
     private int attend_count;        
     private int total_member_count;  
     private String my_attendance_status;
-    
+    private String opponent_emblem; 
+    private String home_away_side;
+    private String match_date_raw;
     
     public String getMatchType() {
 		return matchType;
@@ -305,6 +307,30 @@ public class MatchDTO {
 
 	public void setMy_attendance_status(String my_attendance_status) {
 		this.my_attendance_status = my_attendance_status;
+	}
+
+	public String getOpponent_emblem() {
+		return opponent_emblem;
+	}
+
+	public void setOpponent_emblem(String opponent_emblem) {
+		this.opponent_emblem = opponent_emblem;
+	}
+
+	public String getHome_away_side() {
+		return home_away_side;
+	}
+
+	public void setHome_away_side(String home_away_side) {
+		this.home_away_side = home_away_side;
+	}
+
+	public String getMatch_date_raw() {
+		return match_date_raw;
+	}
+
+	public void setMatch_date_raw(String match_date_raw) {
+		this.match_date_raw = match_date_raw;
 	}
     
     

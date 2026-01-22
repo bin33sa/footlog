@@ -279,7 +279,6 @@ public class MyTeamController {
                             param.put("team_code", myTeamCode);
                             
                             service.insertMissingAttendance(param);
-
                             int scheduleCount = service.countMatchSchedule(param);
                             if (scheduleCount == 0) {
                                 ScheduleDTO sch = new ScheduleDTO();
@@ -289,17 +288,18 @@ public class MyTeamController {
                                 
                                 String opponent = (dto.getOpponent_name() == null || "미정".equals(dto.getOpponent_name())) ? "상대 미정" : dto.getOpponent_name();
                                 sch.setTitle("[매치] vs " + opponent);
-                                sch.setContent("장소: " + dto.getStadiumName() + "\n상태: " + dto.getStatus());
-                                sch.setStart_date(dto.getMatch_date());
-                                sch.setEnd_date(dto.getMatch_date());
+                                sch.setContent("장소: " + dto.getStadiumName() + "\n상태: " + dto.getStatus());                               
+                                sch.setStart_date(dto.getMatch_date_raw());
+                                sch.setEnd_date(dto.getMatch_date_raw());
                                 
                                 service.insertSchedule(sch);
                             }
+                            
                             String opponent = (dto.getOpponent_name() == null) ? "상대 미정" : dto.getOpponent_name();
                             
                             Map<String, Object> voteCheckParam = new HashMap<>();
                             voteCheckParam.put("team_code", myTeamCode);
-                            voteCheckParam.put("match_date", dto.getMatch_date());
+                            voteCheckParam.put("match_date", dto.getMatch_date_raw()); 
                             voteCheckParam.put("opponent_name", opponent);
                             
                             int voteExists = service.countMatchVoteBoard(voteCheckParam);
@@ -308,15 +308,14 @@ public class MyTeamController {
                                 VoteDTO voteDto = new VoteDTO();
                                 voteDto.setMemberCode(memberCode);
                                 voteDto.setTeamCode(myTeamCode);
-                                voteDto.setTitle("[매치] vs " + opponent);
-                                
+                                voteDto.setTitle("[매치] vs " + opponent);                             
                                 String content = "경기 일시: " + dto.getMatch_date() + "<br>" +
                                                  "경기 장소: " + dto.getStadiumName() + "<br>" +
                                                  "많은 참석 바랍니다.";
-                                voteDto.setContent(content);
-                                voteDto.setEventDate(dto.getMatch_date());
-                                voteDto.setStartDate(dto.getMatch_date());
-                                voteDto.setEndDate(dto.getMatch_date());
+                                voteDto.setContent(content);                              
+                                voteDto.setEventDate(dto.getMatch_date_raw());
+                                voteDto.setStartDate(dto.getMatch_date_raw());
+                                voteDto.setEndDate(dto.getMatch_date_raw());
                                 
                                 service.insertVoteFromMatch(voteDto);
                             }
@@ -324,9 +323,8 @@ public class MyTeamController {
                     }
                 }
             } catch (Exception e) {
-                System.out.println("[Controller] 자동 생성 로직 에러 (무시됨): " + e.toString());
-            }
-           
+                System.err.println("[Controller] 자동 생성 로직 상세 에러: " + e.getMessage());
+            }          
         } catch (Exception e) {
             result.put("state", "false");
             e.printStackTrace();
