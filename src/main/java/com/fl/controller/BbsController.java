@@ -286,7 +286,9 @@ public class BbsController {
             dto.setContent(req.getParameter("content"));
             dto.setMember_code(info.getMember_code());
             dto.setCategory(Integer.parseInt(category));
-
+            
+            dto.setVideo_url(req.getParameter("video_url"));
+            
             // [갤러리 이미지 수정 로직]
             if (category.equals("4")) {
                 jakarta.servlet.http.Part part = req.getPart("selectFile");
@@ -337,7 +339,20 @@ public class BbsController {
             if (dto == null) {
                 return new ModelAndView("redirect:/bbs/list?page=" + page + "&category=" + category);
             }
-
+            
+            String videoUrl = dto.getVideo_url();
+            if (videoUrl != null && !videoUrl.isEmpty()) {
+                String embedUrl = videoUrl;
+                if (videoUrl.contains("watch?v=")) {
+                    String videoId = videoUrl.split("v=")[1].split("&")[0];
+                    embedUrl = "https://www.youtube.com/embed/" + videoId;
+                } else if (videoUrl.contains("youtu.be/")) {
+                    String videoId = videoUrl.split("be/")[1].split("\\?")[0];
+                    embedUrl = "https://www.youtube.com/embed/" + videoId;
+                }
+                dto.setVideo_url(embedUrl); // DTO에 변환된 주소를 다시 담음
+            }
+            
             mav.addObject("dto", dto);
             mav.addObject("page", page);
             mav.addObject("category", category);
