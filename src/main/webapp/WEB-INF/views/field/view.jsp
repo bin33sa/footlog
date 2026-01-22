@@ -139,14 +139,9 @@
 											class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
 											class="bi bi-star-fill"></i>
 									</div>
-									<a href="#" class="text-decoration-underline small text-muted">리뷰
-										128개 보기</a>
+									
 								</div>
-								<div class="d-grid">
-									<button class="btn btn-outline-dark rounded-pill">
-										<i class="bi bi-heart me-1"></i> 찜하기
-									</button>
-								</div>
+								
 							</div>
 						</div>
 
@@ -243,12 +238,18 @@
 								<div id="map" class="rounded-4 border shadow-sm w-100"
 									style="height: 400px;"></div>
 
+								<script type="text/javascript"
+ 							src="//dapi.kakao.com/v2/maps/sdk.js?appkey=4b8e37e902103e733a46645c22385361"></script>
+								
 								<script>
+								console.log("lat:", ${dto.lat});
+							    console.log("lng:", ${dto.lng});
+								
 									var mapContainer = document
 											.getElementById('map'), // 지도를 표시할 div 
 									mapOption = {
 										center : new kakao.maps.LatLng(
-												37.571679, 126.898320), // 지도의 중심좌표
+												${dto.lat}, ${dto.lng}), // 지도의 중심좌표
 										level : 3
 									};
 
@@ -256,7 +257,7 @@
 											mapOption);
 
 									var markerPosition = new kakao.maps.LatLng(
-											37.571679, 126.898320);
+											${dto.lat}, ${dto.lng});
 
 									var marker = new kakao.maps.Marker({
 										position : markerPosition

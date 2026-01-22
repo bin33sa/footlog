@@ -96,13 +96,13 @@
                 <div class="profile-btn" onclick="document.getElementById('selectFile').click();" title="사진 변경"><i class="bi bi-camera-fill"></i></div>
                 <input type="file" name="selectFile" id="selectFile" accept="image/png, image/jpeg" hidden>
                 <input type="hidden" name="imageDeleted" id="imageDeleted" value="false">
-                <input type="hidden" name="stadiumImage" value="${dto.stadiumImage}">
+                <input type="hidden" name="stadiumImage" value="${StadiumDto.stadiumImage}">
             </div>
         </div>
 
         <div class="mb-4">
             <label class="form-label">구장 명</label>
-            <input type="text" name="stadiumName" value="${dto.stadiumName}" class="form-control">
+            <input type="text" name="stadiumName" value="${StadiumDto.stadiumName}" class="form-control">
         </div>
         <div class="mb-4">
             <label class="form-label">지역</label>
@@ -119,20 +119,29 @@
         </div>
         <div class="mb-3">
             <label class="form-label">대표연락처</label>
-            <input type="text" name="phoneNumber" value="${dto.phoneNumber}" class="form-control">
+            <input type="text" name="phoneNumber" value="${StadiumDto.phoneNumber}" class="form-control">
         </div>
         <div class="mb-3">
             <label class="form-label">구장 소개글</label>
-            <input type="text" name="description" value="${dto.description}" class="form-control">
+            <input type="text" name="description" value="${StadiumDto.description}" class="form-control">
         </div>
 	        
 	    <div class="mb-3">
 			<label class="form-label">평점</label>
-			<input type="number" name="rating" value="${dto.rating}" class="form-control">
+			<input type="number" name="rating" value="${StadiumDto.rating}" class="form-control">
 		</div>
 		<div class="mb-3">
 			<label class="form-label">시간당 가격</label>
-			<input type="number" name="price" value="${dto.price}" class="form-control">
+			<input type="number" name="price" value="${StadiumDto.price}" class="form-control">
+		</div>
+		
+		<div class="mb-3">
+			<label class="form-label">위도 좌표</label>
+			<input type="number" name="lat" value="${StadiumDto.lat}" class="form-control">
+		</div>
+		<div class="mb-3">
+			<label class="form-label">경도 좌표</label>
+			<input type="number" name="lng" value="${StadiumDto.lng}" class="form-control">
 		</div>
 	        
         <div class="row g-2">

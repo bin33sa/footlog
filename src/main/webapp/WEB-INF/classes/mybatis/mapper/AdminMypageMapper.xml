@@ -16,6 +16,8 @@
 		parameterType="com.fl.model.StadiumDTO">
 
 		INSERT INTO stadium (
+		lat,
+		lng,
 		stadium_code,
 		stadium_name,
 		region,
@@ -25,6 +27,8 @@
 		rating,
 		price
 		) VALUES (
+		#{lat},
+		#{lng},
 		seq_stadium.NEXTVAL,
 		#{stadiumName},
 		#{region},
@@ -41,6 +45,8 @@
 
 	    UPDATE stadium
 	    SET
+	    	lat = #{lat},
+	    	lng = #{lng},
 	        stadium_name   = #{stadiumName},
 	        region         = #{region},
 	        phone_number   = #{phoneNumber},
@@ -106,7 +112,15 @@
 		resultType="com.fl.model.StadiumDTO">
 		SELECT
 		stadium_code AS stadiumCode,
-		stadium_name AS stadiumName
+		stadium_name AS stadiumName,
+		region,
+		description,
+		rating,
+		price,
+		lat,
+		lng,
+		phone_number AS phoneNumber,
+		stadium_image AS stadiumImage
 		FROM stadium
 		WHERE stadium_code = #{stadiumCode}
 	</select>

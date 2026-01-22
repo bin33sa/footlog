@@ -216,10 +216,13 @@ public class MypageAdminController {
 		
 		StadiumDTO dto = new StadiumDTO();
 	    dto.setStadiumCode(stadiumCode); 
+	    
+	    StadiumDTO StadiumDto = adminService.ListStadiumFind(stadiumCode);
 
 	    ModelAndView mav = new ModelAndView("admin/mypage/updateStadium");
 	    
-	    mav.addObject("dto", dto);   // ★ 이 한 줄이 핵심
+	    mav.addObject("StadiumDto", StadiumDto);   
+	    mav.addObject("dto", dto);   
 		mav.addObject("mode", "update");
 		return mav;
 	}
@@ -252,6 +255,9 @@ public class MypageAdminController {
 		    try {
 		    	
 		        StadiumDTO dto = new StadiumDTO();
+		        dto.setLat(Double.parseDouble(req.getParameter("lat")));
+		        dto.setLng(Double.parseDouble(req.getParameter("lng")));
+		        
 		        dto.setStadiumName(req.getParameter("stadiumName"));
 		        dto.setRegion(req.getParameter("region"));
 		        dto.setPhoneNumber(req.getParameter("phoneNumber"));

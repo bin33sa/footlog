@@ -12,8 +12,25 @@ public class StadiumDTO {
 	private long price;
 	private long is_deleted;
 	
+	private double lat;
+	private double lng;
 	
 	
+	
+	
+	
+	public double getLat() {
+		return lat;
+	}
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+	public double getLng() {
+		return lng;
+	}
+	public void setLng(double lng) {
+		this.lng = lng;
+	}
 	public String getStadiumImage() {
 		return stadiumImage;
 	}
