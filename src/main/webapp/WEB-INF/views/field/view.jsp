@@ -238,9 +238,9 @@
 								<div id="map" class="rounded-4 border shadow-sm w-100"
 									style="height: 400px;"></div>
 
-								<script type="text/javascript"
- 							src="//dapi.kakao.com/v2/maps/sdk.js?appkey=4b8e37e902103e733a46645c22385361"></script>
-								
+
+
+
 								<script>
 								console.log("lat:", ${dto.lat});
 							    console.log("lng:", ${dto.lng});
