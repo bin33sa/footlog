@@ -238,9 +238,7 @@
 								<div id="map" class="rounded-4 border shadow-sm w-100"
 									style="height: 400px;"></div>
 
-
-
-
+								<c:import url="/WEB-INF/views/api/field.jsp"/>
 								<script>
 								console.log("lat:", ${dto.lat});
 							    console.log("lng:", ${dto.lng});
