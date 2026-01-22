@@ -138,11 +138,22 @@ public class MyTeamController {
         HttpSession session = req.getSession();
 
         long teamCode = setTeamInfoAndRole(req, session, mav);
-
         if (teamCode == -1) {
-            return new ModelAndView("redirect:/team/list?msg=noteam"); 
+            return new ModelAndView("redirect:/myteam/list?msg=noteam"); 
         }
 
+        SessionInfo info = (SessionInfo) session.getAttribute("member");
+        long memberCode = info.getMember_code();
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("team_code", teamCode);
+        map.put("member_code", memberCode);
+        map.put("offset", 0);
+        map.put("size", 10); 
+
+        List<MatchDTO> matchList = service.listMatch(map);
+        
+        mav.addObject("matchList", matchList); 
         List<TeamBoardDTO> boardList = service.listHomeTeamBoard(teamCode);
         mav.addObject("boardList", boardList);
         
@@ -201,21 +212,15 @@ public class MyTeamController {
     }
 
     @GetMapping("match")
-    public ModelAndView manageMatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public ModelAndView match(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         ModelAndView mav = new ModelAndView("myteam/match");
         HttpSession session = req.getSession();
 
         long teamCode = setTeamInfoAndRole(req, session, mav);
+
         if (teamCode == -1) {
-            return new ModelAndView("redirect:/team/list?msg=noteam");
+            return new ModelAndView("redirect:/myteam/list"); 
         }
-
-        SessionInfo info = (SessionInfo) session.getAttribute("member");
-        int myRoleLevel = service.readMemberRoleLevel(info.getMember_code(), teamCode);
-        
-        if (myRoleLevel < 10) return new ModelAndView("redirect:/myteam/main?msg=unauthorized");
-
-        mav.addObject("teamCode", teamCode);
 
         return mav;
     }

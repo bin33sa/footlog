@@ -93,7 +93,12 @@
                                     <c:otherwise>구단 스쿼드</c:otherwise>
                                 </c:choose>
                             </a>
-                            
+                            <a href="${pageContext.request.contextPath}/myteam/match?teamCode=${sessionScope.currentTeamCode}" class="list-group-item list-group-item-action border-0">
+                                <c:choose>
+                                    <c:when test="${myRoleLevel >= 10}">매치 관리</c:when>
+                                    <c:otherwise>매치 일정</c:otherwise>
+                                </c:choose>
+                            </a>
                             <c:if test="${myRoleLevel >= 10}">
                                 <a href="${pageContext.request.contextPath}/myteam/manage/match?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">매치 관리</a>
                                 <a href="${pageContext.request.contextPath}/myteam/requestList?teamCode=${teamCode}" class="list-group-item list-group-item-action border-0">
