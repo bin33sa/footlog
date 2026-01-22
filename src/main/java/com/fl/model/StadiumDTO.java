@@ -7,13 +7,19 @@ public class StadiumDTO {
 	private String phoneNumber;
 	private String description;
 	private String introUrl;
-	private String stadium_image;
+	private String stadiumImage;
 	private long rating;
 	private long price;
 	private long is_deleted;
 	
 	
 	
+	public String getStadiumImage() {
+		return stadiumImage;
+	}
+	public void setStadiumImage(String stadiumImage) {
+		this.stadiumImage = stadiumImage;
+	}
 	public long getIs_deleted() {
 		return is_deleted;
 	}
@@ -56,12 +62,7 @@ public class StadiumDTO {
 	public void setIntroUrl(String introUrl) {
 		this.introUrl = introUrl;
 	}
-	public String getStadium_image() {
-		return stadium_image;
-	}
-	public void setStadium_image(String stadium_image) {
-		this.stadium_image = stadium_image;
-	}
+	
 	public long getRating() {
 		return rating;
 	}

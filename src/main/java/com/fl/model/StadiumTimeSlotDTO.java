@@ -5,6 +5,15 @@ public class StadiumTimeSlotDTO {
 	private long timeCode;
 	private String timeLabel; // time_code 조인용
 	private String dayType;
+	private String availableYn;
+	
+	
+	public String getAvailableYn() {
+		return availableYn;
+	}
+	public void setAvailableYn(String availableYn) {
+		this.availableYn = availableYn;
+	}
 	public long getStadiumCode() {
 		return stadiumCode;
 	}

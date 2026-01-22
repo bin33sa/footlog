@@ -85,18 +85,18 @@
         <div class="profile-section">
             <div class="profile-wrapper">
                 <c:choose>
-                    <c:when test="${not empty dto.stadium_image && dto.stadium_image != 'avatar.png'}">
-                        <img src="${pageContext.request.contextPath}/uploads/member/${dto.stadium_image}" id="profilePreview" class="profile-img" onerror="this.src='${pageContext.request.contextPath}/dist/images/avatar.png'">
+                    <c:when test="${not empty dto.stadiumImage && dto.stadiumImage != 'default.jpg'}">
+                        <img src="${pageContext.request.contextPath}/uploads/member/${dto.stadiumImage}" id="profilePreview" class="profile-img" onerror="this.src='${pageContext.request.contextPath}/dist/images/default.jpg'">
                     </c:when>
                     <c:otherwise>
-                        <img src="${pageContext.request.contextPath}/dist/images/avatar.png" id="profilePreview" class="profile-img">
+                        <img src="${pageContext.request.contextPath}/dist/images/default.jpg" id="profilePreview" class="profile-img">
                     </c:otherwise>
                 </c:choose>
                 <div class="delete-btn" onclick="deleteImage()" title="기본 이미지로 변경"><i class="bi bi-trash-fill"></i></div>
                 <div class="profile-btn" onclick="document.getElementById('selectFile').click();" title="사진 변경"><i class="bi bi-camera-fill"></i></div>
                 <input type="file" name="selectFile" id="selectFile" accept="image/png, image/jpeg" hidden>
                 <input type="hidden" name="imageDeleted" id="imageDeleted" value="false">
-                <input type="hidden" name="stadiumImage" value="${dto.stadium_image}">
+                <input type="hidden" name="stadiumImage" value="${dto.stadiumImage}">
             </div>
         </div>
 
@@ -155,7 +155,7 @@ $(function() {
 
 function deleteImage() {
     if(!confirm("프로필 사진을 삭제하시겠습니까?")) return;
-    document.getElementById('profilePreview').src = '${pageContext.request.contextPath}/dist/images/avatar.png';
+    document.getElementById('profilePreview').src = '${pageContext.request.contextPath}/dist/images/default.jpg';
     document.getElementById('selectFile').value = '';
     document.getElementById('imageDeleted').value = "true";
 }

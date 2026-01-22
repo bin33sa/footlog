@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fl.model.BoardReplyDTO;
 import com.fl.model.GalleryDTO;
 import com.fl.model.JoinRequestDTO;
+import com.fl.model.MatchDTO;
 import com.fl.model.ScheduleDTO;
 import com.fl.model.TeamBoardDTO;
 import com.fl.model.TeamDTO;
@@ -146,5 +147,19 @@ public interface MyTeamService {
     public int countBoardLike(long board_team_code);
     
     public boolean isUserBoardLiked(Map<String, Object> map);
-
+    
+    public List<MatchDTO> listMatch(Map<String, Object> map);
+    
+    public int dataCountMatch(Map<String, Object> map);
+    
+    public void insertMissingAttendance(Map<String, Object> map) throws Exception;
+    
+    public void updateMatchAttendance(Map<String, Object> map) throws Exception;
+    
+    public int countMatchSchedule(Map<String, Object> map);
+    
+    public int countMatchVoteBoard(Map<String, Object> map);
+    
+    public void insertVoteFromMatch(VoteDTO dto) throws Exception;
+    
 }

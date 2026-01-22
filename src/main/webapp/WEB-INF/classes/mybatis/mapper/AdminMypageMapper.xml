@@ -30,7 +30,7 @@
 		#{region},
 		#{phoneNumber},
 		#{description},
-		#{stadium_image},
+		#{stadiumImage},
 		#{rating},
 		#{price}
 		)
@@ -45,7 +45,7 @@
 	        region         = #{region},
 	        phone_number   = #{phoneNumber},
 	        description    = #{description},
-	        stadium_image  = #{stadium_image},
+	        stadium_image  = #{stadiumImage},
 	        rating         = #{rating},
 	        price          = #{price}
 	    WHERE stadium_code = #{stadiumCode}

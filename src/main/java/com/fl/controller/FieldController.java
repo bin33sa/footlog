@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.util.List;
 
 import com.fl.model.PageResult;
+import com.fl.model.SessionInfo;
 import com.fl.model.StadiumDTO;
+import com.fl.model.StadiumReservationDTO;
 import com.fl.model.StadiumTimeSlotDTO;
+import com.fl.model.TeamDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
+import com.fl.mvc.annotation.PostMapping;
 import com.fl.mvc.annotation.RequestMapping;
 import com.fl.mvc.view.ModelAndView;
 import com.fl.service.StadiumService;
@@ -18,6 +22,7 @@ import com.fl.service.TimeSlotServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/field/*")
@@ -40,7 +45,7 @@ public class FieldController {
 		mav.addObject("list", result.getList());
 		mav.addObject("pageNo", result.getPageNo());
 		mav.addObject("totalPage", result.getTotalPage());
-		
+
 		mav.addObject("keyword", keyword);
 		mav.addObject("sort", sort);
 
@@ -49,58 +54,158 @@ public class FieldController {
 
 	@RequestMapping("view")
 	public ModelAndView detail(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
-		
-		int stadiumCode = Integer.parseInt(req.getParameter("stadiumCode"));
-		
-		StadiumDTO dto = Stadiumservice.findById(stadiumCode);
-		
-		
-		ModelAndView mav = new ModelAndView("field/view");
-		
-		mav.addObject("dto", dto);
-		
-		return mav;
+		try {
+
+			HttpSession session = req.getSession();
+			SessionInfo info = (SessionInfo) session.getAttribute("member");
+			long memberCode = info.getMember_code();
+
+			List<TeamDTO> teams = Stadiumservice.findByMemberCode(memberCode);
+
+			int stadiumCode = Integer.parseInt(req.getParameter("stadiumCode"));
+
+			StadiumDTO dto = Stadiumservice.findById(stadiumCode);
+
+			ModelAndView mav = new ModelAndView("field/view");
+
+			mav.addObject("teams", teams);
+			mav.addObject("dto", dto);
+
+			return mav;
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return null;
+		}
+
 	}
 
 	@GetMapping("listMore")
-	public ModelAndView listMore(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException{
+	public ModelAndView listMore(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
 
 		int pageNo = Integer.parseInt(req.getParameter("pageNo"));
 		int size = 4; // list()와 반드시 동일
 		String keyword = req.getParameter("keyword");
 		String sort = req.getParameter("sort");
-		
+
 		PageResult<StadiumDTO> result = Stadiumservice.listStadium(pageNo, size, keyword, sort);
 
 		ModelAndView mav = new ModelAndView("field/stadiumList");
-		
+
 		mav.addObject("list", result.getList());
 		mav.addObject("pageNo", result.getPageNo());
 		mav.addObject("totalPage", result.getTotalPage());
-		
+
 		mav.addObject("keyword", keyword);
 		mav.addObject("sort", sort);
 
 		return mav;
 	}
-	
-	
-	
-	//날짜에 따른 타임슬롯
+
+	// 날짜에 따른 타임슬롯
 	@GetMapping("timeSlot")
-	public ModelAndView timeSlot(HttpServletRequest req, HttpServletResponse resp) 
-				throws ServletException, IOException{
-			
+	public ModelAndView timeSlot(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
 		int stadiumCode = Integer.parseInt(req.getParameter("stadiumCode"));
-	    String date = req.getParameter("date");
-		
-	    List<StadiumTimeSlotDTO> result = TimeSlotservice.TimeSlots(stadiumCode, date);
+		String playDate = req.getParameter("date");
 
-	    ModelAndView mav = new ModelAndView("field/timeSlot");
-	    mav.addObject("list", result);
+		// 날짜 평일/주말 판단
+		String dayType = TimeSlotservice.isWeekend(playDate) ? "WEEKEND" : "WEEKDAY";
 
-	    return mav;
+		List<StadiumTimeSlotDTO> result = TimeSlotservice.TimeSlots(stadiumCode, playDate, dayType);
+
+		ModelAndView mav = new ModelAndView("field/timeSlot");
+		mav.addObject("list", result);
+
+		return mav;
+	}
+
+	@PostMapping("reservation")
+	public ModelAndView createReservation(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		if (info == null) {
+			return new ModelAndView("redirect:/member/login");
+		}
+		long memberCode = info.getMember_code();
+		long stadiumCode = Long.parseLong(req.getParameter("stadiumCode"));
+		int timeCode = Integer.parseInt(req.getParameter("timeCode"));
+		String playDate = req.getParameter("playDate");
+		long teamCode = Long.parseLong(req.getParameter("teamCode"));
+		try {
+
+			StadiumReservationDTO dto = new StadiumReservationDTO();
+			dto.setStadiumCode(stadiumCode);
+			dto.setMemberCode(memberCode);
+			dto.setTimeCode(timeCode);
+			dto.setPlayDate(playDate);
+			dto.setTeamCode(teamCode);
+
+			int result = TimeSlotservice.InsertReservation(dto);
+
+			if (result == 1) {
+				return new ModelAndView("redirect:/field/view?stadiumCode=" + stadiumCode + "&success=1");
+			} else {
+				return new ModelAndView("redirect:/field/view?stadiumCode=" + stadiumCode + "&error=1");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ModelAndView("redirect:/field/view?stadiumCode=" + stadiumCode + "&error=1");
+		}
+	}
+
+	// 예약한 구장 관리로 이동
+	@RequestMapping("booking")
+	public ModelAndView booking(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		try {
+
+			HttpSession session = req.getSession();
+			SessionInfo info = (SessionInfo) session.getAttribute("member");
+			if (info == null) {
+				return new ModelAndView("redirect:/member/login");
+			}
+
+			long memberCode = info.getMember_code();
+
+			List<StadiumReservationDTO> bookingList;
+			// 멤버코드가 관리자(31)이면
+			if (memberCode == 31) {
+				bookingList = TimeSlotservice.BookingList();
+			} else {
+				bookingList = TimeSlotservice.BookingFindById(memberCode);
+			}
+
+			ModelAndView mav = new ModelAndView("field/booking");
+			mav.addObject("bookingList", bookingList);
+
+			return mav;
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			return null;
+		}
+
+	}
+
+	@PostMapping("deleteTimeSlot")
+	public ModelAndView deleteTimeSlot(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		try {
+
+			long reservationId = Long.parseLong(req.getParameter("reservationId"));
+
+			TimeSlotservice.DeleteTimeSlot(reservationId);
+
+			return new ModelAndView("redirect:/field/booking");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ModelAndView("redirect:/field/booking");
+		}
+
 	}
 
 }

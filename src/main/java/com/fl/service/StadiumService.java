@@ -1,11 +1,10 @@
 package com.fl.service;
 
 import java.util.List;
-import java.util.Map;
-
 
 import com.fl.model.PageResult;
 import com.fl.model.StadiumDTO;
+import com.fl.model.TeamDTO;
 
 public interface StadiumService {
 
@@ -15,9 +14,9 @@ public interface StadiumService {
 	
 	public StadiumDTO findById(int stadiumCode);
 	
-	// 구장내 경기장 목록출력 , 경기장 페이징 처리?
+	public List<TeamDTO> findByMemberCode(long memberCode);
+	
 
-	public int arenaCount(Map<String, Object> map);
 	
 	
 	

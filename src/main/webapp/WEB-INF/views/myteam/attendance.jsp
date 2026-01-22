@@ -38,11 +38,53 @@
     </style>
     
     <script type="text/javascript">
-        // 팀 코드를 JS 전역 변수로 선언 (attendance.js에서 사용)
         let teamCode = "${teamCode}";
     </script>
     
     <script src="${pageContext.request.contextPath}/dist/js2/attendance.js"></script>
+
+    <script type="text/javascript">
+        $(function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const matchCode = urlParams.get('matchCode');
+            const targetTeamCode = urlParams.get('teamCode');
+            if (matchCode) {
+                const matchModal = new bootstrap.Modal(document.getElementById('matchVoteModal'));
+                matchModal.show();
+ 
+            }
+
+            window.sendMatchVote = function(status) {
+                if(!confirm(status + " 상태로 투표하시겠습니까?")) return;
+
+                let url = "${pageContext.request.contextPath}/myteam/vote_match";
+                let query = {
+                    match_code: matchCode,
+                    status: status,    
+                    team_code: targetTeamCode
+                };
+
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: query,
+                    dataType: "json",
+                    success: function(data) {
+                        if (data.state === "true") {
+                            alert("투표가 완료되었습니다.");
+                            location.href = "${pageContext.request.contextPath}/myteam/match?teamCode=" + targetTeamCode;
+                        } else {
+                            alert(data.msg || "로그인이 필요하거나 오류가 발생했습니다.");
+                        }
+                    },
+                    error: function(e) {
+                        console.log(e);
+                        alert("서버 통신 오류");
+                    }
+                });
+            };
+        });
+    </script>
 </head>
 
 <body>
@@ -109,7 +151,6 @@
     
     <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
-
     <div class="modal fade" id="voteWriteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
@@ -125,12 +166,10 @@
                             <label class="form-label fw-bold">제목</label>
                             <input type="text" name="title" class="form-control" placeholder="예: 1월 24일 회식">
                         </div>
-                        
                         <div class="mb-3">
                             <label class="form-label fw-bold">내용</label>
                             <textarea name="content" class="form-control" rows="3" placeholder="내용을 입력하세요"></textarea>
                         </div>
-
                         <div class="row">
                             <div class="col-6 mb-3">
                                 <label class="form-label fw-bold">투표 시작일</label>
@@ -141,12 +180,10 @@
                                 <input type="date" name="end_date" class="form-control">
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label fw-bold text-primary">경기/모임 날짜 (중요)</label>
                             <input type="datetime-local" name="event_date" class="form-control">
                         </div>
-                        
                         <div class="d-grid mt-4">
                             <button type="button" class="btn btn-primary fw-bold py-2" onclick="insertVote()">등록하기</button>
                         </div>
@@ -156,7 +193,6 @@
         </div>
     </div>
 
-
     <div class="modal fade" id="voteDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
@@ -164,40 +200,72 @@
                     <h5 class="modal-title fw-bold fs-4" id="detailTitle"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                
                 <div class="modal-body p-4">
                     <input type="hidden" id="detail_board_vote_code" value="">
-                    
                     <p class="text-primary fw-bold mb-3" id="detailEventDate"></p>
-                    
                     <div class="bg-light p-3 rounded mb-4" id="detailContent" style="min-height: 100px; color: #555;"></div>
     
                     <hr class="my-4">
-    
                     <h6 class="text-center mb-3 fw-bold text-dark">참석 여부를 선택해주세요</h6>
                     <div class="btn-group w-100" role="group">
                         <input type="radio" class="btn-check" name="status" id="v1" value="1" onclick="sendVote(1)">
-                        <label class="btn btn-outline-success py-3 fw-bold" for="v1">
-                            <i class="bi bi-check-circle me-1"></i> 참석
-                        </label>
+                        <label class="btn btn-outline-success py-3 fw-bold" for="v1"><i class="bi bi-check-circle me-1"></i> 참석</label>
     
                         <input type="radio" class="btn-check" name="status" id="v2" value="2" onclick="sendVote(2)">
-                        <label class="btn btn-outline-danger py-3 fw-bold" for="v2">
-                            <i class="bi bi-x-circle me-1"></i> 불참
-                        </label>
+                        <label class="btn btn-outline-danger py-3 fw-bold" for="v2"><i class="bi bi-x-circle me-1"></i> 불참</label>
     
                         <input type="radio" class="btn-check" name="status" id="v3" value="3" onclick="sendVote(3)">
-                        <label class="btn btn-outline-secondary py-3 fw-bold" for="v3">
-                            <i class="bi bi-question-circle me-1"></i> 미정
-                        </label>
+                        <label class="btn btn-outline-secondary py-3 fw-bold" for="v3"><i class="bi bi-question-circle me-1"></i> 미정</label>
                     </div>
                 </div>
-                
                 <div class="modal-footer justify-content-between border-top-0 pt-0">
                     <button type="button" class="btn btn-link text-danger text-decoration-none btn-sm" onclick="deleteVote()">
                         <i class="bi bi-trash"></i> 삭제
                     </button>
                     <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="matchVoteModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold fs-4">⚽ 매치 참석 투표</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="history.back()"></button>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <p class="text-primary fw-bold mb-3">선택하신 매치의 참석 여부입니다.</p>
+                    <div class="bg-light p-3 rounded mb-4" style="color: #555;">
+                        리스트에서 선택한 경기에 대해 투표를 진행합니다.<br>
+                        신중하게 선택해주세요!
+                    </div>
+    
+                    <hr class="my-4">
+    
+                    <h6 class="text-center mb-3 fw-bold text-dark">참석 여부를 선택해주세요</h6>
+                    <div class="btn-group w-100" role="group">
+                        <input type="radio" class="btn-check" name="matchStatus" id="mv1" onclick="sendMatchVote('참석')">
+                        <label class="btn btn-outline-success py-3 fw-bold" for="mv1">
+                            <i class="bi bi-check-circle me-1"></i> 참석
+                        </label>
+    
+                        <input type="radio" class="btn-check" name="matchStatus" id="mv2" onclick="sendMatchVote('불참')">
+                        <label class="btn btn-outline-danger py-3 fw-bold" for="mv2">
+                            <i class="bi bi-x-circle me-1"></i> 불참
+                        </label>
+    
+                        <input type="radio" class="btn-check" name="matchStatus" id="mv3" onclick="sendMatchVote('미정')">
+                        <label class="btn btn-outline-secondary py-3 fw-bold" for="mv3">
+                            <i class="bi bi-question-circle me-1"></i> 미정
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-top-0 pt-0 justify-content-end">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal" onclick="history.back()">목록으로 돌아가기</button>
                 </div>
             </div>
         </div>

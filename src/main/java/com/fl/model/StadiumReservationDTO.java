@@ -4,12 +4,37 @@ public class StadiumReservationDTO {
 	 	private long reservationId;
 	    private long stadiumCode;
 	    private long memberCode;
+	    private long teamCode;
+	    
 	    private String playDate;   // yyyy-MM-dd
-	    private int timeCode;
+	    private long timeCode;
 	    private String timeLabel;  // 10:00
 	    private String reservedAt; // 예약 시각
 	    
+	    private String stadiumName;
+	    private String teamName;
+	    private String memberName;
 	    
+	    
+	    
+		public String getStadiumName() {
+			return stadiumName;
+		}
+		public void setStadiumName(String stadiumName) {
+			this.stadiumName = stadiumName;
+		}
+		public String getTeamName() {
+			return teamName;
+		}
+		public void setTeamName(String teamName) {
+			this.teamName = teamName;
+		}
+		public String getMemberName() {
+			return memberName;
+		}
+		public void setMemberName(String memberName) {
+			this.memberName = memberName;
+		}
 		public long getReservationId() {
 			return reservationId;
 		}
@@ -28,16 +53,22 @@ public class StadiumReservationDTO {
 		public void setMemberCode(long memberCode) {
 			this.memberCode = memberCode;
 		}
+		public long getTeamCode() {
+			return teamCode;
+		}
+		public void setTeamCode(long teamCode) {
+			this.teamCode = teamCode;
+		}
 		public String getPlayDate() {
 			return playDate;
 		}
 		public void setPlayDate(String playDate) {
 			this.playDate = playDate;
 		}
-		public int getTimeCode() {
+		public long getTimeCode() {
 			return timeCode;
 		}
-		public void setTimeCode(int timeCode) {
+		public void setTimeCode(long timeCode) {
 			this.timeCode = timeCode;
 		}
 		public String getTimeLabel() {
@@ -52,7 +83,7 @@ public class StadiumReservationDTO {
 		public void setReservedAt(String reservedAt) {
 			this.reservedAt = reservedAt;
 		}
-
+	    
 	    
 	    
 	    
