@@ -10,14 +10,19 @@
             SELECT p.recruit_id, p.team_code, p.member_code, p.category, p.title, 
                    p.view_count, p.created_at, p.status, m.member_name,
                    t.team_name, 
-                   /* 팀이 없는 회원은 등급을 기본값 1로 표시 */
-                   NVL(mt.role_level, 1) as role_level 
+                   /* 수정 포인트: 
+                      게시글에 팀코드가 있으면 그 팀의 레벨을, 
+                      없으면(용병지원) 해당 멤버의 기본 등급(최고등급 등) 1개만 가져오도록 처리
+                   */
+                   (SELECT MAX(role_level) 
+                    FROM member_team 
+                    WHERE member_code = p.member_code 
+                      AND (team_code = p.team_code OR p.team_code IS NULL)
+                   ) as role_level 
             FROM MERCENARY_POST p
             JOIN MEMBER m ON p.member_code = m.member_code
             LEFT JOIN TEAM t ON p.team_code = t.team_code
-            /* 팀 코드가 있을 때만 등급 조인, 없으면 그냥 지나감 */
-            LEFT JOIN member_team mt ON p.member_code = mt.member_code 
-                                    AND (p.team_code = mt.team_code OR p.team_code IS NULL)
+            /* 기존의 중복을 유발하던 LEFT JOIN member_team mt 삭제 */
             <where>
                 <if test="category != null and category != ''">
                     AND p.category = #{category}
