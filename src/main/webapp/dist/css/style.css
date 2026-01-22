@@ -1360,3 +1360,15 @@ a { text-decoration: none; color: inherit; }
         font-weight: 700;
     }
 }
+
+  /* 탭 스타일 */
+    .nav-pills .nav-link { 
+        color: #6c757d; font-weight: 600; padding: 12px 25px; border-radius: 50px; 
+        background-color: #fff; border: 1px solid #dee2e6; margin-right: 10px; 
+    }
+    /* 활성화된 탭 스타일 */
+    .nav-pills .nav-link.active { 
+        background-color: #212529; color: #fff; border-color: #212529; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+    }
+    .match-item { transition: transform 0.2s; }
+    .match-item:hover { transform: translateY(-3px); }

@@ -1,7 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
-
+<c:set var="canCreate" value="false"/>
+<c:if test="${not empty myTeams}">
+    <c:forEach var="team" items="${myTeams}">
+        <c:if test="${team.role_level >= 10}">
+            <c:set var="canCreate" value="true"/>
+        </c:if>
+    </c:forEach>
+</c:if>
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -14,19 +21,6 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/style.css">
 
-<style>
-    /* 탭 스타일 */
-    .nav-pills .nav-link { 
-        color: #6c757d; font-weight: 600; padding: 12px 25px; border-radius: 50px; 
-        background-color: #fff; border: 1px solid #dee2e6; margin-right: 10px; 
-    }
-    /* 활성화된 탭 스타일 */
-    .nav-pills .nav-link.active { 
-        background-color: #212529; color: #fff; border-color: #212529; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
-    }
-    .match-item { transition: transform 0.2s; }
-    .match-item:hover { transform: translateY(-3px); }
-</style>
 </head>
 
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp" />
@@ -45,7 +39,7 @@
                     <div class="mb-4">
                         <p class="sidebar-title">매치</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action active-menu">내 매치 일정</a>
+                            <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action active-menu">내 매치 관리</a>
                             <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action  ">전체 매치 리스트</a>
                             <c:if test="${canCreate}">
                                 <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action ">매치 개설하기</a>

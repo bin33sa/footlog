@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fl.mapper.MatchMapper;
 import com.fl.model.MatchApplyDTO;
 import com.fl.model.MatchDTO;
+import com.fl.model.StadiumReservationDTO;
 import com.fl.model.TeamDTO;
 import com.fl.mybatis.support.MapperContainer;
 
@@ -227,6 +228,17 @@ public class MatchServiceImpl implements MatchService{
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+	@Override
+	public List<StadiumReservationDTO> listMyFutureReservations(long team_code) {
+		List<StadiumReservationDTO> list = null;
+		try {
+			list=mapper.listMyFutureReservations(team_code);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
 	}
 	
 }

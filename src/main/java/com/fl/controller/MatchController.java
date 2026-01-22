@@ -9,6 +9,7 @@ import com.fl.model.MatchApplyDTO;
 import com.fl.model.MatchDTO;
 import com.fl.model.SessionInfo;
 import com.fl.model.StadiumDTO;
+import com.fl.model.StadiumReservationDTO;
 import com.fl.model.TeamDTO;
 import com.fl.mvc.annotation.Controller;
 import com.fl.mvc.annotation.GetMapping;
@@ -20,6 +21,8 @@ import com.fl.service.MatchService;
 import com.fl.service.MatchServiceImpl;
 import com.fl.service.StadiumService;
 import com.fl.service.StadiumServiceImpl;
+import com.fl.service.TimeSlotService;
+import com.fl.service.TimeSlotServiceImpl;
 import com.fl.util.MyUtil;
 
 import jakarta.servlet.ServletException;
@@ -31,6 +34,7 @@ import jakarta.servlet.http.HttpSession;
 public class MatchController {
 	private MatchService service = new MatchServiceImpl();
 	private StadiumService stadiumservice = new StadiumServiceImpl();
+	private TimeSlotService TimeSlotService = new TimeSlotServiceImpl();
 	private MyUtil util = new MyUtil();
 	
 	@GetMapping("list")
@@ -146,7 +150,7 @@ public class MatchController {
 			kwd = util.decodeUrl(kwd);
 			
 			if(!kwd.isBlank()) {
-				query += "&schType="+schType+"&kwd="+util.encodeUrl(kwd);
+				query += "&schType="+schType+"&kwd="+util.encodeUrl(kwd)+"match_code="+match_code;
 			}
 			
 			service.updateHitCount(match_code);
@@ -182,6 +186,8 @@ public class MatchController {
 				
 				List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
 				mav.addObject("myTeams", myTeams);
+				
+				
             }else {
             	map.put("member_code",0);
             }
@@ -208,10 +214,9 @@ public class MatchController {
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
 
 		try {
-			
 			List<TeamDTO> myTeams = service.listUserTeams(info.getMember_code());
-			boolean hasPermission = false;
 			
+			boolean hasPermission = false;
 			if(myTeams!=null) {
 				for(TeamDTO team:myTeams) {
 					if(team.getRole_level()>=10) {
@@ -220,9 +225,6 @@ public class MatchController {
 					}
 				}
 			}
-			
-			List<StadiumDTO> list = stadiumservice.listStadiumAll();
-			mav.addObject("stadiumList", list);
 			mav.addObject("myTeams", myTeams);
 			mav.addObject("mode", "write");
 			
@@ -477,6 +479,8 @@ public class MatchController {
 	        String kwd = req.getParameter("kwd");
 	        String match_date = req.getParameter("match_date");
 	        String region = req.getParameter("region");
+	        String match_code = req.getParameter("match_code");
+	        String status = req.getParameter("status");
 
 	        if (kwd == null) kwd = "";
 	        kwd = util.decodeUrl(kwd);
@@ -486,10 +490,12 @@ public class MatchController {
 
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("member_code", info.getMember_code());
+	        map.put("match_code", match_code);
 	        map.put("tab", tab);     
 	        map.put("kwd", kwd);
 	        map.put("match_date", match_date);
 	        map.put("region", region);
+	        map.put("status", status);
 
 	        dataCount = service.dataCountMyMatch(map); 
 
@@ -509,7 +515,7 @@ public class MatchController {
 
 	        String query = "";
 	        if (!kwd.isBlank()) query += "&kwd=" + util.encodeUrl(kwd);
-	        if (match_date != null && !match_date.isBlank()) query += "&matchDate=" + match_date;
+	        if (match_date != null && !match_date.isBlank()) query += "&match_date=" + match_date;
 	        if (region != null && !region.isBlank()) query += "&region=" + util.encodeUrl(region);
 
 	        if (!query.isBlank()) listUrl += query;
@@ -562,5 +568,29 @@ public class MatchController {
 	    }
 
 	    return new ModelAndView("redirect:/match/myMatch?tab=past");
+	}
+	
+	@ResponseBody 
+	@GetMapping("listTeamReservations")
+	public Map<String, Object> listTeamReservations(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException  {
+	    Map<String, Object> model = new HashMap<>();
+	    
+	    try {
+	        String teamCodeStr = req.getParameter("team_code");
+	        if(teamCodeStr == null) {
+	            return model; // 팀 코드가 없으면 빈 맵 반환
+	        }
+	        
+	        long team_code = Long.parseLong(teamCodeStr);
+	        
+	        List<StadiumReservationDTO> list = service.listMyFutureReservations(team_code);
+	        
+	        model.put("list", list);
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return model;
 	}
 }

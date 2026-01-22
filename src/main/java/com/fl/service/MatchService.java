@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.fl.model.MatchApplyDTO;
 import com.fl.model.MatchDTO;
+import com.fl.model.StadiumReservationDTO;
 import com.fl.model.TeamDTO;
 
 public interface MatchService {
@@ -30,4 +31,5 @@ public interface MatchService {
 	public int updateMatchResult(MatchDTO dto);
 	public List<MatchDTO> listMyMatch(Map<String, Object> map);
 	public int dataCountMyMatch(Map<String, Object> map );
+	public List<StadiumReservationDTO> listMyFutureReservations(long team_code);
 }

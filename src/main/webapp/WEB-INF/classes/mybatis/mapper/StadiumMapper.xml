@@ -18,7 +18,6 @@
 	</select>
 
 
-
 	<!-- 상세 축구장 조회 -->
 
 	<select id="findById" parameterType="int"

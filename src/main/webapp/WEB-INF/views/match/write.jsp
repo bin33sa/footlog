@@ -27,7 +27,7 @@
                     <div class="mb-4">
                         <p class="sidebar-title">매치</p>
                         <div class="list-group">
-                            <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action ">내 매치 일정</a>
+                            <a href="${pageContext.request.contextPath}/match/myMatch" class="list-group-item list-group-item-action ">내 매치 관리</a>
                             <a href="${pageContext.request.contextPath}/match/list" class="list-group-item list-group-item-action ">전체 매치 리스트</a>
                             <a href="${pageContext.request.contextPath}/match/write" class="list-group-item list-group-item-action  active-menu">${mode=='write'?'매치 개설하기' : '매치 수정하기' }</a>
                             <a href="${pageContext.request.contextPath}/mercenary/list" class="list-group-item list-group-item-action ">용병 구하기</a>
@@ -54,41 +54,41 @@
                     </c:if>
                     
                     <div class="modern-card p-5">
-					     <div class="mb-3">
-					    <label class="form-label fw-bold">주최 팀 선택</label>
-					    <select name="home_code" class="form-select rounded-pill shadow-sm">
-					        <c:choose>
-					            <c:when test="${empty myTeams}">
-					                <option value="" disabled selected>소속된 팀이 없습니다.</option>
-					            </c:when>
-					            <c:otherwise>
-					                <c:forEach var="team" items="${myTeams}">
-					                    <option value="${team.team_code}" ${dto.home_code==team.team_code? "selected":""}>${team.team_name}</option>
-					                </c:forEach>
-					            </c:otherwise>
-					        </c:choose>
-					    </select>
-					</div>
+					    <div class="mb-3">
+						    <label class="form-label fw-bold">주최 팀 선택</label>
+						    <select name="home_code" id="teamSelect" class="form-select rounded-pill shadow-sm" onchange="loadReservations()">
+						        <c:choose>
+						            <c:when test="${empty myTeams}">
+						                <option value="" disabled selected>소속된 팀이 없습니다.</option>
+						            </c:when>
+						            <c:otherwise>
+						                <option value="" disabled selected>팀을 선택하세요</option>
+						                <c:forEach var="team" items="${myTeams}">
+						                    <option value="${team.team_code}" ${dto.home_code==team.team_code? "selected":""}>${team.team_name}</option>
+						                </c:forEach>
+						            </c:otherwise>
+						        </c:choose>
+						    </select>
+						</div>
                         <div class="mb-4">
                             <label for="title" class="form-label fw-bold">매치 제목</label>
                             <input type="text" class="form-control form-control-lg bg-light border-0" id="title" name="title" placeholder="예) 9월 20일 상암 3파전 모집합니다!" value="${dto.title }">
                         </div>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="matchDate" class="form-label fw-bold">경기 일시</label>
-                                <input type="datetime-local" class="form-control bg-light border-0" id="match_date" name="match_date" value="${dto.match_date}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="stadium" class="form-label fw-bold">구장 선택</label>
-                                <select class="form-select bg-light border-0" id="stadium" name="stadium_code">
-                                    <option value="" >구장을 선택해주세요</option>
-                                    <c:forEach var="item" items="${stadiumList}">
-                                    	<option value="${item.stadiumCode}" ${dto.stadium_code == item.stadiumCode ? "selected" : ""}>${item.stadiumName}</option>
-                            		</c:forEach>
-                                </select>
-                            </div>
-                        </div>
+						    <div class="col-md-6">
+						        <label for="match_date" class="form-label fw-bold">경기 일시 (자동 입력)</label>
+						        <input type="text" class="form-control bg-light border-0" id="match_date" name="match_date" 
+						               placeholder="예약된 구장을 선택하면 자동 입력됩니다." value="${dto.match_date}" readonly>
+						    </div>
+						
+						    <div class="col-md-6">
+						        <label for="stadiumSelect" class="form-label fw-bold">구장 예약 선택</label>
+						        <select class="form-select bg-light border-0" id="stadiumSelect" name="stadium_code" onchange="setMatchInfo()">
+						            <option value="">팀을 먼저 선택해주세요</option>
+						            </select>
+						    </div>
+						</div>
 
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
@@ -153,70 +153,121 @@
         </div> 
     </div>
 	<script type="text/javascript">
-	function matchOk(){
-		const f = document.matchForm;
-		let str,p;
-		
-		str = f.title.value.trim();
-		if(! str){
-			alert('제목을 입력하세요.');
-			f.title.focus();
-			return;
-		}
-		
-		str = f.match_date.value.trim();
-		if(! str){
-			alert('경기일자를 입력하세요.');
-			f.match_date.focus();
-			return;
-		}
-		
-		str = f.stadium_code.value.trim();
-		if(! str){
-			alert('구장을 선택하세요.');
-			f.stadium_code.focus();
-			return;
-		}
-		
-		str = f.matchType.value.trim();
-		if(! str){
-			alert('경기방식을 선택하세요.');
-			f.matchType.focus();
-			return;
-		}
-		
-		str = f.gender.value.trim();
-		if(! str){
-			alert('성별을 선택하세요.');
-			f.gender.focus();
-			return;
-		}
-		
-		str = f.matchLevel.value.trim();
-		if(! str){
-			alert('실력을 선택하세요.');
-			f.matchLevel.focus();
-			return;
-		}
-		
-		str = f.fee.value.trim();
-		if(! str){
-			alert('참가비를 입력하세요.');
-			f.fee.focus();
-			return;
-		}
-		
-		str = f.content.value.trim();
-		if(! str){
-			alert('내용을 입력하세요.');
-			f.content.focus();
-			return;
-		}
-		
-		f.action = '${pageContext.request.contextPath}/match/${mode}';
-		f.submit();
-	}
-	</script>
+$(function(){
+    if($("#teamSelect").val()){
+        loadReservations();
+    }
+});
+
+function loadReservations(){
+    let teamCode = $("#teamSelect").val();
+    let $stadiumSelect = $("#stadiumSelect");
+    
+    let currentStadiumCode = "${dto.stadium_code}";
+    let currentMatchDate = "${dto.match_date}"; 
+    let mode = "${mode}"; 
+    
+    $stadiumSelect.empty();
+    $stadiumSelect.append('<option value="">구장 예약을 선택해주세요.</option>');
+    
+    if(!teamCode) return;
+    
+    let url = "${pageContext.request.contextPath}/match/listTeamReservations";
+    let method = "get";
+    let params = { team_code: teamCode }; 
+    let dataType = "json";
+    
+    const fn = function(data){
+        let list = data.list;
+        
+        if(!list || list.length === 0){
+            $stadiumSelect.empty();
+            $stadiumSelect.append('<option value="" disabled> 예약된 내역이 없습니다.</option>');
+            return;
+        }
+        
+        $.each(list, function(index, item){
+            let text = `[\${item.playDate}] \${item.stadiumName} (\${item.timeLabel})`;
+            let disabled = "";
+            let note = "";
+            let mode = "${mode}";
+
+            if(mode === 'write' && item.matchCount > 0) {
+                disabled = "disabled";
+                note = " (이미 등록됨)";
+            }
+            let selected = (currentStadiumCode == item.stadiumCode) ? "selected" : "";
+            
+            let option  = `<option value="\${item.stadium_code}" 
+                data-date="\${item.match_date}" 
+                data-time="\${item.timeLabel}" 
+                \${selected} \${disabled}>
+          		\${text}\${note}
+        		</option>`;
+            $stadiumSelect.append(option);
+        });
+        
+        if(currentStadiumCode){
+            setMatchInfo();
+        }
+    };
+    
+    ajaxRequest(url, method, params, dataType, fn);
+}
+
+function setMatchInfo(){
+    let selectedOption = $("#stadiumSelect option:selected");
+    
+    let date = selectedOption.attr("data-date");
+    let timeLabel = selectedOption.attr("data-time");
+    
+    let $dateInput = $("#match_date");
+    
+    if(date && timeLabel){
+        let startTime = timeLabel.split('~')[0].trim();
+        
+        if(startTime === "24:00") {
+            startTime = "00:00";
+        }
+        
+        $dateInput.val(date + " " + startTime); 
+    } else {
+        $dateInput.val("");
+    }
+}
+
+function matchOk(){
+    const f = document.matchForm;
+    let str;
+    
+    str = f.title.value.trim();
+    if(!str){ alert('제목을 입력하세요.'); f.title.focus(); return; }
+    
+    str = f.match_date.value.trim();
+    if(!str){ alert('구장을 선택하여 경기일자를 입력하세요.'); return; }
+    
+    str = f.stadium_code.value.trim();
+    if(!str){ alert('구장을 선택하세요.'); f.stadium_code.focus(); return; }
+    
+    str = f.matchType.value.trim();
+    if(!str){ alert('경기방식을 선택하세요.'); f.matchType.focus(); return; }
+    
+    str = f.gender.value.trim();
+    if(!str){ alert('성별을 선택하세요.'); f.gender.focus(); return; }
+    
+    str = f.matchLevel.value.trim();
+    if(!str){ alert('실력을 선택하세요.'); f.matchLevel.focus(); return; }
+    
+    str = f.fee.value.trim();
+    if(!str){ alert('참가비를 입력하세요.'); f.fee.focus(); return; }
+    
+    str = f.content.value.trim();
+    if(!str){ alert('내용을 입력하세요.'); f.content.focus(); return; }
+    
+    f.action = '${pageContext.request.contextPath}/match/${mode}';
+    f.submit();
+}
+</script>
     <footer>
 	   <jsp:include page="/WEB-INF/views/layout/footer.jsp"/>
 	</footer>

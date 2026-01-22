@@ -15,7 +15,7 @@ public class StadiumReservationDTO {
 	    private String teamName;
 	    private String memberName;
 	    
-	    
+	    private int matchCount;
 	    
 		public String getStadiumName() {
 			return stadiumName;
@@ -82,6 +82,12 @@ public class StadiumReservationDTO {
 		}
 		public void setReservedAt(String reservedAt) {
 			this.reservedAt = reservedAt;
+		}
+		public int getMatchCount() {
+			return matchCount;
+		}
+		public void setMatchCount(int matchCount) {
+			this.matchCount = matchCount;
 		}
 	    
 	    
