@@ -156,6 +156,8 @@ public interface MyTeamService {
     
     public void updateMatchAttendance(Map<String, Object> map) throws Exception;
     
+    public MatchDTO readMatch(Map<String, Object> map);
+    
     public int countMatchSchedule(Map<String, Object> map);
     
     public int countMatchVoteBoard(Map<String, Object> map);

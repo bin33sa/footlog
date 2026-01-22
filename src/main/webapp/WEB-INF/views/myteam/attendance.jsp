@@ -48,38 +48,40 @@
             const urlParams = new URLSearchParams(window.location.search);
             const matchCode = urlParams.get('matchCode');
             const targetTeamCode = urlParams.get('teamCode');
+
             if (matchCode) {
-                const matchModal = new bootstrap.Modal(document.getElementById('matchVoteModal'));
-                matchModal.show();
- 
+                let url = "${pageContext.request.contextPath}/myteam/read_match_info";
+                let query = "match_code=" + matchCode + "&team_code=" + targetTeamCode;
+
+                ajaxRequest(url, "get", query, "json", function(data) {
+                    if (data.state === "true") {
+                        let dto = data.dto;
+                        
+                        $("#matchModalTitle").text("VS " + dto.opponent_name + " 경기 투표");
+                        $("#matchModalDate").text(dto.match_date);
+                        $("#matchModalPlace").text(dto.stadiumName ? dto.stadiumName : "장소 미정");
+                        
+                        const matchModal = new bootstrap.Modal(document.getElementById('matchVoteModal'));
+                        matchModal.show();
+                    } else {
+                        alert("매치 정보를 불러올 수 없습니다.");
+                    }
+                });
             }
 
+            // 매치 투표 전송 함수
             window.sendMatchVote = function(status) {
                 if(!confirm(status + " 상태로 투표하시겠습니까?")) return;
 
                 let url = "${pageContext.request.contextPath}/myteam/vote_match";
-                let query = {
-                    match_code: matchCode,
-                    status: status,    
-                    team_code: targetTeamCode
-                };
+                let query = "match_code=" + matchCode + "&status=" + status + "&team_code=" + targetTeamCode;
 
-                $.ajax({
-                    type: "POST",
-                    url: url,
-                    data: query,
-                    dataType: "json",
-                    success: function(data) {
-                        if (data.state === "true") {
-                            alert("투표가 완료되었습니다.");
-                            location.href = "${pageContext.request.contextPath}/myteam/match?teamCode=" + targetTeamCode;
-                        } else {
-                            alert(data.msg || "로그인이 필요하거나 오류가 발생했습니다.");
-                        }
-                    },
-                    error: function(e) {
-                        console.log(e);
-                        alert("서버 통신 오류");
+                ajaxRequest(url, "post", query, "json", function(data) {
+                    if (data.state === "true") {
+                        alert("투표가 완료되었습니다.");
+                        location.href = "${pageContext.request.contextPath}/myteam/match?teamCode=" + targetTeamCode;
+                    } else {
+                        alert(data.msg || "투표 처리에 실패했습니다.");
                     }
                 });
             };
@@ -232,15 +234,23 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold fs-4">⚽ 매치 참석 투표</h5>
+                    <h5 class="modal-title fw-bold fs-4" id="matchVoteModalTitle">⚽ 매치 참석 투표</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="history.back()"></button>
                 </div>
                 
-                <div class="modal-body p-4">
-                    <p class="text-primary fw-bold mb-3">선택하신 매치의 참석 여부입니다.</p>
-                    <div class="bg-light p-3 rounded mb-4" style="color: #555;">
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4">
+                        <p class="text-primary fw-bold mb-1" style="font-size: 1.1rem;">
+                            <i class="bi bi-calendar-check me-1"></i> <span id="matchModalDate">경기 일시</span>
+                        </p>
+                        <p class="text-muted">
+                            <i class="bi bi-geo-alt-fill me-1"></i> <span id="matchModalPlace">경기 장소</span>
+                        </p>
+                    </div>
+
+                    <div class="bg-light p-3 rounded mb-4 text-start" style="color: #555;">
                         리스트에서 선택한 경기에 대해 투표를 진행합니다.<br>
-                        신중하게 선택해주세요!
+                        <strong>정확한 인원 파악을 위해 신중히 선택해주세요!</strong>
                     </div>
     
                     <hr class="my-4">
