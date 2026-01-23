@@ -220,44 +220,29 @@
 	    </where>
 	</select>
 	
-	<select id="listMyMatch" parameterType="map" resultType="com.fl.model.MatchDTO">
-		SELECT m.match_code, ht.team_name AS home_team_name,TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') AS match_date, 
-        m.status, m.title, m.content, m.fee, s.stadium_name AS stadiumName, 
-        s.region AS region, m.matchType, m.gender, m.matchLevel, m.stadium_code, 
-        m.home_code, m.member_code, m.view_count, at.team_name AS away_team_name, 
-        NVL(r.away_score, 0) AS away_score, NVL(r.home_score, 0) AS home_score, m.away_code, a.status AS my_attendance_status
-		FROM match_post m
-		JOIN team ht ON ht.team_code = m.home_code
-		JOIN stadium s ON s.stadium_code = m.stadium_code
-		LEFT JOIN team at ON at.team_code = m.away_code
-		LEFT JOIN match_result r ON m.match_code = r.match_code 
-		JOIN match_attendance a ON a.match_code = m.match_code AND a.member_code=#{member_code} AND a.status='참석'
-	   <where>
-	      <if test="region != null and region != '' and region != 'all'">
-	          AND s.region = #{region}
-	      </if>
-	      <if test="match_date!=null and match_date!=''">
-	          AND TO_CHAR(m.match_date, 'YYYY-MM-DD') = #{match_date}
-	      </if>
-	      <if test="kwd != null and kwd != ''">
-	          AND ( INSTR(m.title, #{kwd}) &gt; 0
-	             OR INSTR(ht.team_name, #{kwd}) &gt; 0 
-	             OR INSTR(s.stadium_name, #{kwd}) &gt; 0 )
-	      </if>
-
-	      AND a.member_code = #{member_code}
-	      AND a.status = '참석'
-	      <choose>
-	      	<when test="tab == 'future' ">
-	      		AND ( m.match_date &gt; SYSDATE )
-	      	</when>
-	      	<when test="tab == 'past' ">
-	      		AND ( m.match_date &lt;= SYSDATE )
-	      	</when>
-	      </choose>
-	    </where>
-	    ORDER BY m.match_date DESC
-	   	OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-	</select>
-	
+	<select id="listMyFutureReservations" parameterType="Long" 
+            resultType="com.fl.model.StadiumReservationDTO">
+        SELECT 
+            sr.reservation_id AS reservationId,
+            sr.stadium_code AS stadiumCode,
+            s.stadium_name AS stadiumName,
+            TO_CHAR(sr.play_date, 'YYYY-MM-DD') AS playDate, 
+            sr.time_code AS timeCode, 
+            tc.label AS timeLabel,
+            (SELECT COUNT(*) 
+             FROM match_post m 
+             WHERE m.stadium_code = sr.stadium_code
+               AND m.home_code = sr.team_code
+               AND TO_CHAR(m.match_date, 'YYYY-MM-DD HH24:MI') = 
+                   TO_CHAR(sr.play_date, 'YYYY-MM-DD') || ' ' || 
+                   CASE WHEN tc.label = '24:00' THEN '00:00' ELSE tc.label END
+            ) AS matchCount
+        FROM stadium_reservation sr
+        JOIN stadium s ON sr.stadium_code = s.stadium_code
+        JOIN time_code tc ON sr.time_code = tc.time_code
+        WHERE sr.team_code = #{teamCode}  
+          AND sr.play_date >= TRUNC(SYSDATE)  ORDER BY sr.play_date ASC, sr.time_code ASC
+    </select>
+    
 </mapper>
+	
