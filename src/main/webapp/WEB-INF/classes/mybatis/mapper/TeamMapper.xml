@@ -15,7 +15,7 @@
   
   	<!-- 팀 기본정보, 멤버수, 좋아요수, 구단장 이름 조회 -->
     <sql id="commonSelect">
-	        SELECT 
+	    SELECT 
 	        t.team_code, 
 	        t.team_name, 
 	        t.region, 
@@ -30,13 +30,14 @@
 	
 	        (SELECT COUNT(*) FROM like_team lt WHERE lt.team_code = t.team_code) AS like_count,
 	        
-	        (SELECT m.member_name 
+	        /* [수정] 여러 명일 경우를 대비해 1명만 가져오도록 명시 */
+	        (SELECT MAX(m.member_name) 
 	         FROM member m 
 	         JOIN member_team mt ON m.member_code = mt.member_code 
 	         WHERE mt.team_code = t.team_code AND mt.role_level = 10) AS leader_name      
 	    FROM team t
 	    WHERE t.status = 1
-    </sql>
+	</sql>
 
 	<!-- 구단 리스트 조회(기본:최신순 정렬) -->
     <select id="listTeam" parameterType="map" resultType="com.fl.model.TeamDTO">
