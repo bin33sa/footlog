@@ -198,12 +198,12 @@ function loadReservations(){
             }
             let selected = (currentStadiumCode == item.stadiumCode) ? "selected" : "";
             
-            let option  = `<option value="\${item.stadium_code}" 
-                data-date="\${item.match_date}" 
+            let option  = `<option value="\${item.stadiumCode}" 
+                data-date="\${item.playDate}" 
                 data-time="\${item.timeLabel}" 
                 \${selected} \${disabled}>
-          		\${text}\${note}
-        		</option>`;
+                \${text}\${note}
+                </option>`;
             $stadiumSelect.append(option);
         });
         
